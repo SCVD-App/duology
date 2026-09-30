@@ -1,0 +1,1206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chart, Explained</title>
+<meta name="description" content="Your birth chart in plain English, with the why behind every placement. Plus forecasts and numerology.">
+<meta name="theme-color" content="#F4F1EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14131A" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23F4F1EA' stroke='%232E3A8C' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='11' fill='none' stroke='%232E3A8C' stroke-width='4'/%3E%3Cline x1='4' y1='32' x2='60' y2='32' stroke='%232E3A8C' stroke-width='4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F1EA;--surface:#FFFDF8;--ink:#1D1B26;--ink2:#3E3947;--muted:#5E5869;--line:#DDD6C8;--line2:#BDB4A3;--soft:#EAE4D7;
+  --accent:#2E3A8C;--accent-soft:#E6E8F4;--on-accent:#FFFFFF;--rust:#A0521A;--flow:#2E6BC4;--tension:#C2561B;--danger:#B3261E;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#14131A;--surface:#1E1C26;--ink:#EEEAF2;--ink2:#D2CCDA;--muted:#A9A3B5;--line:#34313F;--line2:#4A4657;--soft:#282533;
+  --accent:#A9B6FF;--accent-soft:#2A2F52;--on-accent:#14131A;--rust:#E4A673;--flow:#6EA8FF;--tension:#F08A4B;--danger:#FF8A80;color-scheme:dark}
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.app{max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;background:var(--bg);position:relative}
+@media (min-width:520px){.app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+header.top{position:sticky;top:0;z-index:5;height:56px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:var(--bg)}
+.brand{font-family:var(--serif);font-size:21px;font-weight:600;letter-spacing:-.2px}
+.brand em{font-style:italic;font-weight:500;color:var(--accent)}
+.screen-name{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+main{flex:1;padding:18px 20px 110px}
+h1{margin:0;font-family:var(--serif);font-size:30px;line-height:1.1;font-weight:600}
+h2{margin:0;font-family:var(--serif);font-size:22px;font-weight:600}
+.lede{margin:6px 0 0;color:var(--muted);font-size:14px}
+.stack{display:flex;flex-direction:column;gap:18px}
+.stack-s{display:flex;flex-direction:column;gap:10px}
+.small{font-size:12.5px;color:var(--muted)}
+.note{font-size:13px;line-height:1.5;background:var(--soft);padding:12px 14px;border-radius:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.btn{height:52px;border:none;border-radius:12px;background:var(--accent);color:var(--on-accent);font-size:16px;font-weight:700;padding:0 18px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn-ghost{min-height:44px;padding:0 14px;border:1px solid var(--line2);border-radius:10px;background:none;font-size:14px;font-weight:600}
+.btn-dashed{min-height:48px;border:1px dashed var(--line2);border-radius:12px;background:none;font-size:14px;font-weight:600;color:var(--accent)}
+.btn-danger{min-height:48px;border:1px solid var(--danger);border-radius:12px;background:none;font-size:14px;font-weight:700;color:var(--danger)}
+.note .link{min-height:0}
+.link{background:none;border:none;padding:0;min-height:44px;color:var(--accent);font-weight:700;text-decoration:underline;font-size:14px;text-align:left}
+/* form */
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.lbl{font-size:13px;font-weight:700}
+.input{height:48px;padding:0 14px;font-size:16px;border:1px solid var(--line2);border-radius:10px;background:var(--surface);width:100%}
+.input[disabled]{opacity:.45}
+.check{display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px}
+.check input{width:22px;height:22px;accent-color:var(--accent);margin:0}
+.results{display:flex;flex-direction:column;gap:6px}
+.result{display:flex;flex-direction:column;align-items:flex-start;padding:10px 12px;min-height:48px;border:1px solid var(--line);border-radius:10px;background:var(--surface);text-align:left}
+.result b{font-size:14px}
+.chosen{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:var(--accent-soft);font-size:13px}
+.err{color:var(--danger);font-size:13px;font-weight:600}
+details.manual summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);min-height:36px;display:flex;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+/* segmented */
+.seg{display:grid;gap:6px;background:var(--soft);padding:4px;border-radius:12px}
+.seg button{height:44px;border:none;border-radius:9px;font-size:14px;font-weight:700;background:transparent}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{min-height:36px;padding:0 12px;border-radius:18px;border:1px solid var(--line2);background:none;font-size:13px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+/* chart */
+.wheel{display:flex;justify-content:center}
+.wheel svg{width:100%;max-width:360px;height:auto}
+.w-bg{fill:var(--surface);stroke:var(--ink);stroke-width:1.5}
+.w-ring{fill:none;stroke:var(--ink);stroke-width:1}
+.w-core{fill:var(--bg);stroke:var(--ink);stroke-width:1}
+.w-line{stroke:var(--ink);stroke-width:1}
+.w-cusp{stroke:var(--ink);stroke-width:.75;stroke-dasharray:2 3}
+.w-angle{stroke:var(--ink);stroke-width:2}
+.w-sg{fill:var(--accent);font-size:11px}
+.w-sn{fill:var(--ink);font-size:7.5px;font-weight:600}
+.w-hn{fill:var(--muted);font-size:8px}
+.w-pg{fill:var(--ink);font-size:14px}
+.w-pn{fill:var(--ink);font-size:7px;font-weight:700}
+.w-ax{fill:var(--rust);font-size:9px;font-weight:700}
+.w-planet{cursor:pointer}
+.w-planet:hover .w-pg,.w-planet:focus .w-pg{fill:var(--accent)}
+.legend{display:flex;gap:16px;justify-content:center;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:6px}
+.row-btn{display:flex;align-items:center;gap:14px;padding:12px 14px;min-height:64px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-align:left;width:100%}
+.orb{width:40px;height:40px;flex-shrink:0;border-radius:20px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700}
+.orb.pt{font-size:13px}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;min-height:60px;background:var(--surface);border:1px solid var(--line);border-radius:10px;text-align:left}
+.tile b{font-size:14px}
+.tile .g{color:var(--accent)}
+.asp{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 2px;min-height:48px;border:none;border-bottom:1px solid var(--line);background:none;width:100%;text-align:left}
+.asp b{font-size:14px;font-weight:600}
+.asp span{font-size:13px;font-weight:600;text-align:right}
+.bal{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.bal div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+.bal b{display:block;font-family:var(--serif);font-size:22px}
+.bal small{font-size:11.5px;color:var(--muted)}
+/* forecast */
+.dark-strip{padding:12px 14px;border-radius:12px;background:var(--ink);color:var(--bg)}
+.dark-strip .k{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.75}
+.dark-strip .v{font-size:15px;font-weight:600}
+.dark-strip .s{font-size:12.5px;opacity:.85}
+.month{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:6px}
+details.ev{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+details.ev summary{list-style:none;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;cursor:pointer}
+details.ev summary::-webkit-details-marker{display:none}
+.date{width:46px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+.date .m{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.date .d{font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.1}
+.ev-body{flex:1;display:flex;flex-direction:column;gap:3px}
+.tag{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.tag.Planets{color:var(--accent)}.tag.Moon{color:var(--flow)}.tag.Numbers{color:var(--rust)}
+.ev-title{font-size:15px;font-weight:700;line-height:1.3}
+.ev-read{font-size:13px;color:var(--ink2)}
+.plus{font-size:18px;color:var(--muted);line-height:1}
+details[open] .plus{transform:rotate(45deg)}
+.why{margin:0 14px 14px 72px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink2)}
+.why b{color:var(--rust);font-size:12px;text-transform:uppercase;letter-spacing:.8px;display:block}
+/* numbers */
+.num{padding:16px;display:flex;flex-direction:column;gap:10px}
+.num-head{display:flex;align-items:center;gap:14px}
+.big{width:56px;height:56px;flex-shrink:0;border-radius:28px;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:26px;font-weight:600}
+.num .k{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.num .m{font-size:15px;font-weight:700;line-height:1.3}
+.work{font-size:12.5px;line-height:1.55;color:var(--ink2);background:var(--bg);border-radius:8px;padding:10px 12px;font-variant-numeric:tabular-nums;white-space:pre-line;overflow-wrap:anywhere}
+/* learn */
+details.lesson{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+details.lesson summary{list-style:none;display:flex;align-items:center;gap:12px;padding:14px;min-height:56px;cursor:pointer;font-weight:700}
+details.lesson summary::-webkit-details-marker{display:none}
+details.lesson .n{font-family:var(--serif);color:var(--rust);width:22px}
+details.lesson .body{padding:0 16px 16px 48px;font-size:14px;line-height:1.6;color:var(--ink2);white-space:pre-line}
+/* settings */
+.opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:56px;padding:10px 14px;border-radius:10px;text-align:left;background:var(--surface);border:1px solid var(--line);width:100%}
+.opt[aria-pressed="true"]{border:2px solid var(--accent);background:var(--accent-soft)}
+.opt[disabled]{opacity:.6;cursor:not-allowed}
+.opt b{font-size:14px}
+.opt span{font-size:12px;color:var(--muted)}
+.prof{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.avatar{width:40px;height:40px;flex-shrink:0;border-radius:20px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.switch{width:52px;height:32px;flex-shrink:0;border-radius:16px;border:none;padding:3px;display:flex;background:var(--line2)}
+.switch[aria-checked="true"]{background:var(--accent);justify-content:flex-end}
+.switch i{width:26px;height:26px;border-radius:13px;background:#fff;display:block}
+/* tabs */
+nav.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:6;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid var(--line);background:var(--surface);padding:6px 0 max(8px,env(safe-area-inset-bottom))}
+nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;min-height:52px;color:var(--muted);font-size:11px;font-weight:500}
+nav.tabs button[aria-current="page"]{color:var(--accent);font-weight:700}
+nav.tabs svg{width:24px;height:24px}
+/* sheet */
+.scrim{position:fixed;inset:0;z-index:20;background:rgba(10,9,14,.55);display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.sheet{width:100%;max-width:480px;max-height:88vh;overflow-y:auto;background:var(--surface);border-radius:22px 22px 0 0;padding:18px 22px 32px;display:flex;flex-direction:column;gap:16px}
+.sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.sheet-title{font-family:var(--serif);font-size:25px;font-weight:600;line-height:1.1}
+.x{width:44px;height:44px;flex-shrink:0;border-radius:22px;border:1px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:center}
+.sec-k{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.sec-k.a{color:var(--accent)}.sec-k.r{color:var(--rust)}.sec-k.m{color:var(--muted)}
+.whybox{display:flex;flex-direction:column;gap:6px;background:var(--bg);border-radius:12px;padding:14px;font-size:14px}
+.housebox{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:12px;padding:14px;font-size:14px}
+.empty{text-align:center;padding:40px 10px;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+footer.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+// ===== ENGINE START =====
+// Astronomy engine: no dependencies. Accuracy is roughly 1-2 arcminutes for the
+// planets (JPL approximate Keplerian elements, valid 1800-2050) and a few
+// arcminutes for the Moon (truncated Meeus series). Plenty for sign/house/aspect work.
+var Astro = (function () {
+  var D2R = Math.PI / 180, R2D = 180 / Math.PI;
+  function norm(x) { x = x % 360; return x < 0 ? x + 360 : x; }
+  function sind(x) { return Math.sin(x * D2R); }
+  function cosd(x) { return Math.cos(x * D2R); }
+  function tand(x) { return Math.tan(x * D2R); }
+  function atan2d(y, x) { return Math.atan2(y, x) * R2D; }
+  function asind(x) { return Math.asin(Math.max(-1, Math.min(1, x))) * R2D; }
+
+  function jdFromMs(ms) { return ms / 86400000 + 2440587.5; }
+  function msFromJd(jd) { return (jd - 2440587.5) * 86400000; }
+
+  // [a, e, I, L, longPeri, longNode] and their rates per Julian century
+  var EL = {
+    mercury: [0.38709927, 0.20563593, 7.00497902, 252.25032350, 77.45779628, 48.33076593, 0.00000037, 0.00001906, -0.00594749, 149472.67411175, 0.16047689, -0.12534081],
+    venus: [0.72333566, 0.00677672, 3.39467605, 181.97909950, 131.60246718, 76.67984255, 0.00000390, -0.00004107, -0.00078890, 58517.81538729, 0.00268329, -0.27769418],
+    earth: [1.00000261, 0.01671123, -0.00001531, 100.46457166, 102.93768193, 0.0, 0.00000562, -0.00004392, -0.01294668, 35999.37244981, 0.32327364, 0.0],
+    mars: [1.52371034, 0.09339410, 1.84969142, -4.55343205, -23.94362959, 49.55953891, 0.00001847, 0.00007882, -0.00813131, 19140.30268499, 0.44441088, -0.29257343],
+    jupiter: [5.20288700, 0.04838624, 1.30439695, 34.39644051, 14.72847983, 100.47390909, -0.00011607, -0.00013253, -0.00183714, 3034.74612775, 0.21252668, 0.20469106],
+    saturn: [9.53667594, 0.05386179, 2.48599187, 49.95424423, 92.59887831, 113.66242448, -0.00125060, -0.00050991, 0.00193609, 1222.49362201, -0.41897216, -0.28867794],
+    uranus: [19.18916464, 0.04725744, 0.77263783, 313.23810451, 170.95427630, 74.01692503, -0.00196176, -0.00004397, -0.00242939, 428.48202785, 0.40805281, 0.04240589],
+    neptune: [30.06992276, 0.00859048, 1.77004347, -55.12002969, 44.96476227, 131.78422574, 0.00026291, 0.00005105, 0.00035372, 218.45945325, -0.32241464, -0.00508664],
+    pluto: [39.48211675, 0.24882730, 17.14001206, 238.92903833, 224.06891629, 110.30393684, -0.00031596, 0.00005170, 0.00004818, 145.20780515, -0.04062942, -0.01183482]
+  };
+
+  function helio(name, T) {
+    var p = EL[name];
+    var a = p[0] + p[6] * T, e = p[1] + p[7] * T, I = p[2] + p[8] * T;
+    var L = p[3] + p[9] * T, wbar = p[4] + p[10] * T, O = p[5] + p[11] * T;
+    var M = norm(L - wbar), w = wbar - O;
+    var Mr = M * D2R, E = Mr + e * Math.sin(Mr);
+    for (var i = 0; i < 12; i++) E = E - (E - e * Math.sin(E) - Mr) / (1 - e * Math.cos(E));
+    var xp = a * (Math.cos(E) - e), yp = a * Math.sqrt(1 - e * e) * Math.sin(E);
+    var cw = cosd(w), sw = sind(w), cO = cosd(O), sO = sind(O), cI = cosd(I), sI = sind(I);
+    return {
+      x: (cw * cO - sw * sO * cI) * xp + (-sw * cO - cw * sO * cI) * yp,
+      y: (cw * sO + sw * cO * cI) * xp + (-sw * sO + cw * cO * cI) * yp,
+      z: (sw * sI) * xp + (cw * sI) * yp
+    };
+  }
+
+  function precession(T) { return (5028.796195 * T + 1.1054348 * T * T) / 3600; }
+
+  function moonLon(T) {
+    var Lp = 218.3164477 + 481267.88123421 * T - 0.0015786 * T * T;
+    var D = 297.8501921 + 445267.1114034 * T - 0.0018819 * T * T;
+    var M = 357.5291092 + 35999.0502909 * T - 0.0001536 * T * T;
+    var Mp = 134.9633964 + 477198.8675055 * T + 0.0087414 * T * T;
+    var F = 93.2720950 + 483202.0175233 * T - 0.0036539 * T * T;
+    var E = 1 - 0.002516 * T;
+    var terms = [
+      [0, 0, 1, 0, 6288774], [2, 0, -1, 0, 1274027], [2, 0, 0, 0, 658314], [0, 0, 2, 0, 213618],
+      [0, 1, 0, 0, -185116], [0, 0, 0, 2, -114332], [2, 0, -2, 0, 58793], [2, -1, -1, 0, 57066],
+      [2, 0, 1, 0, 53322], [2, -1, 0, 0, 45758], [0, 1, -1, 0, -40923], [1, 0, 0, 0, -34720],
+      [0, 1, 1, 0, -30383], [2, 0, 0, -2, 15327], [0, 0, 1, 2, -12528], [0, 0, 1, -2, 10980],
+      [4, 0, -1, 0, 10675], [0, 0, 3, 0, 10034], [4, 0, -2, 0, 8548], [2, 1, -1, 0, -7888],
+      [2, 1, 0, 0, -6766], [1, 0, -1, 0, -5163], [1, 1, 0, 0, 4987], [2, -1, 1, 0, 4036],
+      [2, 0, 2, 0, 3994], [4, 0, 0, 0, 3861], [2, 0, -3, 0, 3665], [0, 1, -2, 0, -2689],
+      [2, 0, -1, 2, -2602], [2, -1, -2, 0, 2390], [1, 0, 1, 0, -2348], [2, -2, 0, 0, 2236],
+      [0, 1, 2, 0, -2120], [0, 2, 0, 0, -2069], [2, -2, -1, 0, 2048], [2, 0, 1, -2, -1773],
+      [2, 0, 0, 2, -1595], [4, -1, -1, 0, 1215], [0, 0, 2, 2, -1110], [3, 0, -1, 0, -892],
+      [2, 1, 1, 0, -810], [4, -1, -2, 0, 759], [0, 2, -1, 0, -713], [2, 2, -1, 0, -700],
+      [2, 1, -2, 0, 691], [2, -1, 0, -2, 596], [4, 0, 1, 0, 549], [0, 0, 4, 0, 537],
+      [4, -1, 0, 0, 520], [1, 0, -2, 0, -487]
+    ];
+    var s = 0;
+    for (var i = 0; i < terms.length; i++) {
+      var t = terms[i], arg = t[0] * D + t[1] * M + t[2] * Mp + t[3] * F;
+      var c = t[4];
+      if (Math.abs(t[1]) === 1) c *= E; else if (Math.abs(t[1]) === 2) c *= E * E;
+      s += c * sind(arg);
+    }
+    var A1 = 119.75 + 131.849 * T, A2 = 53.09 + 479264.290 * T;
+    s += 3958 * sind(A1) + 1962 * sind(Lp - F) + 318 * sind(A2);
+    return norm(Lp + s / 1e6);
+  }
+
+  function meanNode(T) { return norm(125.04452 - 1934.136261 * T + 0.0020708 * T * T); }
+  function obliquity(T) { return 23.439291 - 0.0130042 * T; }
+
+  var BODIES = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+
+  // Tropical ecliptic longitudes (mean equinox of date) for all bodies at a Julian Day (UT).
+  function positions(jd) {
+    var T = (jd - 2451545.0) / 36525;
+    var pr = precession(T);
+    var ea = helio('earth', T);
+    var out = { sun: norm(atan2d(-ea.y, -ea.x) + pr), moon: moonLon(T) };
+    ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'].forEach(function (n) {
+      var h = helio(n, T);
+      out[n] = norm(atan2d(h.y - ea.y, h.x - ea.x) + pr);
+    });
+    out.node = meanNode(T);
+    return out;
+  }
+
+  function angles(jd, lat, lon) {
+    var T = (jd - 2451545.0) / 36525;
+    var gmst = norm(280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T);
+    var ramc = norm(gmst + lon);
+    var eps = obliquity(T);
+    var mc = norm(atan2d(sind(ramc), cosd(ramc) * cosd(eps)));
+    var asc = norm(atan2d(cosd(ramc), -(sind(ramc) * cosd(eps) + tand(lat) * sind(eps))));
+    return { asc: asc, mc: mc, ramc: ramc, eps: eps };
+  }
+
+  function raToLon(ra, eps) { return norm(atan2d(sind(ra), cosd(ra) * cosd(eps))); }
+
+  // Returns 12 cusps (index 0 = 1st house). Placidus falls back to null near the poles.
+  function placidus(ang, lat) {
+    if (Math.abs(lat) >= 66) return null;
+    var eps = ang.eps, ramc = ang.ramc;
+    function cusp(frac, above) {
+      var lon = above ? norm(ang.mc + 30 * frac * 3) : norm(ang.mc + 180 - 30 * frac * 3);
+      for (var i = 0; i < 30; i++) {
+        var dec = asind(sind(eps) * sind(lon));
+        var x = tand(lat) * tand(dec);
+        if (Math.abs(x) > 1) return null;
+        var ad = asind(x);
+        var ra = above ? ramc + frac * (90 + ad) : ramc + 180 - frac * (90 - ad);
+        var nl = raToLon(norm(ra), eps);
+        if (Math.abs(((nl - lon + 540) % 360) - 180) < 1e-7) { lon = nl; break; }
+        lon = nl;
+      }
+      return lon;
+    }
+    var c11 = cusp(1 / 3, true), c12 = cusp(2 / 3, true), c2 = cusp(2 / 3, false), c3 = cusp(1 / 3, false);
+    if ([c11, c12, c2, c3].some(function (v) { return v === null || isNaN(v); })) return null;
+    var c = [];
+    c[0] = ang.asc; c[1] = c2; c[2] = c3; c[3] = norm(ang.mc + 180);
+    c[4] = norm(c11 + 180); c[5] = norm(c12 + 180); c[6] = norm(ang.asc + 180);
+    c[7] = norm(c2 + 180); c[8] = norm(c3 + 180); c[9] = ang.mc; c[10] = c11; c[11] = c12;
+    return c;
+  }
+
+  function cusps(system, ang, lat) {
+    var c = [], i;
+    if (system === 'placidus') {
+      var p = placidus(ang, lat);
+      if (p) return { cusps: p, system: 'placidus' };
+      system = 'equal';
+    }
+    if (system === 'whole') {
+      var start = Math.floor(ang.asc / 30) * 30;
+      for (i = 0; i < 12; i++) c.push(norm(start + 30 * i));
+      return { cusps: c, system: 'whole' };
+    }
+    for (i = 0; i < 12; i++) c.push(norm(ang.asc + 30 * i));
+    return { cusps: c, system: 'equal' };
+  }
+
+  function houseOf(lon, cs) {
+    for (var i = 0; i < 12; i++) {
+      var a = cs[i], b = cs[(i + 1) % 12];
+      var span = norm(b - a), d = norm(lon - a);
+      if (d < span) return i + 1;
+    }
+    return 1;
+  }
+
+  // Timezone: convert a wall-clock time in an IANA zone to a UTC timestamp (handles historical DST).
+  function tzOffsetMin(ms, tz) {
+    var f = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    var p = {}; f.formatToParts(new Date(ms)).forEach(function (x) { p[x.type] = x.value; });
+    var asUtc = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
+    return Math.round((asUtc - ms) / 60000);
+  }
+  function zonedToUtc(y, mo, d, h, mi, tz) {
+    var wall = Date.UTC(y, mo - 1, d, h, mi);
+    var guess = wall;
+    for (var i = 0; i < 4; i++) guess = wall - tzOffsetMin(guess, tz) * 60000;
+    return { ms: guess, offsetMin: tzOffsetMin(guess, tz) };
+  }
+
+  return { norm: norm, jdFromMs: jdFromMs, msFromJd: msFromJd, positions: positions, angles: angles, cusps: cusps, houseOf: houseOf, zonedToUtc: zonedToUtc, tzOffsetMin: tzOffsetMin, BODIES: BODIES };
+})();
+// ===== ENGINE END =====
+
+// ===== CONTENT START =====
+var VS = '︎';
+var PLANETS = {
+  sun: { name: 'Sun', glyph: '☉', theme: 'sense of self', short: 'Your core self',
+    domain: "your core self: what you run on, and what makes you feel most like you",
+    why: "The Sun is the centre of the solar system and the source of light and life, so astrologers made it the centre of you.",
+    keep: "Your Sun sign is the one horoscope columns use, but astrologers say it's only one piece of the chart. The Moon and Rising matter just as much." },
+  moon: { name: 'Moon', glyph: '☽', theme: 'feelings', short: 'Your emotional side',
+    domain: "your emotional side: how you react, and what makes you feel safe",
+    why: "The Moon changes shape every few days and pulls the tides, so it became feelings, moods and instinct: the part of you that shifts.",
+    keep: "The Moon moves about 13 degrees a day, so your birth time matters more for the Moon than for any other planet." },
+  mercury: { name: 'Mercury', glyph: '☿', theme: 'thinking and talking',
+    domain: "how you think, talk and learn",
+    why: "Mercury was the messenger of the gods, and it's the fastest-moving planet, so it got thinking, talking and getting around.",
+    keep: "Mercury never gets more than about 28 degrees from the Sun, so it's always in your Sun sign or a neighbouring one." },
+  venus: { name: 'Venus', glyph: '♀', theme: 'love and money',
+    domain: "what you love, how you love, and what you find beautiful",
+    why: "Venus was the goddess of love and beauty, and it's the brightest planet in the night sky, so it got attraction, pleasure and what you value.",
+    keep: "Venus never gets more than about 47 degrees from the Sun, so it's always in your Sun sign or within two signs of it." },
+  mars: { name: 'Mars', glyph: '♂', theme: 'drive',
+    domain: "your drive: how you chase what you want and how you handle a blue",
+    why: "Mars was the Roman god of war, and it glows red in the night sky, so it got energy, courage, anger and push.",
+    keep: "Mars takes about two years to get around the zodiac." },
+  jupiter: { name: 'Jupiter', glyph: '♃', theme: 'growth and luck',
+    domain: "where you grow, and where luck and generosity show up",
+    why: "Jupiter is the biggest planet, named after the king of the Roman gods, so it got expansion, generosity, optimism and luck.",
+    keep: "Jupiter takes about 12 years to go around the zodiac, so everyone born within about a year of you shares your Jupiter sign. Its house says more about you personally." },
+  saturn: { name: 'Saturn', glyph: '♄', theme: 'limits and responsibility',
+    domain: "your hard lessons: where you get tested, and where you build things that last",
+    why: "Saturn is the slowest planet you can see without a telescope and was the god of time and harvest, so it got limits, discipline, time and consequences.",
+    keep: "Saturn takes about 29 years to come back to where it was when you were born. That's the famous 'Saturn return' in your late 20s, and again in your late 50s." },
+  uranus: { name: 'Uranus', glyph: '♅', theme: 'change and surprises',
+    domain: "where you rebel, break the mould and want your freedom",
+    why: "Uranus was found in 1781, the first planet discovered with a telescope, in an age of revolutions. It upended the old seven-planet sky, so it got surprise, rebellion and sudden change.",
+    keep: "Uranus spends about 7 years in each sign, so you share this sign with everyone born in the same stretch of years. Its house position is the personal bit." },
+  neptune: { name: 'Neptune', glyph: '♆', theme: 'dreams and imagination',
+    domain: "dreams, imagination, and where things get a bit blurry",
+    why: "Neptune is named after the god of the sea: deep, murky, hard to see the bottom of. It was found in 1846, just as photography and spiritualism were taking off, so it got illusion, dreams and escape.",
+    keep: "Neptune spends about 14 years in a sign, so the sign belongs to your whole generation. Look at its house for the personal angle." },
+  pluto: { name: 'Pluto', glyph: '♇', theme: 'power and transformation',
+    domain: "power, transformation, and the stuff you'd rather keep buried",
+    why: "Pluto is named after the god of the underworld and was found in 1930. Astronomers downgraded it to a dwarf planet in 2006. Astrologers kept it anyway.",
+    keep: "Pluto can stay in one sign for 12 to 30 years, so its sign is a generational marker. Its house is where it gets personal." },
+  asc: { name: 'Rising', glyph: 'AC', theme: 'how you come across', short: 'How you come across', isPoint: true,
+    domain: "your front door: first impressions, your style, and how you come at the world",
+    why: "It isn't a planet. It's the sign that was coming up over the eastern horizon the moment you were born. Sunrise means beginnings, so it became how you show up.",
+    keep: "The Rising sign changes roughly every two hours, so a birth time that's out by half an hour can change it. If you're not sure, check your birth certificate or hospital records." },
+  mc: { name: 'Midheaven', glyph: 'MC', theme: 'career and reputation', isPoint: true,
+    domain: "your public direction: career, reputation, and what you want to be known for",
+    why: "It's the point of the zodiac that was highest in the sky when you were born, the most visible spot there is, so it became your public side.",
+    keep: "Like the Rising sign, it needs an accurate birth time." }
+};
+var SIGNS = [
+  { name: 'Aries', glyph: '♈', el: 'fire', mode: 'cardinal', style: "direct, quick off the mark and keen to have a go",
+    why: "It's the first sign, starting at the northern spring equinox: the year's starting gun. Its symbol is the ram, head first." },
+  { name: 'Taurus', glyph: '♉', el: 'earth', mode: 'fixed', style: "steady, patient and fond of comfort and good things",
+    why: "It falls in mid-spring up north, when everything's growing lush. Its symbol is the bull: strong, slow to move, and hard to shift once it's set." },
+  { name: 'Gemini', glyph: '♊', el: 'air', mode: 'mutable', style: "curious, chatty and quick to change channels",
+    why: "It falls at the end of the northern spring, when everything's buzzing. Its symbol is the twins: two sides to everything." },
+  { name: 'Cancer', glyph: '♋', el: 'water', mode: 'cardinal', style: "protective, caring and home-focused",
+    why: "It starts at the northern summer solstice. Its symbol is the crab: hard shell, soft inside, and carries its home on its back." },
+  { name: 'Leo', glyph: '♌', el: 'fire', mode: 'fixed', style: "warm, proud and wanting to be seen",
+    why: "It falls at the height of the northern summer, when the Sun is strongest, so the Sun rules it. Its symbol is the lion, king of the jungle." },
+  { name: 'Virgo', glyph: '♍', el: 'earth', mode: 'mutable', style: "careful, practical and with an eye for detail",
+    why: "It falls at harvest time up north: sorting the good grain from the bad. Its symbol is the maiden holding a sheaf of wheat." },
+  { name: 'Libra', glyph: '♎', el: 'air', mode: 'cardinal', style: "fair, charming and keen to keep the peace",
+    why: "It starts at the northern autumn equinox, when day and night are equal. Its symbol is the scales: balance." },
+  { name: 'Scorpio', glyph: '♏', el: 'water', mode: 'fixed', style: "intense, private and all-or-nothing",
+    why: "It falls in late autumn up north, when things die back and go underground. Its symbol is the scorpion, which keeps its sting out of sight." },
+  { name: 'Sagittarius', glyph: '♐', el: 'fire', mode: 'mutable', style: "adventurous, blunt and big-picture",
+    why: "It falls at the end of the northern autumn, looking ahead. Its symbol is the archer, aiming at far-off targets." },
+  { name: 'Capricorn', glyph: '♑', el: 'earth', mode: 'cardinal', style: "disciplined, ambitious and in it for the long haul",
+    why: "It starts at the northern winter solstice, the cold, lean season. Its symbol is the sea-goat, climbing the mountain one step at a time." },
+  { name: 'Aquarius', glyph: '♒', el: 'air', mode: 'fixed', style: "independent, inventive and a bit unconventional",
+    why: "It falls in deep northern winter. Its symbol is the water bearer, pouring out for everyone, hence community and big ideas." },
+  { name: 'Pisces', glyph: '♓', el: 'water', mode: 'mutable', style: "sensitive, imaginative and go-with-the-flow",
+    why: "It's the last sign, closing the cycle before spring. Its symbol is two fish swimming opposite ways: boundaries dissolving." }
+];
+var ELEMENT = { fire: 'energy, enthusiasm', earth: 'practical, real-world', air: 'ideas, talking, connecting', water: 'feelings, intuition' };
+var MODE = { cardinal: 'starts things', fixed: 'holds steady', mutable: 'adapts' };
+var RULER = { sun: [4], moon: [3], mercury: [2, 5], venus: [1, 6], mars: [0, 7], jupiter: [8, 11], saturn: [9, 10], uranus: [10], neptune: [11], pluto: [7] };
+var EXALT = { sun: 0, moon: 1, mercury: 5, venus: 11, mars: 9, jupiter: 3, saturn: 6 };
+var HOUSES = [null,
+  { area: "you: your body, your approach and first impressions", why: "It starts at your Rising sign, the eastern horizon when you were born, so it's the 'you' house." },
+  { area: "money, possessions and what you value", why: "It comes straight after 'you', so it became what's yours: your resources." },
+  { area: "communication, siblings, short trips and your local patch", why: "Next out from you and your stuff is your immediate world: the people and places close by." },
+  { area: "home, family and roots", why: "It's the very bottom of the chart, the ground under your feet when you were born." },
+  { area: "creativity, fun, romance and kids", why: "It follows home and family, so it's what you create and enjoy from that base." },
+  { area: "work routines, daily habits and health", why: "It's the last house below the horizon, read as the everyday grind that keeps things running." },
+  { area: "partners, marriage and one-on-one relationships", why: "It sits directly opposite the 1st house. If the 1st is 'me', the 7th is 'the other person': partners, and even open rivals." },
+  { area: "shared money, intimacy and big changes", why: "It's opposite the 2nd (your money), so it's other people's money and the things you share." },
+  { area: "travel, study, beliefs and the big picture", why: "It's opposite the 3rd (your local patch), so it's the far-away stuff: long trips and big ideas." },
+  { area: "career, reputation and public life", why: "It sits at the top of the chart, the part of the sky that was overhead, so it's the side of you everyone can see." },
+  { area: "friends, groups and hopes for the future", why: "It follows your public life, so it's your network and what you're working towards." },
+  { area: "the hidden stuff: rest, solitude and what goes on behind the scenes", why: "It's the slice of sky just before sunrise at your Rising sign: the dark before the day starts." }
+];
+var ASPECTS = [
+  { key: 'conj', name: 'Conjunction', angle: 0, orb: 8, easy: null, verb: 'lines up with', flavour: 'a merging',
+    plain: "They're fused together, so it's hard to use one without the other.",
+    why: "At 0 degrees the two are in the same spot in the sky, so their meanings blend." },
+  { key: 'sext', name: 'Sextile', angle: 60, orb: 5, easy: true, verb: 'gives a nudge to', flavour: 'an opening',
+    plain: "They cooperate nicely if you put in a bit of effort.",
+    why: "60 degrees is a sixth of the circle, the angle of a hexagon. The ancient Greeks saw it as a friendly, helpful angle." },
+  { key: 'sq', name: 'Square', angle: 90, orb: 7, easy: false, verb: 'clashes with', flavour: 'friction',
+    plain: "They push against each other. That's frustrating, but it's also read as a source of drive.",
+    why: "90 degrees is a quarter of the circle, the angle of a square. In the old number symbolism, squares meant friction and hard work." },
+  { key: 'tri', name: 'Trine', angle: 120, orb: 7, easy: true, verb: 'flows with', flavour: 'an easy flow',
+    plain: "They back each other up without much effort.",
+    why: "120 degrees is a third of the circle, the angle of a triangle. The ancient Greeks saw triangles as harmony." },
+  { key: 'opp', name: 'Opposition', angle: 180, orb: 8, easy: false, verb: 'faces off with', flavour: 'a tug-of-war',
+    plain: "They pull in opposite directions, so the job is finding a balance.",
+    why: "At 180 degrees they're on opposite sides of the sky, staring each other down across the chart." }
+];
+var NUM_MEAN = { 1: 'Leader, self-starter', 2: 'Peacemaker, partner, diplomat', 3: 'Creative, expressive, social', 4: 'Builder: steady, practical, reliable',
+  5: 'Freedom, change, the traveller', 6: 'Carer, responsibility, home', 7: 'Thinker, seeker, needs alone time', 8: 'Ambition, power, money matters',
+  9: 'Big-picture, compassionate, finishing things', 11: 'Master number: intuition and inspiration, with nervous energy to match',
+  22: 'Master number: the master builder, big plans made real', 33: 'Master number: the master teacher, care on a big scale' };
+var NUM_WHY = {
+  1: "1 is the first number, the one that starts everything, so it got leadership and independence.",
+  2: "2 is a pair, so it got partnership, balance and cooperation.",
+  3: "3 is what you get when a pair makes something new, so it got creativity and expression.",
+  4: "4 is the square: four corners, four walls, solid foundations. So it got structure and hard work.",
+  5: "5 sits right in the middle of 1 to 9 and matches the five senses, so it got movement, change and experience.",
+  6: "6 was seen as a 'perfect' number (1 + 2 + 3 = 6), so it got harmony, home and responsibility.",
+  7: "7 turns up in the seven classical planets and seven days of the week, so it got mystery, study and looking inward.",
+  8: "8 is 4 doubled, structure on structure, so it got power, ambition and material success.",
+  9: "9 is the last single digit, the end of the cycle, so it got completion and the big picture.",
+  11: "11 is two 1s side by side. Numerologists treat it as a supercharged 2, so it isn't reduced.",
+  22: "22 is two 2s. Numerologists treat it as a supercharged 4 (building), so it isn't reduced.",
+  33: "33 is two 3s. Numerologists treat it as a supercharged 6 (care), so it isn't reduced."
+};
+var LESSONS = [
+  { id: 'houses', title: 'Why are there 12 houses?',
+    body: "Picture the sky around you at the moment you were born, sliced into 12 pieces like a pizza, starting from the eastern horizon.\n\nThe 6 slices below the horizon cover your private life (you, money, home, family, daily work). The 6 above cover your more public life (partners, career, friends).\n\nEach house got its meaning from where it sits. The 1st starts at the horizon where the Sun rises, so it's 'you'. The 7th is directly opposite, so it's 'the other person'. The 10th is overhead, so it's what everyone sees: your career and reputation.\n\nDifferent house systems cut the slices differently. You can switch between them in Settings and see what moves." },
+  { id: 'time', title: 'Why do houses need a birth time?',
+    body: "The houses are pinned to your horizon, and the sky spins past the horizon once a day. A new sign rises roughly every two hours.\n\nSo without a birth time we know where the planets were (that barely changes in a day, except for the Moon), but not which slice of your sky they were in. Rather than guess, the app leaves houses and the Rising sign out." },
+  { id: 'planets', title: 'Why does Mars mean fighting?',
+    body: "Most planet meanings come straight from Greek and Roman mythology, plus what the planet looks like in the sky.\n\nMars is red and named after the god of war, so it means drive and conflict. Venus is the brightest and most beautiful, so it means love. Saturn is the slowest you can see, so it means time and limits. Mercury is the quickest, so it means thinking and messages.\n\nIt's symbolism stacked on symbolism, over about 2,000 years." },
+  { id: 'signs', title: 'The recipe for every sign',
+    body: "Every sign is one element plus one mode.\n\nElements: fire (energy), earth (practical), air (ideas), water (feelings).\nModes: cardinal (starts things), fixed (holds steady), mutable (adapts).\n\n4 elements × 3 modes = 12 signs. Aries = fire + cardinal. Leo = fire + fixed. Sagittarius = fire + mutable. Once you know the recipe, you can work out any sign's personality yourself." },
+  { id: 'dignity', title: "What does 'at home' or 'in fall' mean?",
+    body: "Every sign has a ruling planet, the one that's said to be 'at home' there. Mars rules Aries, Venus rules Taurus, and so on. The rulers came from an old pattern: the Sun and Moon got the summer signs (Leo and Cancer), then the other planets were handed out in order of speed on either side.\n\nThe sign opposite a planet's home is its 'detriment', where it's said to work harder. Each planet also has an 'exaltation', a sign where it's an honoured guest, and a 'fall' opposite that.\n\nIt's the ancient version of home-ground advantage." },
+  { id: 'aspects', title: "What's an aspect?",
+    body: "An aspect is the angle between two planets, measured around the chart.\n\n0° (conjunction): blending.\n60° (sextile) and 120° (trine): flowing, easy.\n90° (square) and 180° (opposition): friction, tension.\n\nThe meanings come from ancient Greek geometry and number symbolism. Triangles were seen as harmonious and squares as hard.\n\nAngles don't have to be exact. The 'orb' is how far off exact is allowed. The tighter the orb, the stronger the aspect is read." },
+  { id: 'retro', title: "What does 'retrograde' actually mean?",
+    body: "No planet ever really goes backwards. Earth is moving too, and when we overtake a slower outer planet (or a faster inner one swings past us), it looks like it's reversing against the stars, the same way a car you're passing on the highway seems to slide backwards.\n\nAstrologers read that apparent going-back as a time for review, delays and do-overs in whatever the planet stands for. That's why Mercury retrograde (Mercury is thinking and talking) gets blamed for mix-ups." },
+  { id: 'vedic', title: 'Why is my Vedic sign different?',
+    body: "Western astrology ties the signs to the seasons: Aries always starts at the March equinox. Vedic astrology ties them to the actual star constellations.\n\nThe two lined up about 2,000 years ago. Since then Earth's slow wobble (precession) has shifted them apart by roughly 24°. So in Vedic astrology your Sun sign is usually one sign earlier.\n\nNeither is 'wrong'. They're different rulebooks." },
+  { id: 'numerology', title: 'How numerology works',
+    body: "Numerology turns your birth date and birth name into single digits and reads meaning into each number.\n\nDates: add the digits until you get a single number. Names: each letter gets a value, you add them up, and reduce the same way.\n\nThe two main letter systems are Pythagorean (A = 1 up to I = 9, then round again) and Chaldean (older, based on the sound of each letter, never uses 9). The letter Y is counted as a consonant here. Some numerologists treat it as a vowel when it sounds like one.\n\nThe number meanings come mostly from Pythagoras and his followers, who believed numbers had personalities of their own." },
+  { id: 'real', title: 'Where does science stand on this?',
+    body: "Fair question, and you deserve a straight answer.\n\nAstrology is a symbolic system, not a science. When researchers have tested its predictions under controlled conditions, the results haven't held up. And the physical pull of the planets at birth is tiny: the midwife in the room has more gravitational pull on a newborn than Mars does.\n\nThat's not why most people come to it, though. For thousands of years, in almost every culture on Earth, people have looked to the sky for meaning. Plenty still find real value in it: a language for reflecting on who they are, a nudge to think about their relationships, or a sense of connection to something bigger.\n\nThis app won't tell you what to believe. It shows you how the system works and where its ideas come from. What it means to you is yours to decide." }
+];
+
+// ---------- helpers ----------
+function ord(n) { var s = { 1: 'st', 2: 'nd', 3: 'rd' }; return n + ((n % 100 > 10 && n % 100 < 14) ? 'th' : (s[n % 10] || 'th')); }
+function signOf(lon) { return Math.floor(Astro.norm(lon) / 30); }
+function degIn(lon) { var d = Astro.norm(lon) % 30; var deg = Math.floor(d); var min = Math.floor((d - deg) * 60); return deg + '°' + (min < 10 ? '0' : '') + min + "'"; }
+function sepDeg(a, b) { var d = Math.abs(Astro.norm(a - b)); return d > 180 ? 360 - d : d; }
+function glyph(id) { var p = PLANETS[id]; return p.isPoint ? p.glyph : p.glyph + VS; }
+
+// ---------- chart ----------
+var CHART_POINTS = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+
+function buildChart(profile, houseSystem) {
+  var dp = profile.date.split('-').map(Number);
+  var hasTime = !!profile.time;
+  var tp = hasTime ? profile.time.split(':').map(Number) : [12, 0];
+  var z = Astro.zonedToUtc(dp[0], dp[1], dp[2], tp[0], tp[1], profile.tz);
+  var jd = Astro.jdFromMs(z.ms);
+  var pos = Astro.positions(jd);
+  var before = Astro.positions(jd - 0.5), after = Astro.positions(jd + 0.5);
+  var retro = {};
+  CHART_POINTS.forEach(function (b) { var sp = ((after[b] - before[b] + 540) % 360) - 180; retro[b] = sp < 0; });
+  var chart = { profile: profile, hasTime: hasTime, utcMs: z.ms, offsetMin: z.offsetMin, jd: jd, pos: pos, retro: retro, houses: {}, cusps: null, points: CHART_POINTS.slice() };
+  if (hasTime) {
+    var ang = Astro.angles(jd, profile.lat, profile.lon);
+    var hc = Astro.cusps(houseSystem, ang, profile.lat);
+    chart.asc = ang.asc; chart.mc = ang.mc; chart.cusps = hc.cusps; chart.houseSystemUsed = hc.system;
+    chart.houseFallback = hc.system !== houseSystem;
+    pos.asc = ang.asc; pos.mc = ang.mc;
+    CHART_POINTS.forEach(function (b) { chart.houses[b] = Astro.houseOf(pos[b], hc.cusps); });
+    chart.houses.asc = 1; chart.houses.mc = Astro.houseOf(ang.mc, hc.cusps);
+    chart.points = ['asc', 'mc'].concat(CHART_POINTS);
+  }
+  // natal aspects
+  var aps = [], pts = chart.points;
+  for (var i = 0; i < pts.length; i++) for (var j = i + 1; j < pts.length; j++) {
+    var a = pts[i], b = pts[j];
+    if ((a === 'asc' && b === 'mc') || (a === 'mc' && b === 'asc')) continue;
+    var s = sepDeg(pos[a], pos[b]);
+    for (var k = 0; k < ASPECTS.length; k++) {
+      var A = ASPECTS[k], orb = Math.abs(s - A.angle);
+      if (orb <= A.orb) { aps.push({ a: a, b: b, asp: A, orb: orb }); break; }
+    }
+  }
+  aps.sort(function (x, y) { return x.orb - y.orb; });
+  chart.aspects = aps;
+  return chart;
+}
+
+function dignityNote(id, sign) {
+  var P = PLANETS[id]; if (!RULER[id]) return '';
+  var S = SIGNS[sign].name;
+  if (RULER[id].indexOf(sign) >= 0) return P.name + ' rules ' + S + ", so astrologers say it's at home here and working at full strength.";
+  if (RULER[id].some(function (r) { return (r + 6) % 12 === sign; })) return P.name + " is in 'detriment' in " + S + ", the sign opposite its home, so it's said to have to work a bit harder here.";
+  if (EXALT[id] === sign) return 'Traditionally ' + P.name + " is 'exalted' in " + S + ": an honoured guest, said to be at its best.";
+  if (EXALT[id] !== undefined && (EXALT[id] + 6) % 12 === sign) return P.name + " is in 'fall' in " + S + ", opposite where it's exalted, so it's said to be less comfortable here.";
+  return '';
+}
+
+function placementCard(chart, id) {
+  var P = PLANETS[id], lon = chart.pos[id], si = signOf(lon), S = SIGNS[si];
+  var title = id === 'asc' ? S.name + ' Rising' : (id === 'mc' ? 'Midheaven in ' + S.name : P.name + ' in ' + S.name);
+  var what = P.name === 'Rising' ? 'Your Rising sign is read as ' + P.domain + '. In ' + S.name + ', astrologers say you come across ' + S.style + '.'
+    : (P.name === 'Midheaven' ? 'The Midheaven is read as ' + P.domain + '. In ' + S.name + ', astrologers say you want to be known as ' + S.style + '.'
+    : P.name + ' is read as ' + P.domain + '. In ' + S.name + ', astrologers say that comes out ' + S.style + '.');
+  var meta = degIn(lon) + ' ' + S.name;
+  var h = chart.houses[id];
+  if (chart.hasTime && id !== 'asc') meta += ' · ' + ord(h) + ' house';
+  if (chart.retro[id]) meta += ' · retrograde';
+  var card = {
+    title: title, glyph: glyph(id), meta: meta, what: what, whyLabel: P.isPoint ? 'The point' : 'The planet', whyPlanet: P.why,
+    whySign: S.name + ' is ' + (S.el === 'earth' || S.el === 'air' ? 'an ' : 'a ') + S.el + ' sign (' + ELEMENT[S.el] + ') and a ' + S.mode + ' sign (' + MODE[S.mode] + '). ' + S.why,
+    dignity: dignityNote(id, si), keep: P.keep, hasHouse: false,
+    retro: chart.retro[id] ? P.name + " was retrograde when you were born: from Earth it looked like it was moving backwards. Astrologers read that as its energy turned inward, more reflective and less straightforward." : ''
+  };
+  if (id === 'moon' && !chart.hasTime) card.keep = "Without a birth time we've used noon. The Moon moves about 13° a day, so it could be up to 6 or 7 degrees either side, and if it's near the edge of a sign it might even be in the next one.";
+  if (chart.hasTime && id !== 'asc') {
+    card.hasHouse = true; card.houseTitle = 'In your ' + ord(h) + ' house'; card.houseArea = HOUSES[h].area; card.houseWhy = HOUSES[h].why;
+  }
+  return card;
+}
+
+function aspectCard(chart, ap) {
+  var A = PLANETS[ap.a], B = PLANETS[ap.b];
+  return {
+    title: A.name + ' ' + ap.asp.name.toLowerCase() + ' ' + B.name, glyph: glyph(ap.a),
+    meta: ap.asp.name + ' · ' + ap.asp.angle + '° · off exact by ' + ap.orb.toFixed(1) + '°',
+    what: 'Astrologers read this as ' + ap.asp.flavour + ' between your ' + A.theme + ' (' + A.name + ') and your ' + B.theme + ' (' + B.name + '). ' + ap.asp.plain,
+    whyLabel: 'The angle', whyPlanet: ap.asp.why,
+    whySign: 'Your ' + A.name + ' sits at ' + degIn(chart.pos[ap.a]) + ' ' + SIGNS[signOf(chart.pos[ap.a])].name + ' and your ' + B.name + ' at ' + degIn(chart.pos[ap.b]) + ' ' + SIGNS[signOf(chart.pos[ap.b])].name + ', about ' + Math.round(sepDeg(chart.pos[ap.a], chart.pos[ap.b])) + '° apart.',
+    whySignLabel: 'The measurement',
+    dignity: '', retro: '', hasHouse: false,
+    keep: "The 'orb' is how far off exact an aspect is. Tighter orbs are read as stronger. This one is " + (ap.orb < 2 ? 'tight' : (ap.orb < 5 ? 'moderate' : 'fairly loose')) + '.'
+  };
+}
+
+// ---------- numerology ----------
+var PYTH = {}; 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function (c, i) { PYTH[c] = (i % 9) + 1; });
+var CHAL = { A: 1, B: 2, C: 3, D: 4, E: 5, F: 8, G: 3, H: 5, I: 1, J: 1, K: 2, L: 3, M: 4, N: 5, O: 7, P: 8, Q: 1, R: 2, S: 3, T: 4, U: 6, V: 6, W: 6, X: 5, Y: 1, Z: 7 };
+function reduceNum(n, masters) {
+  var txt = '';
+  while (n > 9 && !(masters && (n === 11 || n === 22 || n === 33))) {
+    var digits = String(n).split('').map(Number), s = digits.reduce(function (a, b) { return a + b; }, 0);
+    txt += ' → ' + digits.join(' + ') + ' = ' + s; n = s;
+  }
+  if (masters && (n === 11 || n === 22 || n === 33)) txt += ' (master number, kept)';
+  return { n: n, txt: txt };
+}
+function lifePath(dateStr, masters) {
+  var p = dateStr.split('-').map(Number);
+  var d = reduceNum(p[2], masters), m = reduceNum(p[1], masters), y = reduceNum(p[0], masters);
+  var sum = d.n + m.n + y.n, t = reduceNum(sum, masters);
+  return { n: t.n, working: 'Day ' + p[2] + d.txt + ' · Month ' + p[1] + m.txt + ' · Year ' + p[0] + y.txt + '\n' + d.n + ' + ' + m.n + ' + ' + y.n + ' = ' + sum + t.txt };
+}
+function nameNumber(name, sys, masters, filter) {
+  var T = sys === 'chaldean' ? CHAL : PYTH;
+  var words = name.toUpperCase().replace(/[^A-Z\s]/g, '').split(/\s+/).filter(Boolean);
+  var parts = [], total = 0;
+  words.forEach(function (w) {
+    var letters = w.split('').filter(function (c) { return filter === 'all' || (filter === 'vowels' ? 'AEIOU'.indexOf(c) >= 0 : 'AEIOU'.indexOf(c) < 0); });
+    if (!letters.length) return;
+    var vals = letters.map(function (c) { return T[c]; }), s = vals.reduce(function (a, b) { return a + b; }, 0);
+    total += s; parts.push({ w: w, letters: letters.join(''), vals: vals, s: s });
+  });
+  if (!parts.length) return null;
+  var r = reduceNum(total, masters);
+  var lines = parts.map(function (p) { return (filter === 'all' ? p.w : p.letters) + ' ' + p.vals.join('+') + ' = ' + p.s; }).join(' · ');
+  return { n: r.n, working: lines + '\n' + (parts.length > 1 ? parts.map(function (p) { return p.s; }).join(' + ') + ' = ' : '') + total + r.txt };
+}
+function personalYear(dateStr, year) {
+  var p = dateStr.split('-').map(Number);
+  var dr = reduceNum(p[2], false), mr = reduceNum(p[1], false), yr = reduceNum(year, false);
+  var d = dr.n, m = mr.n, y = yr.n, sum = d + m + y, r = reduceNum(sum, false);
+  return { n: r.n, working: 'Birth day ' + p[2] + dr.txt + ' · Birth month ' + p[1] + mr.txt + ' · Year ' + year + yr.txt + '\n' + d + ' + ' + m + ' + ' + y + ' = ' + sum + r.txt };
+}
+function personalMonth(py, month) {
+  var mm = reduceNum(month, false).n, sum = py + mm, r = reduceNum(sum, false);
+  return { n: r.n, working: 'Personal Year ' + py + ' + month ' + month + (month > 9 ? ' (→ ' + mm + ')' : '') + ' = ' + sum + r.txt };
+}
+
+// ---------- forecast ----------
+var DUR = { sun: 'about a month', mercury: 'about three weeks', venus: 'about a month', mars: 'about six weeks', jupiter: 'about a year', saturn: 'two to three years', uranus: 'about seven years', neptune: 'about fourteen years', pluto: 'a decade or more' };
+var RX_DUR = { mercury: 'about three weeks', venus: 'about six weeks', mars: 'about two and a half months', jupiter: 'about four months', saturn: 'about four and a half months', uranus: 'about five months', neptune: 'about five months', pluto: 'about five months' };
+var SPEED_NOTE = { sun: "Fast-moving, so it's a day or two thing.", mercury: "Fast-moving, so it's a day or two thing.", venus: "Fast-moving, so it's a day or two thing.", mars: 'Mars takes a few days to pass through.', jupiter: 'Jupiter is slow, so this is a theme for a few weeks.', saturn: 'Saturn is slow, so this is a theme for a few weeks, and can come back around.', uranus: 'Very slow. This can build for months and hit exact more than once.', neptune: 'Very slow. This can build for months and hit exact more than once.', pluto: 'Very slow. This can build for months and hit exact more than once.' };
+var FAST = { sun: 1, mercury: 1, venus: 1 };
+var SLOW = { jupiter: 1, saturn: 1, uranus: 1, neptune: 1, pluto: 1 };
+
+function forecast(chart, startMs, days) {
+  var N = days + 2, P = [];
+  for (var i = 0; i < N; i++) P.push(Astro.positions(Astro.jdFromMs(startMs + i * 86400000)));
+  var ev = [], TR = ['sun', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+  var targets = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'].concat(chart.hasTime ? ['asc', 'mc'] : []);
+  function wrap(x) { return ((x % 360) + 540) % 360 - 180; }
+  function at(i, frac) { return startMs + (i + frac) * 86400000; }
+  function houseTxt(lon) { return chart.hasTime ? Astro.houseOf(lon, chart.cusps) : 0; }
+  // aspects to natal
+  TR.forEach(function (tp) {
+    targets.forEach(function (np) {
+      var nl = chart.pos[np];
+      ASPECTS.forEach(function (A) {
+        var tg = A.angle === 0 || A.angle === 180 ? [A.angle] : [A.angle, 360 - A.angle];
+        tg.forEach(function (t) {
+          for (var i = 0; i < N - 1; i++) {
+            var f0 = wrap(P[i][tp] - nl - t), f1 = wrap(P[i + 1][tp] - nl - t);
+            if (Math.abs(f0) < 20 && Math.abs(f1) < 20 && ((f0 <= 0 && f1 > 0) || (f0 >= 0 && f1 < 0))) {
+              var fr = f0 / (f0 - f1), ms = at(i, fr);
+              var TPl = PLANETS[tp], NPl = PLANETS[np], tl = Astro.norm(nl + t);
+              var tier = SLOW[tp] ? (A.key === 'sext' ? 'mid' : 'major') : (FAST[tp] ? 'all' : (A.key === 'sext' ? 'all' : 'mid'));
+              ev.push({ ms: ms, tag: 'Planets', tier: tier, glyph: glyph(tp),
+                chip: A.name + ' · ' + A.angle + '°',
+                title: TPl.name + ' ' + A.verb + ' your ' + NPl.name,
+                read: 'Astrologers would read this as ' + A.flavour + ' between ' + TPl.theme + ' and your ' + NPl.theme + '. ' + SPEED_NOTE[tp],
+                why: TPl.name + ' will be at ' + degIn(tl) + ' ' + SIGNS[signOf(tl)].name + ', exactly ' + A.angle + '° from where your ' + NPl.name + ' sat at birth (' + degIn(nl) + ' ' + SIGNS[signOf(nl)].name + '). ' + A.why });
+            }
+          }
+        });
+      });
+    });
+  });
+  // ingresses and stations
+  TR.forEach(function (tp) {
+    for (var i = 0; i < N - 1; i++) {
+      var s0 = signOf(P[i][tp]), s1 = signOf(P[i + 1][tp]);
+      if (s0 !== s1) {
+        var TPl = PLANETS[tp], S = SIGNS[s1], h = houseTxt(s1 * 30 + 0.01);
+        var goingBack = wrap(P[i + 1][tp] - P[i][tp]) < 0;
+        if (goingBack) { S = SIGNS[s1]; }
+        var bound = goingBack ? s0 * 30 : s1 * 30;
+        var f0 = wrap(P[i][tp] - bound), f1 = wrap(P[i + 1][tp] - bound), fr = f0 / (f0 - f1);
+        h = houseTxt(P[i + 1][tp]);
+        ev.push({ ms: at(i, fr), tag: 'Planets', tier: SLOW[tp] ? 'major' : (FAST[tp] && tp !== 'sun' ? 'all' : 'mid'), glyph: glyph(tp),
+          chip: 'Changes sign',
+          title: TPl.name + (goingBack ? ' slips back into ' : ' moves into ') + S.name,
+          read: h ? "That's your " + ord(h) + ' house, so astrologers would read your ' + TPl.theme + ' as turning towards ' + HOUSES[h].area + ' for ' + DUR[tp] + '.'
+            : 'Astrologers would read ' + TPl.theme + ' as taking on ' + (S.el === 'earth' || S.el === 'air' ? 'an ' : 'a ') + S.el + ' flavour (' + S.style + ') for ' + DUR[tp] + '.',
+          why: 'Planets take on the flavour of the sign they pass through. ' + S.name + ' is ' + S.el + ' (' + ELEMENT[S.el] + ') and ' + S.mode + ' (' + MODE[S.mode] + ').' + (h ? ' ' + HOUSES[h].why : '') });
+      }
+      if (tp !== 'sun' && i > 0) {
+        var d0 = wrap(P[i][tp] - P[i - 1][tp]), d1 = wrap(P[i + 1][tp] - P[i][tp]);
+        if ((d0 > 0 && d1 <= 0) || (d0 < 0 && d1 >= 0)) {
+          var rx = d1 <= 0, TP2 = PLANETS[tp], sg = SIGNS[signOf(P[i][tp])].name;
+          ev.push({ ms: at(i, 0), tag: 'Planets', tier: 'major', glyph: glyph(tp), chip: rx ? 'Retrograde' : 'Direct',
+            title: TP2.name + (rx ? ' turns retrograde in ' : ' goes direct in ') + sg,
+            read: rx ? "A classic 'slow down and double-check' stretch for " + TP2.theme + '. It lasts ' + RX_DUR[tp] + '.' : 'Things tied to ' + TP2.theme + ' are read as moving forward again after the review period.',
+            why: TP2.name + " doesn't really change direction. Earth and " + TP2.name + ' are both moving, and from where we stand it looks like it ' + (rx ? 'starts sliding backwards' : 'stops and heads forwards again') + ' against the stars, like a car you pass on the highway. Astrologers read that apparent going-back as review, delays and do-overs.' });
+        }
+      }
+    }
+  });
+  // lunations and eclipses
+  for (var i = 0; i < N - 1; i++) {
+    [0, 180].forEach(function (t) {
+      var f0 = wrap(P[i].moon - P[i].sun - t), f1 = wrap(P[i + 1].moon - P[i + 1].sun - t);
+      if (f0 <= 0 && f1 > 0 && Math.abs(f0) < 30) {
+        var fr = f0 / (f0 - f1), ms = at(i, fr), p = Astro.positions(Astro.jdFromMs(ms));
+        var lon = t === 0 ? p.sun : p.moon, S = SIGNS[signOf(lon)], h = houseTxt(lon);
+        var nd = Math.min(sepDeg(p.sun, p.node), sepDeg(p.sun, p.node + 180));
+        var ecl = t === 0 ? nd < 15.4 : nd < 11.5;
+        var nm = ecl ? (t === 0 ? 'Solar eclipse' : 'Lunar eclipse') : (t === 0 ? 'New Moon' : 'Full Moon');
+        ev.push({ ms: ms, tag: 'Moon', tier: ecl ? 'major' : 'mid', glyph: t === 0 ? '●' : '○', chip: ecl ? 'Eclipse' : (t === 0 ? 'New Moon' : 'Full Moon'),
+          title: nm + ' in ' + S.name + (h ? ' · ' + ord(h) + ' house' : ''),
+          read: (ecl ? 'Eclipses are read as turning points, a supercharged ' + (t === 0 ? 'New' : 'Full') + ' Moon. ' : '') + (t === 0 ? 'Read as a fresh start' : 'Read as a peak, when things come to a head') + (h ? ' for ' + HOUSES[h].area + '.' : ', with a ' + S.name + ' flavour: ' + S.style + '.'),
+          why: ecl ? "An eclipse happens when a New or Full Moon lands near the point where the Moon's path crosses the Sun's. Ancient skywatchers saw the light going out as a sign of big change, and the idea stuck. Whether you can see it depends on where you are."
+            : (t === 0 ? 'The New Moon is when the Moon sits between us and the Sun, the start of its monthly cycle, so it has always been read as a reset.' : 'The Full Moon is when Earth sits between the Sun and the Moon, so the Moon is fully lit, halfway through its cycle. Hence culmination.') });
+      }
+    });
+    // solar return
+    var g0 = wrap(P[i].sun - chart.pos.sun), g1 = wrap(P[i + 1].sun - chart.pos.sun);
+    if (g0 <= 0 && g1 > 0 && Math.abs(g0) < 5) {
+      var srMs = at(i, g0 / (g0 - g1));
+      ev.push({ ms: srMs, tag: 'Planets', tier: 'major', glyph: glyph('sun'), chip: 'Solar return', title: 'Your solar return',
+        read: 'Your birthday chart for the year ahead. Astrologers treat it as the theme-setter for the next 12 months.',
+        why: "It's the exact moment the Sun gets back to where it was when you were born (" + degIn(chart.pos.sun) + ' ' + SIGNS[signOf(chart.pos.sun)].name + '). That isn’t always on your birthday itself.' });
+    }
+  }
+  // numerology cycle changes
+  var d = new Date(startMs), endMs = startMs + days * 86400000;
+  for (var k = 1; k <= Math.ceil(days / 28) + 1; k++) {
+    var mDate = new Date(d.getFullYear(), d.getMonth() + k, 1);
+    if (mDate.getTime() > endMs) break;
+    var yr = mDate.getFullYear(), mo = mDate.getMonth() + 1;
+    var py = personalYear(chart.profile.date, yr), pm = personalMonth(py.n, mo);
+    if (mo === 1) {
+      ev.push({ ms: mDate.getTime(), tag: 'Numbers', tier: 'major', glyph: '#', chip: 'Personal Year', title: 'Personal Year ' + py.n + ' begins',
+        read: 'Numerology reads a ' + py.n + ' year as: ' + NUM_MEAN[py.n].toLowerCase() + '.', why: py.working.replace('\n', '. ') + '.' });
+    }
+    ev.push({ ms: mDate.getTime() + 1, tag: 'Numbers', tier: 'mid', glyph: '#', chip: 'Personal Month', title: 'Personal Month ' + pm.n,
+      read: 'Numerology reads a ' + pm.n + ' month as: ' + NUM_MEAN[pm.n].toLowerCase() + '.', why: pm.working + '.' });
+  }
+  ev = ev.filter(function (e) { return e.ms >= startMs && e.ms <= endMs; });
+  ev.sort(function (a, b) { return a.ms - b.ms; });
+  return ev;
+}
+
+function moonToday(chart, nowMs) {
+  var p = Astro.positions(Astro.jdFromMs(nowMs)), S = SIGNS[signOf(p.moon)];
+  var el = Astro.norm(p.moon - p.sun);
+  var phases = ['New Moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full Moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
+  var ph = phases[Math.floor(((el + 22.5) % 360) / 45)];
+  var h = chart.hasTime ? Astro.houseOf(p.moon, chart.cusps) : 0;
+  return { sign: S.name, phase: ph, text: ph + ' in ' + S.name + (h ? ', passing through your ' + ord(h) + ' house (' + HOUSES[h].area + ')' : '') + '. The Moon changes sign every two to three days, so this is your mood-of-the-moment reading.' };
+}
+// ===== CONTENT END =====
+
+// ===== APP START =====
+(function () {
+  var KEY = 'chartExplained.v1';
+  var DEFAULT_STORE = { profiles: [], activeId: null, settings: { houses: 'placidus', numSys: 'pyth', masters: true } };
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem(KEY));
+      if (s && Array.isArray(s.profiles)) { s.settings = Object.assign({}, DEFAULT_STORE.settings, s.settings || {}); return s; }
+    } catch (e) {}
+    return JSON.parse(JSON.stringify(DEFAULT_STORE));
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+
+  var store = load();
+  var ui = { screen: store.profiles.length ? 'chart' : 'onboard', card: null, range: 30, tag: 'all', lesson: null, editId: null, showAllAsp: false, confirmDel: null, confirmWipe: false, place: null, results: [], searchMsg: '', formErr: '' };
+  var root = document.getElementById('app');
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function active() { return store.profiles.filter(function (p) { return p.id === store.activeId; })[0] || store.profiles[0] || null; }
+  function initials(n) { return (n || '?').split(/\s+/).filter(Boolean).map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase(); }
+  function fmtDate(ms, opts) { return new Date(ms).toLocaleDateString('en-AU', opts || { day: 'numeric', month: 'short', year: 'numeric' }); }
+  function offStr(min) { var s = min < 0 ? '-' : '+'; min = Math.abs(min); return 'UTC' + s + String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
+  function fmtTime(t) { var p = t.split(':').map(Number); var h = p[0] % 12 || 12; return h + ':' + String(p[1]).padStart(2, '0') + (p[0] < 12 ? 'am' : 'pm'); }
+
+  var chartCache = {}, fcCache = {};
+  function getChart(p) {
+    var k = p.id + '|' + p.updated + '|' + store.settings.houses;
+    if (!chartCache[k]) chartCache[k] = buildChart(p, store.settings.houses);
+    return chartCache[k];
+  }
+  function todayStart() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }
+  function getForecast(c) {
+    var start = todayStart(), k = c.profile.id + '|' + c.profile.updated + '|' + store.settings.houses + '|' + start;
+    if (!fcCache[k]) fcCache[k] = forecast(c, start, 366);
+    return fcCache[k];
+  }
+
+  // ---------- icons ----------
+  var ICON = {
+    chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="12" y1="3" x2="12" y2="21"/></svg>',
+    forecast: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><line x1="3.5" y1="10" x2="20.5" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>',
+    numbers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><line x1="9" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="15" y2="20"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/></svg>',
+    learn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 5.5c3-1.5 6-1.5 9 0v14c-3-1.5-6-1.5-9 0z"/><path d="M21 5.5c-3-1.5-6-1.5-9 0v14c3-1.5 6-1.5 9 0z"/></svg>',
+    settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.3" fill="var(--surface)"/><circle cx="15" cy="17" r="2.3" fill="var(--surface)"/></svg>',
+    x: '<svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>'
+  };
+  var TABS = [['chart', 'Chart'], ['forecast', 'Forecast'], ['numbers', 'Numbers'], ['learn', 'Learn'], ['settings', 'Settings']];
+  var NAMES = { onboard: 'New chart', chart: 'My chart', forecast: 'Forecast', numbers: 'Numbers', learn: 'Learn', settings: 'Settings' };
+  var ABBR = { sun: 'SUN', moon: 'MOON', mercury: 'MERC', venus: 'VEN', mars: 'MARS', jupiter: 'JUP', saturn: 'SAT', uranus: 'URA', neptune: 'NEP', pluto: 'PLU' };
+
+  // ---------- wheel ----------
+  function wheelSVG(c) {
+    var S = 340, C = 170, R1 = 164, R2 = 134, R3 = 64, o = [];
+    var rot = c.hasTime ? c.asc : 0;
+    function pt(lon, r) { var t = (lon - rot) * Math.PI / 180; return [(C - r * Math.cos(t)).toFixed(1), (C + r * Math.sin(t)).toFixed(1)]; }
+    o.push('<svg viewBox="0 0 ' + S + ' ' + S + '" role="img" aria-label="Birth chart wheel. Every planet is also listed below.">');
+    o.push('<circle class="w-bg" cx="' + C + '" cy="' + C + '" r="' + R1 + '"/><circle class="w-ring" cx="' + C + '" cy="' + C + '" r="' + R2 + '"/><circle class="w-core" cx="' + C + '" cy="' + C + '" r="' + R3 + '"/>');
+    for (var i = 0; i < 12; i++) {
+      var a = pt(i * 30, R2), b = pt(i * 30, R1), g = pt(i * 30 + 15, 152), n = pt(i * 30 + 15, 140);
+      o.push('<line class="w-line" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>');
+      o.push('<text class="w-sg" x="' + g[0] + '" y="' + g[1] + '" text-anchor="middle" dominant-baseline="central">' + SIGNS[i].glyph + VS + '</text>');
+      o.push('<text class="w-sn" x="' + n[0] + '" y="' + n[1] + '" text-anchor="middle" dominant-baseline="central">' + SIGNS[i].name.slice(0, 3).toUpperCase() + '</text>');
+    }
+    if (c.hasTime) {
+      for (var h = 0; h < 12; h++) {
+        var cu = c.cusps[h], nx = c.cusps[(h + 1) % 12], span = Astro.norm(nx - cu);
+        var p1 = pt(cu, R3), p2 = pt(cu, R2), hn = pt(cu + span / 2, R3 + 9);
+        o.push('<line class="' + (h % 3 === 0 ? 'w-angle' : 'w-cusp') + '" x1="' + p1[0] + '" y1="' + p1[1] + '" x2="' + p2[0] + '" y2="' + p2[1] + '"/>');
+        o.push('<text class="w-hn" x="' + hn[0] + '" y="' + hn[1] + '" text-anchor="middle" dominant-baseline="central">' + (h + 1) + '</text>');
+      }
+      var ac = pt(c.asc, R2 + 0), mc = pt(c.mc, R2);
+      o.push('<text class="w-ax" x="' + (+ac[0] + 4) + '" y="' + (+ac[1] - 5) + '">AC</text>');
+      o.push('<text class="w-ax" x="' + (+mc[0] + 4) + '" y="' + (+mc[1] + 10) + '">MC</text>');
+    }
+    c.aspects.forEach(function (ap) {
+      if (ap.asp.key === 'conj' || PLANETS[ap.a].isPoint || PLANETS[ap.b].isPoint) return;
+      var x = pt(c.pos[ap.a], R3 - 2), y = pt(c.pos[ap.b], R3 - 2);
+      var cls = ap.asp.easy ? 'stroke:var(--flow)' : 'stroke:var(--tension);stroke-dasharray:4 3';
+      o.push('<line x1="' + x[0] + '" y1="' + x[1] + '" x2="' + y[0] + '" y2="' + y[1] + '" style="' + cls + ';stroke-width:1.3;opacity:' + (ap.orb < 3 ? 0.95 : 0.55) + '"/>');
+    });
+    // spread planet labels
+    var items = CHART_POINTS.map(function (id) { return { id: id, lon: c.pos[id], d: c.pos[id] }; }).sort(function (a, b) { return a.lon - b.lon; });
+    for (var it = 0; it < 80; it++) {
+      var moved = false;
+      for (var k = 0; k < items.length; k++) {
+        var A = items[k], B = items[(k + 1) % items.length];
+        var gap = Astro.norm(B.d - A.d);
+        if (gap < 11) { var push = (11 - gap) / 2; A.d = Astro.norm(A.d - push); B.d = Astro.norm(B.d + push); moved = true; }
+      }
+      if (!moved) break;
+    }
+    items.forEach(function (itm) {
+      var t1 = pt(itm.lon, R2), t2 = pt(itm.lon, R2 - 6), gp = pt(itm.d, 110), np = pt(itm.d, 97), lp = pt(itm.d, 121);
+      o.push('<line class="w-line" x1="' + t1[0] + '" y1="' + t1[1] + '" x2="' + t2[0] + '" y2="' + t2[1] + '" style="stroke-width:1.4"/>');
+      if (Math.abs(((itm.d - itm.lon + 540) % 360) - 180) > 1.5) o.push('<line class="w-line" x1="' + t2[0] + '" y1="' + t2[1] + '" x2="' + lp[0] + '" y2="' + lp[1] + '" style="stroke-width:.6;opacity:.6"/>');
+      var P = PLANETS[itm.id];
+      o.push('<g class="w-planet" role="button" tabindex="0" data-act="card-place:' + itm.id + '" aria-label="' + P.name + ' in ' + SIGNS[signOf(itm.lon)].name + '">' +
+        '<circle cx="' + gp[0] + '" cy="' + (+gp[1] + 5) + '" r="14" style="fill:transparent"/>' +
+        '<text class="w-pg" x="' + gp[0] + '" y="' + gp[1] + '" text-anchor="middle" dominant-baseline="central">' + P.glyph + VS + '</text>' +
+        '<text class="w-pn" x="' + np[0] + '" y="' + np[1] + '" text-anchor="middle" dominant-baseline="central">' + ABBR[itm.id] + (c.retro[itm.id] ? ' R' : '') + '</text></g>');
+    });
+    o.push('</svg>');
+    return o.join('');
+  }
+
+  // ---------- screens ----------
+  function birthLine(c) {
+    var p = c.profile, y = +p.date.split('-')[0];
+    var jan = Astro.tzOffsetMin(Date.UTC(y, 0, 15), p.tz), jul = Astro.tzOffsetMin(Date.UTC(y, 6, 15), p.tz);
+    var dst = c.hasTime && c.offsetMin > Math.min(jan, jul);
+    var d = new Date(p.date + 'T00:00:00');
+    return fmtDate(d.getTime()) + ' · ' + (c.hasTime ? fmtTime(p.time) + ' (' + offStr(c.offsetMin) + (dst ? ', daylight saving was on' : '') + ')' : 'time unknown') + ' · ' + esc(p.placeName);
+  }
+
+  function screenOnboard() {
+    var p = ui.editId ? store.profiles.filter(function (x) { return x.id === ui.editId; })[0] : null;
+    var guessTz = ''; try { guessTz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) {}
+    var tzs = []; try { tzs = Intl.supportedValuesOf('timeZone'); } catch (e) { tzs = [guessTz || 'UTC']; }
+    var tzSel = (p && p.manual) ? p.tz : guessTz;
+    var place = ui.place;
+    return '<div class="stack">' +
+      '<div><h1>' + (p ? 'Edit chart' : (store.profiles.length ? 'Add a chart' : "Let's build your chart")) + '</h1><p class="lede">Plain English, no glyph-guessing. Takes about a minute.</p></div>' +
+      '<div class="field"><label for="f-name">Full birth name</label><input class="input" id="f-name" autocomplete="name" value="' + esc(p ? p.name : '') + '"><div class="small">As it’s written on the birth certificate. Numerology works from this, not a nickname.</div></div>' +
+      '<div class="field"><label for="f-date">Birth date</label><input class="input" id="f-date" type="date" min="1800-01-01" max="2050-12-31" value="' + esc(p ? p.date : '') + '"></div>' +
+      '<div class="field"><label for="f-time">Birth time</label><input class="input" id="f-time" type="time" value="' + esc(p && p.time ? p.time : '') + '"' + (p && !p.time ? ' disabled' : '') + '>' +
+      '<div class="check"><input type="checkbox" id="f-notime"' + (p && !p.time ? ' checked' : '') + '><label for="f-notime">I don’t know the birth time</label></div>' +
+      '<div class="small" id="notime-note"' + (p && !p.time ? '' : ' hidden') + '>No drama. We’ll build a noon chart and leave out the houses and Rising sign, because those need the time. We won’t fake them.</div></div>' +
+      '<div class="field"><label for="f-place">Birth place</label>' +
+      (place ? '<div class="chosen"><div style="flex:1"><b>' + esc(place.label) + '</b><br>' + Math.abs(place.lat).toFixed(2) + '°' + (place.lat < 0 ? 'S' : 'N') + ' ' + Math.abs(place.lon).toFixed(2) + '°' + (place.lon < 0 ? 'W' : 'E') + ' · ' + esc(place.tz) + '</div><button type="button" class="btn-ghost" data-act="clear-place">Change</button></div>'
+        : '<input class="input" id="f-place" placeholder="Start typing a town or city" autocomplete="off"><div id="place-results" class="results" aria-live="polite"></div>') +
+      '<div class="small">We look up the coordinates, plus the timezone and daylight saving rules that applied on that day.</div>' +
+      (place ? '' : '<details class="manual"' + (p && p.manual ? ' open' : '') + '><summary>Can’t find it? Enter coordinates yourself</summary><div class="stack-s" style="padding-top:8px">' +
+        '<div class="grid2"><div class="field"><label for="m-lat">Latitude (− for south)</label><input class="input" id="m-lat" inputmode="decimal" value="' + (p && p.manual ? p.lat : '') + '"></div><div class="field"><label for="m-lon">Longitude (− for west)</label><input class="input" id="m-lon" inputmode="decimal" value="' + (p && p.manual ? p.lon : '') + '"></div></div>' +
+        '<div class="field"><label for="m-tz">Timezone</label><select class="input" id="m-tz">' + tzs.map(function (z) { return '<option' + (z === tzSel ? ' selected' : '') + '>' + esc(z) + '</option>'; }).join('') + '</select></div>' +
+        '<div class="field"><label for="m-name">Place name (for your reference)</label><input class="input" id="m-name" value="' + esc(p && p.manual ? p.placeName : '') + '"></div></div></details>') +
+      '</div>' +
+      (ui.formErr ? '<div class="err" role="alert">' + esc(ui.formErr) + '</div>' : '') +
+      '<button type="button" class="btn" data-act="save-profile">' + (p ? 'Save changes' : 'Save to my profile') + '</button>' +
+      (store.profiles.length ? '<button type="button" class="btn-ghost" data-act="tab:' + (p ? 'settings' : 'chart') + '">Cancel</button>' : '') +
+      '<p class="small" style="text-align:center;margin:0">Your details are saved on this device only. Delete them any time in Settings.</p></div>';
+  }
+
+  function screenChart() {
+    var p = active(); if (!p) return '';
+    var c = getChart(p), out = [];
+    out.push('<div class="stack">');
+    if (store.profiles.length > 1) {
+      out.push('<div class="field"><label for="f-switch" class="sr">Showing chart for</label><select class="input" id="f-switch">' + store.profiles.map(function (x) { return '<option value="' + x.id + '"' + (x.id === p.id ? ' selected' : '') + '>' + esc(x.name) + '</option>'; }).join('') + '</select></div>');
+    }
+    out.push('<div><h1>' + esc(p.name.split(/\s+/)[0]) + '’s chart</h1><p class="lede">' + birthLine(c) + '</p></div>');
+    if (!c.hasTime) out.push('<div class="note">No birth time, so no houses or Rising sign. Those depend on which bit of sky was on the horizon when you were born, and that changes every few minutes. <button type="button" class="link" data-act="learn:time">Why?</button></div>');
+    if (c.houseFallback) out.push('<div class="note">Placidus houses don’t work this close to the poles (the maths breaks down), so we’ve used Equal houses instead.</div>');
+    out.push('<div class="wheel">' + wheelSVG(c) + '</div>');
+    out.push('<div class="legend"><span><svg width="22" height="4" aria-hidden="true"><line x1="0" y1="2" x2="22" y2="2" style="stroke:var(--flow);stroke-width:2"/></svg>Flowing angle</span><span><svg width="22" height="4" aria-hidden="true"><line x1="0" y1="2" x2="22" y2="2" style="stroke:var(--tension);stroke-width:2;stroke-dasharray:4 3"/></svg>Tension angle</span>' + (c.hasTime ? '<span>AC = Rising · MC = Midheaven</span>' : '') + '</div>');
+    // big three
+    var big = ['sun', 'moon'].concat(c.hasTime ? ['asc'] : []);
+    out.push('<section class="stack-s"><h2>Your Big Three</h2>' + big.map(function (id) {
+      var S = SIGNS[signOf(c.pos[id])], P = PLANETS[id];
+      var title = id === 'asc' ? S.name + ' Rising' : P.name + ' in ' + S.name;
+      return '<button type="button" class="row-btn" data-act="card-place:' + id + '"><div class="orb' + (P.isPoint ? ' pt' : '') + '">' + glyph(id) + '</div><div style="flex:1"><b style="font-size:15px">' + title + '</b><div class="small" style="color:var(--ink2)">' + P.short + ': ' + S.style + '</div></div><span aria-hidden="true" style="color:var(--muted);font-size:18px">›</span></button>';
+    }).join('') + '</section>');
+    // placements
+    out.push('<section class="stack-s"><h2>Every placement</h2><p class="small" style="margin:0">Tap any of them for what it means, and why astrologers say so.</p><div class="grid2">' + c.points.map(function (id) {
+      var P = PLANETS[id], S = SIGNS[signOf(c.pos[id])];
+      var sub = degIn(c.pos[id]) + (c.hasTime && id !== 'asc' ? ' · ' + ord(c.houses[id]) + ' house' : '') + (c.retro[id] ? ' · R' : '');
+      return '<button type="button" class="tile" data-act="card-place:' + id + '"><b><span class="g">' + glyph(id) + '</span> ' + (id === 'asc' ? 'Rising' : (id === 'mc' ? 'MC' : P.name)) + ' in ' + S.name + '</b><span class="small">' + sub + '</span></button>';
+    }).join('') + '</div>' + (!c.hasTime ? '<p class="small" style="margin:0">Moon position is for noon, so it could be a few degrees either side.</p>' : '') + '</section>');
+    // balance
+    var cnt = { fire: 0, earth: 0, air: 0, water: 0 };
+    CHART_POINTS.concat(c.hasTime ? ['asc'] : []).forEach(function (id) { cnt[SIGNS[signOf(c.pos[id])].el]++; });
+    var top = Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; })[0];
+    out.push('<section class="stack-s"><h2>Your element mix</h2><div class="bal">' + ['fire', 'earth', 'air', 'water'].map(function (e) { return '<div><b>' + cnt[e] + '</b><small>' + e[0].toUpperCase() + e.slice(1) + '</small></div>'; }).join('') + '</div><p class="small" style="margin:0;color:var(--ink2)">Counting which element each planet' + (c.hasTime ? ' (plus your Rising sign)' : '') + ' sits in. Yours leans <b>' + top + '</b> (' + ELEMENT[top] + '). Astrologers use this as a quick read on your overall flavour.</p></section>');
+    // aspects
+    var aps = ui.showAllAsp ? c.aspects : c.aspects.slice(0, 10);
+    out.push('<section class="stack-s"><h2>The lines in the middle</h2><p class="small" style="margin:0">Those are aspects: the angles between planets. Some angles are read as easy, some as friction. Tightest first.</p><div>' + aps.map(function (ap) {
+      var idx = c.aspects.indexOf(ap);
+      var col = ap.asp.easy === null ? 'var(--muted)' : (ap.asp.easy ? 'var(--flow)' : 'var(--tension)');
+      var kind = ap.asp.easy === null ? 'Blending' : (ap.asp.easy ? 'Flowing' : 'Tension');
+      return '<button type="button" class="asp" data-act="card-asp:' + idx + '"><b>' + PLANETS[ap.a].name + ' ' + ap.asp.name.toLowerCase() + ' ' + PLANETS[ap.b].name + '</b><span style="color:' + col + '">' + kind + ' · ' + ap.asp.angle + '°</span></button>';
+    }).join('') + '</div>' + (c.aspects.length > 10 && !ui.showAllAsp ? '<button type="button" class="link" data-act="show-all-asp">Show all ' + c.aspects.length + '</button>' : '') + '</section>');
+    out.push('</div>');
+    return out.join('');
+  }
+
+  function screenForecast() {
+    var p = active(); if (!p) return '';
+    var c = getChart(p), all = getForecast(c), now = Date.now(), start = todayStart(), end = start + ui.range * 86400000;
+    var ev = all.filter(function (e) {
+      if (e.ms > end) return false;
+      if (ui.tag !== 'all' && e.tag !== ui.tag) return false;
+      if (ui.range === 30) return true;
+      if (ui.range === 90) return e.tier !== 'all';
+      return e.tier === 'major';
+    });
+    var py = personalYear(p.date, new Date().getFullYear()), pm = personalMonth(py.n, new Date().getMonth() + 1), mt = moonToday(c, now);
+    var out = ['<div class="stack"><div><h1>What’s coming up</h1><p class="lede">Where the planets are heading, compared with where they were when you were born. Astrologers call these transits.</p></div>'];
+    out.push('<div class="seg" role="group" aria-label="Forecast range" style="grid-template-columns:repeat(3,minmax(0,1fr))">' + [[30, '30 days'], [90, '90 days'], [365, '12 months']].map(function (r) { return '<button type="button" aria-pressed="' + (ui.range === r[0]) + '" data-act="range:' + r[0] + '">' + r[1] + '</button>'; }).join('') + '</div>');
+    out.push('<div class="dark-strip"><div class="k">Today</div><div class="v">' + mt.phase + ' in ' + mt.sign + '</div><div class="s">' + mt.text.replace(mt.phase + ' in ' + mt.sign, 'The Moon is here') + '</div></div>');
+    out.push('<div class="dark-strip"><div class="k">Numbers layer</div><div class="v">Personal Year ' + py.n + ' · Personal Month ' + pm.n + '</div><div class="s">Numerology’s timing cycle, running alongside the planets. ' + pm.working + '.</div></div>');
+    out.push('<div class="chips" role="group" aria-label="Filter">' + [['all', 'Everything'], ['Planets', 'Planets'], ['Moon', 'Moon'], ['Numbers', 'Numbers']].map(function (t) { return '<button type="button" class="chip" aria-pressed="' + (ui.tag === t[0]) + '" data-act="tag:' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>');
+    out.push('<p class="small" style="margin:0">' + (ui.range === 30 ? 'Everything, including the quick stuff.' : (ui.range === 90 ? 'Leaving out the quick day-or-two stuff so the bigger themes stand out.' : 'Just the big-ticket items: slow planets, retrogrades, eclipses and your solar return.')) + ' Tap any event for the why.</p>');
+    if (!ev.length) out.push('<div class="empty">Nothing matching in this window.</div>');
+    var lastMonth = '';
+    ev.forEach(function (e) {
+      var mLabel = fmtDate(e.ms, { month: 'long', year: 'numeric' });
+      if (mLabel !== lastMonth) { out.push('<div class="month">' + mLabel + '</div>'); lastMonth = mLabel; }
+      out.push('<details class="ev"><summary><div class="date"><span class="m">' + fmtDate(e.ms, { month: 'short' }) + '</span><span class="d">' + new Date(e.ms).getDate() + '</span></div><div class="ev-body"><span class="tag ' + e.tag + '">' + e.chip + '</span><span class="ev-title">' + e.title + '</span><span class="ev-read">' + e.read + '</span></div><span class="plus" aria-hidden="true">+</span></summary><div class="why"><b>Why they say that</b>' + e.why + '</div></details>');
+    });
+    out.push('<p class="small" style="margin:0">Dates are calculated from real planet positions and shown in your current local time.</p></div>');
+    return out.join('');
+  }
+
+  function numCard(label, r, typeWhy) {
+    return '<div class="card num"><div class="num-head"><div class="big">' + r.n + '</div><div><div class="k">' + label + '</div><div class="m">' + NUM_MEAN[r.n] + '</div></div></div><div class="work"><b>How we got there: </b>' + esc(r.working) + '</div><div style="font-size:13.5px;color:var(--ink2)"><b style="color:var(--rust)">Why: </b>' + typeWhy + ' ' + NUM_WHY[r.n] + '</div></div>';
+  }
+  function screenNumbers() {
+    var p = active(); if (!p) return '';
+    var s = store.settings, out = ['<div class="stack"><div><h1>' + esc(p.name.split(/\s+/)[0]) + '’s numbers</h1><p class="lede">Every number shows the working. No mystery maths.</p></div>'];
+    out.push('<div class="seg" role="group" aria-label="Numerology system" style="grid-template-columns:repeat(2,minmax(0,1fr))"><button type="button" aria-pressed="' + (s.numSys === 'pyth') + '" data-act="numsys:pyth">Pythagorean</button><button type="button" aria-pressed="' + (s.numSys === 'chaldean') + '" data-act="numsys:chaldean">Chaldean</button></div>');
+    out.push(numCard('Life Path', lifePath(p.date, s.masters), "Your birth date can never change, so numerology treats it as the main road you’re on."));
+    var ex = nameNumber(p.name, s.numSys, s.masters, 'all'), so = nameNumber(p.name, s.numSys, s.masters, 'vowels'), pe = nameNumber(p.name, s.numSys, s.masters, 'cons');
+    if (ex) out.push(numCard('Expression', ex, 'Every letter of your full birth name, read as your natural talents: the toolkit you came with.'));
+    if (so) out.push(numCard('Soul Urge', so, 'Just the vowels, the soft sounds inside the name, so they’re read as what you want deep down.'));
+    if (pe) out.push(numCard('Personality', pe, 'Just the consonants, the hard outer shell of the name, so they’re read as how other people see you.'));
+    var yr = new Date().getFullYear(), py = personalYear(p.date, yr), pm = personalMonth(py.n, new Date().getMonth() + 1);
+    out.push('<h2>Right now</h2>');
+    out.push(numCard('Personal Year ' + yr, py, 'Your birthday plus the current year. It runs in a nine-year cycle, so it changes every 1 January.'));
+    out.push(numCard('Personal Month', pm, 'Your Personal Year plus the calendar month, a smaller cycle inside the bigger one.'));
+    out.push('<div class="note"><b>Why the two systems disagree</b><br>Pythagorean runs A = 1 to I = 9, then starts again at J. Chaldean is the older system. It gives letters values by their sound and never uses 9, which it treats as sacred. Different rules, different answers, and we’d rather show you both than pretend there’s one truth. Master numbers (11, 22, 33) can be switched on or off in Settings.</div></div>');
+    return out.join('');
+  }
+
+  function screenLearn() {
+    return '<div class="stack-s"><div style="margin-bottom:6px"><h1>Learn the system</h1><p class="lede">Short lessons on how it all works, and where the ideas came from.</p></div>' +
+      LESSONS.map(function (l, i) { return '<details class="lesson" id="lesson-' + l.id + '"' + (ui.lesson === l.id ? ' open' : '') + '><summary><span class="n">' + (i + 1) + '</span><span style="flex:1">' + l.title + '</span><span class="plus" aria-hidden="true">+</span></summary><div class="body">' + l.body + '</div></details>'; }).join('') + '</div>';
+  }
+
+  function screenSettings() {
+    var s = store.settings, p = active(), out = ['<div class="stack">'];
+    out.push('<section class="stack-s"><h2>Saved charts</h2>' + store.profiles.map(function (x) {
+      var isA = p && x.id === p.id;
+      return '<div class="card prof"><div class="avatar">' + esc(initials(x.name)) + '</div><div style="flex:1;min-width:0"><b>' + esc(x.name) + '</b>' + (isA ? ' <span class="small">(showing)</span>' : '') + '<div class="small">' + fmtDate(new Date(x.date + 'T00:00:00').getTime()) + ' · ' + (x.time ? fmtTime(x.time) : 'time unknown') + ' · ' + esc(x.placeName) + '</div>' +
+        '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' + (isA ? '' : '<button type="button" class="btn-ghost" data-act="use-profile:' + x.id + '">Show</button>') + '<button type="button" class="btn-ghost" data-act="edit-profile:' + x.id + '">Edit</button>' +
+        '<button type="button" class="btn-ghost" style="color:var(--danger);border-color:var(--danger)" data-act="del-profile:' + x.id + '">' + (ui.confirmDel === x.id ? 'Tap again to delete' : 'Delete') + '</button></div></div></div>';
+    }).join('') + '<button type="button" class="btn-dashed" data-act="add-profile">+ Add a chart (partner, kids, mates)</button></section>');
+    // astrology
+    out.push('<section class="stack-s"><h2>Astrology system</h2><div class="lbl">Zodiac</div><div class="grid2"><button type="button" class="opt" aria-pressed="true"><b>Tropical</b><span>Western standard</span></button><button type="button" class="opt" disabled><b>Sidereal (Vedic)</b><span>Coming later</span></button></div>');
+    out.push('<button type="button" class="link" data-act="learn:vedic">Why are there two zodiacs?</button><div class="lbl">House system</div>');
+    [['placidus', 'Placidus', 'The most common. Divides the sky by time, not equal slices.'], ['whole', 'Whole Sign', 'The oldest system: one sign = one house. Popular with newer astrologers.'], ['equal', 'Equal', 'Twelve equal 30° slices, starting from your Rising sign.']].forEach(function (o) {
+      out.push('<button type="button" class="opt" aria-pressed="' + (s.houses === o[0]) + '" data-act="houses:' + o[0] + '"><b>' + o[1] + '</b><span>' + o[2] + '</span></button>');
+    });
+    if (p && p.time) {
+      var cur = getChart(p), base = buildChart(p, 'placidus'), moves = [];
+      CHART_POINTS.forEach(function (id) { if (base.houses[id] !== cur.houses[id]) moves.push(PLANETS[id].name + ' ' + ord(base.houses[id]) + ' → ' + ord(cur.houses[id])); });
+      out.push('<div class="note"><b>What this changes for ' + esc(p.name.split(/\s+/)[0]) + ': </b>' + (s.houses === 'placidus' ? 'You’re on the default. Switch systems and we’ll show you exactly which planets change house.' : (moves.length ? 'Compared with Placidus: ' + moves.join(', ') + '. Same sky, different slicing.' : 'Nothing moves house in this chart compared with Placidus.')) + '</div>');
+    }
+    out.push('</section>');
+    // numerology
+    out.push('<section class="stack-s"><h2>Numerology system</h2><div class="grid2"><button type="button" class="opt" aria-pressed="' + (s.numSys === 'pyth') + '" data-act="numsys:pyth"><b>Pythagorean</b><span>Most widely used</span></button><button type="button" class="opt" aria-pressed="' + (s.numSys === 'chaldean') + '" data-act="numsys:chaldean"><b>Chaldean</b><span>Older, sound-based</span></button></div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px"><div><b id="mlabel" style="font-size:14px">Keep master numbers</b><div class="small">11, 22 and 33 don’t get reduced</div></div><button type="button" class="switch" role="switch" aria-checked="' + s.masters + '" aria-labelledby="mlabel" data-act="masters"><i></i></button></div></section>');
+    // privacy
+    out.push('<section class="stack-s"><h2>Privacy</h2><p class="small" style="margin:0;color:var(--ink2)">Your charts are stored in this browser only. Nothing is sent to us. The only thing that leaves your device is the place name you type into the search, which goes to Open-Meteo’s free place lookup.</p><button type="button" class="btn-danger" data-act="wipe">' + (ui.confirmWipe ? 'Tap again to delete everything' : 'Delete all my data') + '</button></section>');
+    out.push('<footer class="foot">Chart, Explained · an SCVD prototype<br>All calculations run on your device.</footer></div>');
+    return out.join('');
+  }
+
+  function sheet() {
+    var p = active(); if (!ui.card || !p) return '';
+    var c = getChart(p), cd;
+    if (ui.card.type === 'place') cd = placementCard(c, ui.card.id); else { var ap = c.aspects[ui.card.idx]; if (!ap) return ''; cd = aspectCard(c, ap); }
+    return '<div class="scrim" data-act="close-card"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">' +
+      '<div class="sheet-head"><div style="display:flex;gap:14px;align-items:center"><div class="orb' + (cd.glyph.length > 2 ? ' pt' : '') + '" style="width:52px;height:52px;border-radius:26px;font-size:24px">' + cd.glyph + '</div><div><div class="sheet-title" id="sheet-title">' + cd.title + '</div><div class="small">' + cd.meta + '</div></div></div><button type="button" class="x" aria-label="Close" data-act="close-card" id="sheet-close">' + ICON.x + '</button></div>' +
+      '<div class="stack-s" style="gap:6px"><div class="sec-k a">What it means</div><div style="font-size:15px;line-height:1.55">' + cd.what + '</div></div>' +
+      '<div class="whybox"><div class="sec-k r">Why they say that</div><div><b>' + cd.whyLabel + ': </b>' + cd.whyPlanet + '</div><div><b>' + (cd.whySignLabel || 'The sign') + ': </b>' + cd.whySign + '</div>' + (cd.dignity ? '<div><b>Home ground: </b>' + cd.dignity + '</div>' : '') + '</div>' +
+      (cd.hasHouse ? '<div class="housebox"><div class="sec-k a">' + cd.houseTitle + '</div><div>Covers ' + cd.houseArea + '.</div><div style="color:var(--ink2)"><b>Why: </b>' + cd.houseWhy + '</div><button type="button" class="link" data-act="learn:houses">Lesson: why are there 12 houses?</button></div>' : '') +
+      (cd.retro ? '<div class="note">' + cd.retro + '</div>' : '') +
+      '<div class="stack-s" style="gap:6px"><div class="sec-k m">Keep in mind</div><div style="font-size:14px;color:var(--ink2)">' + cd.keep + '</div></div>' +
+      '</div></div>';
+  }
+
+  // ---------- render ----------
+  function render() {
+    var scr = ui.screen;
+    if (scr !== 'onboard' && !active()) scr = ui.screen = 'onboard';
+    var body = scr === 'onboard' ? screenOnboard() : scr === 'chart' ? screenChart() : scr === 'forecast' ? screenForecast() : scr === 'numbers' ? screenNumbers() : scr === 'learn' ? screenLearn() : screenSettings();
+    var tabs = scr === 'onboard' ? '' : '<nav class="tabs" aria-label="Main">' + TABS.map(function (t) { return '<button type="button" data-act="tab:' + t[0] + '"' + (scr === t[0] ? ' aria-current="page"' : '') + '>' + ICON[t[0]] + t[1] + '</button>'; }).join('') + '</nav>';
+    root.innerHTML = '<header class="top"><div class="brand">Chart, <em>Explained</em></div><div class="screen-name">' + NAMES[scr] + '</div></header><main id="main">' + body + '</main>' + tabs + sheet();
+    document.body.style.overflow = ui.card ? 'hidden' : '';
+    if (ui.card) { var cb = document.getElementById('sheet-close'); if (cb) cb.focus(); }
+    if (scr === 'onboard') wireOnboard();
+    if (scr === 'learn' && ui.lesson) { var el = document.getElementById('lesson-' + ui.lesson); if (el) el.scrollIntoView({ block: 'center' }); }
+  }
+  function go(screen) { ui.screen = screen; ui.card = null; ui.confirmDel = null; ui.confirmWipe = false; render(); window.scrollTo(0, 0); }
+
+  // ---------- onboarding wiring ----------
+  var searchTimer = null, searchSeq = 0;
+  function wireOnboard() {
+    var nt = document.getElementById('f-notime'), ti = document.getElementById('f-time'), note = document.getElementById('notime-note');
+    nt.addEventListener('change', function () { ti.disabled = nt.checked; note.hidden = !nt.checked; });
+    var pl = document.getElementById('f-place');
+    if (!pl) return;
+    pl.addEventListener('input', function () {
+      clearTimeout(searchTimer);
+      var q = pl.value.trim();
+      if (q.length < 2) { ui.results = []; drawResults(''); return; }
+      searchTimer = setTimeout(function () { searchPlace(q); }, 350);
+    });
+  }
+  function drawResults(msg) {
+    var box = document.getElementById('place-results'); if (!box) return;
+    box.innerHTML = (msg ? '<div class="small">' + esc(msg) + '</div>' : '') + ui.results.map(function (r, i) {
+      return '<button type="button" class="result" data-act="pick-place:' + i + '"><b>' + esc(r.name) + '</b><span class="small">' + esc([r.admin1, r.country].filter(Boolean).join(', ')) + '</span></button>';
+    }).join('');
+  }
+  function searchPlace(q) {
+    var seq = ++searchSeq;
+    drawResults('Searching…');
+    fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) + '&count=6&language=en&format=json')
+      .then(function (r) { if (!r.ok) throw new Error('bad'); return r.json(); })
+      .then(function (d) {
+        if (seq !== searchSeq) return;
+        ui.results = (d.results || []).filter(function (r) { return r.timezone; });
+        drawResults(ui.results.length ? '' : 'No matches. Try a bigger town nearby, or enter coordinates below.');
+      })
+      .catch(function () { if (seq !== searchSeq) return; ui.results = []; drawResults('Couldn’t reach the place search. You can enter coordinates below instead.'); });
+  }
+  function readForm() {
+    return {
+      name: document.getElementById('f-name').value.trim(),
+      date: document.getElementById('f-date').value,
+      noTime: document.getElementById('f-notime').checked,
+      time: document.getElementById('f-time').value
+    };
+  }
+  function saveProfile() {
+    var f = readForm(), err = '';
+    if (!f.name) err = 'Add a name. Numerology needs the full birth name.';
+    else if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) err = 'Add the birth date.';
+    else if (+f.date.slice(0, 4) < 1800 || +f.date.slice(0, 4) > 2050) err = 'The calculations are built for births between 1800 and 2050.';
+    else if (!f.noTime && !f.time) err = 'Add the birth time, or tick “I don’t know the birth time”.';
+    var place = ui.place;
+    if (!err && !place) {
+      var lat = parseFloat((document.getElementById('m-lat') || {}).value), lon = parseFloat((document.getElementById('m-lon') || {}).value);
+      if (!isNaN(lat) && !isNaN(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+        place = { label: (document.getElementById('m-name').value.trim() || (lat.toFixed(2) + ', ' + lon.toFixed(2))), lat: lat, lon: lon, tz: document.getElementById('m-tz').value, manual: true };
+      } else err = 'Pick the birth place from the search, or enter coordinates.';
+    }
+    if (err) {
+      ui.formErr = err;
+      var keep = readForm(); render();
+      document.getElementById('f-name').value = keep.name; document.getElementById('f-date').value = keep.date;
+      document.getElementById('f-notime').checked = keep.noTime; document.getElementById('f-time').value = keep.time;
+      document.getElementById('f-time').disabled = keep.noTime; document.getElementById('notime-note').hidden = !keep.noTime;
+      return;
+    }
+    var rec = { name: f.name, date: f.date, time: f.noTime ? null : f.time, placeName: place.label, lat: place.lat, lon: place.lon, tz: place.tz, manual: !!place.manual, updated: Date.now() };
+    if (ui.editId) {
+      store.profiles = store.profiles.map(function (x) { return x.id === ui.editId ? Object.assign({ id: x.id }, rec) : x; });
+      store.activeId = ui.editId;
+    } else {
+      rec.id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      store.profiles.push(rec); store.activeId = rec.id;
+    }
+    save(); ui.editId = null; ui.place = null; ui.formErr = ''; ui.showAllAsp = false;
+    go('chart');
+  }
+
+  // ---------- events ----------
+  root.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-act]'); if (!el) return;
+    if (el.classList.contains('scrim') && e.target !== el) return;
+    var parts = el.getAttribute('data-act').split(':'), act = parts[0], arg = parts.slice(1).join(':');
+    var s = store.settings;
+    switch (act) {
+      case 'tab': ui.editId = null; ui.place = null; ui.formErr = ''; go(arg); break;
+      case 'card-place': ui.card = { type: 'place', id: arg }; render(); break;
+      case 'card-asp': ui.card = { type: 'asp', idx: +arg }; render(); break;
+      case 'close-card': ui.card = null; render(); break;
+      case 'range': ui.range = +arg; render(); break;
+      case 'tag': ui.tag = arg; render(); break;
+      case 'houses': s.houses = arg; save(); render(); break;
+      case 'numsys': s.numSys = arg; save(); render(); break;
+      case 'masters': s.masters = !s.masters; save(); render(); break;
+      case 'show-all-asp': ui.showAllAsp = true; render(); break;
+      case 'learn': ui.lesson = arg; go('learn'); break;
+      case 'add-profile': ui.editId = null; ui.place = null; go('onboard'); break;
+      case 'edit-profile':
+        var ep = store.profiles.filter(function (x) { return x.id === arg; })[0];
+        ui.editId = arg; ui.place = ep && !ep.manual ? { label: ep.placeName, lat: ep.lat, lon: ep.lon, tz: ep.tz } : null; go('onboard'); break;
+      case 'use-profile': store.activeId = arg; save(); ui.showAllAsp = false; go('chart'); break;
+      case 'del-profile':
+        if (ui.confirmDel !== arg) { ui.confirmDel = arg; render(); break; }
+        store.profiles = store.profiles.filter(function (x) { return x.id !== arg; });
+        if (store.activeId === arg) store.activeId = store.profiles.length ? store.profiles[0].id : null;
+        ui.confirmDel = null; save(); render(); break;
+      case 'wipe':
+        if (!ui.confirmWipe) { ui.confirmWipe = true; render(); break; }
+        try { localStorage.removeItem(KEY); } catch (err) {}
+        store = JSON.parse(JSON.stringify(DEFAULT_STORE)); ui.confirmWipe = false; go('onboard'); break;
+      case 'pick-place':
+        var r = ui.results[+arg]; if (!r) break;
+        var keep = readForm();
+        ui.place = { label: [r.name, r.admin1, r.country].filter(Boolean).join(', '), lat: r.latitude, lon: r.longitude, tz: r.timezone };
+        ui.results = []; render();
+        document.getElementById('f-name').value = keep.name; document.getElementById('f-date').value = keep.date;
+        document.getElementById('f-notime').checked = keep.noTime; document.getElementById('f-time').value = keep.time;
+        document.getElementById('f-time').disabled = keep.noTime; document.getElementById('notime-note').hidden = !keep.noTime;
+        break;
+      case 'clear-place':
+        var kp = readForm(); ui.place = null; render();
+        document.getElementById('f-name').value = kp.name; document.getElementById('f-date').value = kp.date;
+        document.getElementById('f-notime').checked = kp.noTime; document.getElementById('f-time').value = kp.time;
+        document.getElementById('f-time').disabled = kp.noTime; document.getElementById('notime-note').hidden = !kp.noTime;
+        document.getElementById('f-place').focus();
+        break;
+      case 'save-profile': saveProfile(); break;
+    }
+  });
+  root.addEventListener('keydown', function (e) {
+    var el = e.target.closest && e.target.closest('g[data-act]');
+    if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); el.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
+  });
+  root.addEventListener('change', function (e) {
+    if (e.target.id === 'f-switch') { store.activeId = e.target.value; save(); ui.showAllAsp = false; render(); }
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ui.card) { ui.card = null; render(); } });
+
+  render();
+})();
+// ===== APP END =====
+
+</script>
+</body>
+</html>
