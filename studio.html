@@ -2,181 +2,101 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Duology: astrology and numerology, explained</title>
-<meta name="description" content="Your birth chart in plain English, with the why behind every placement. Plus forecasts and numerology.">
-<meta name="theme-color" content="#F4F1EA" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14131A" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23F4F1EA' stroke='%232E3A8C' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='11' fill='none' stroke='%232E3A8C' stroke-width='4'/%3E%3Cline x1='4' y1='32' x2='60' y2='32' stroke='%232E3A8C' stroke-width='4'/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Duology Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#F4F1EA;--surface:#FFFDF8;--ink:#1D1B26;--ink2:#3E3947;--muted:#5E5869;--line:#DDD6C8;--line2:#BDB4A3;--soft:#EAE4D7;
-  --accent:#2E3A8C;--accent-soft:#E6E8F4;--on-accent:#FFFFFF;--rust:#A0521A;--flow:#2E6BC4;--tension:#C2561B;--danger:#B3261E;
-  --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
-  color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root{--bg:#14131A;--surface:#1E1C26;--ink:#EEEAF2;--ink2:#D2CCDA;--muted:#A9A3B5;--line:#34313F;--line2:#4A4657;--soft:#282533;
-  --accent:#A9B6FF;--accent-soft:#2A2F52;--on-accent:#14131A;--rust:#E4A673;--flow:#6EA8FF;--tension:#F08A4B;--danger:#FF8A80;color-scheme:dark}
-}
+:root{--v-bg:#14131A;--v-panel:#1F1D29;--v-ink:#EEEAF2;--v-muted:#B3ADBF;--v-line:#3A3647;--v-accent:#A9B6FF;--v-accent-soft:#2E3462;--v-brass:#E4A673;
+  --ui-bg:#0F0E14;--ui-panel:#1A1822;--ui-line:#2F2C3B;--ui-ink:#EEEAF2;--ui-muted:#A9A3B5;--ok:#7FD1A0;--warn:#F0B35B;
+  --serif:'Fraunces',Georgia,serif;--sans:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:dark}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
-button,input,select{font:inherit;color:inherit}
+html,body{margin:0;background:var(--ui-bg);color:var(--ui-ink);font-family:var(--sans);font-size:15px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
-a{color:var(--accent)}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.app{max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;background:var(--bg);position:relative}
-@media (min-width:520px){.app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
-header.top{position:sticky;top:0;z-index:5;height:56px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:var(--bg)}
-.brand{font-family:var(--serif);font-size:21px;font-weight:600;letter-spacing:-.2px}
-.brand em{font-style:italic;font-weight:500;color:var(--accent)}
-.screen-name{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-main{flex:1;padding:18px 20px 110px}
-h1{margin:0;font-family:var(--serif);font-size:30px;line-height:1.1;font-weight:600}
-h2{margin:0;font-family:var(--serif);font-size:22px;font-weight:600}
-.lede{margin:6px 0 0;color:var(--muted);font-size:14px}
-.stack{display:flex;flex-direction:column;gap:18px}
-.stack-s{display:flex;flex-direction:column;gap:10px}
-.small{font-size:12.5px;color:var(--muted)}
-.note{font-size:13px;line-height:1.5;background:var(--soft);padding:12px 14px;border-radius:10px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px}
-.btn{height:52px;border:none;border-radius:12px;background:var(--accent);color:var(--on-accent);font-size:16px;font-weight:700;padding:0 18px}
-.btn[disabled]{opacity:.5;cursor:not-allowed}
-.btn-ghost{min-height:44px;padding:0 14px;border:1px solid var(--line2);border-radius:10px;background:none;font-size:14px;font-weight:600}
-.btn-dashed{min-height:48px;border:1px dashed var(--line2);border-radius:12px;background:none;font-size:14px;font-weight:600;color:var(--accent)}
-.btn-danger{min-height:48px;border:1px solid var(--danger);border-radius:12px;background:none;font-size:14px;font-weight:700;color:var(--danger)}
-.note .link{min-height:0}
-.link{background:none;border:none;padding:0;min-height:44px;color:var(--accent);font-weight:700;text-decoration:underline;font-size:14px;text-align:left}
-/* form */
-.field{display:flex;flex-direction:column;gap:6px}
-.field label,.lbl{font-size:13px;font-weight:700}
-.input{height:48px;padding:0 14px;font-size:16px;border:1px solid var(--line2);border-radius:10px;background:var(--surface);width:100%}
-.input[disabled]{opacity:.45}
-.check{display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px}
-.check input{width:22px;height:22px;accent-color:var(--accent);margin:0}
-.results{display:flex;flex-direction:column;gap:6px}
-.result{display:flex;flex-direction:column;align-items:flex-start;padding:10px 12px;min-height:48px;border:1px solid var(--line);border-radius:10px;background:var(--surface);text-align:left}
-.result b{font-size:14px}
-.chosen{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:var(--accent-soft);font-size:13px}
-.err{color:var(--danger);font-size:13px;font-weight:600}
-details.manual summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);min-height:36px;display:flex;align-items:center}
-.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-/* segmented */
-.seg{display:grid;gap:6px;background:var(--soft);padding:4px;border-radius:12px}
-.seg button{height:44px;border:none;border-radius:9px;font-size:14px;font-weight:700;background:transparent}
-.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{min-height:36px;padding:0 12px;border-radius:18px;border:1px solid var(--line2);background:none;font-size:13px;font-weight:600}
-.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-/* chart */
-.wheel{display:flex;justify-content:center}
-.wheel svg{width:100%;max-width:360px;height:auto}
-.w-bg{fill:var(--surface);stroke:var(--ink);stroke-width:1.5}
-.w-ring{fill:none;stroke:var(--ink);stroke-width:1}
-.w-core{fill:var(--bg);stroke:var(--ink);stroke-width:1}
-.w-line{stroke:var(--ink);stroke-width:1}
-.w-cusp{stroke:var(--ink);stroke-width:.75;stroke-dasharray:2 3}
-.w-angle{stroke:var(--ink);stroke-width:2}
-.w-sg{fill:var(--accent);font-size:11px}
-.w-sn{fill:var(--ink);font-size:7.5px;font-weight:600}
-.w-hn{fill:var(--muted);font-size:8px}
-.w-pg{fill:var(--ink);font-size:14px}
-.w-pn{fill:var(--ink);font-size:7px;font-weight:700}
-.w-ax{fill:var(--rust);font-size:9px;font-weight:700}
-.w-planet{cursor:pointer}
-.w-planet:hover .w-pg,.w-planet:focus .w-pg{fill:var(--accent)}
-.legend{display:flex;gap:16px;justify-content:center;font-size:12px;color:var(--muted);flex-wrap:wrap}
-.legend span{display:flex;align-items:center;gap:6px}
-.row-btn{display:flex;align-items:center;gap:14px;padding:12px 14px;min-height:64px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-align:left;width:100%}
-.orb{width:40px;height:40px;flex-shrink:0;border-radius:20px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700}
-.orb.pt{font-size:13px}
-.tile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;min-height:60px;background:var(--surface);border:1px solid var(--line);border-radius:10px;text-align:left}
-.tile b{font-size:14px}
-.tile .g{color:var(--accent)}
-.asp{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 2px;min-height:48px;border:none;border-bottom:1px solid var(--line);background:none;width:100%;text-align:left}
-.asp b{font-size:14px;font-weight:600}
-.asp span{font-size:13px;font-weight:600;text-align:right}
-.bal{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-.bal div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
-.bal b{display:block;font-family:var(--serif);font-size:22px}
-.bal small{font-size:11.5px;color:var(--muted)}
-/* signs */
-.signgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.signgrid button{min-height:52px;border:1px solid var(--line);border-radius:10px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:12.5px;font-weight:600}
-.signgrid .sg{font-size:17px;color:var(--accent)}
-.signgrid button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-.signgrid button[aria-pressed="true"] .sg{color:var(--on-accent)}
-/* forecast */
-.dark-strip{padding:12px 14px;border-radius:12px;background:var(--ink);color:var(--bg)}
-.dark-strip .k{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.75}
-.dark-strip .v{font-size:15px;font-weight:600}
-.dark-strip .s{font-size:12.5px;opacity:.85}
-.month{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:6px}
-details.ev{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-details.ev summary{list-style:none;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;cursor:pointer}
-details.ev summary::-webkit-details-marker{display:none}
-.date{width:46px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
-.date .m{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase}
-.date .d{font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.1}
-.ev-body{flex:1;display:flex;flex-direction:column;gap:3px}
-.tag{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
-.tag.Planets{color:var(--accent)}.tag.Moon{color:var(--flow)}.tag.Numbers{color:var(--rust)}
-.ev-title{font-size:15px;font-weight:700;line-height:1.3}
-.ev-read{font-size:13px;color:var(--ink2)}
-.plus{font-size:18px;color:var(--muted);line-height:1}
-details[open] .plus{transform:rotate(45deg)}
-.why{margin:0 14px 14px 72px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink2)}
-.why b{color:var(--rust);font-size:12px;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:2px}
-/* numbers */
-.num{padding:16px;display:flex;flex-direction:column;gap:10px}
-.num-head{display:flex;align-items:center;gap:14px}
-.big{width:56px;height:56px;flex-shrink:0;border-radius:28px;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:26px;font-weight:600}
-.num .k{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
-.num .m{font-size:15px;font-weight:700;line-height:1.3}
-.work{font-size:12.5px;line-height:1.55;color:var(--ink2);background:var(--bg);border-radius:8px;padding:10px 12px;font-variant-numeric:tabular-nums;white-space:pre-line;overflow-wrap:anywhere}
-/* learn */
-details.lesson{background:var(--surface);border:1px solid var(--line);border-radius:12px}
-details.lesson summary{list-style:none;display:flex;align-items:center;gap:12px;padding:14px;min-height:56px;cursor:pointer;font-weight:700}
-details.lesson summary::-webkit-details-marker{display:none}
-details.lesson .n{font-family:var(--serif);color:var(--rust);width:22px}
-details.lesson .body{padding:0 16px 16px 48px;font-size:14px;line-height:1.6;color:var(--ink2);white-space:pre-line}
-/* settings */
-.opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:56px;padding:10px 14px;border-radius:10px;text-align:left;background:var(--surface);border:1px solid var(--line);width:100%}
-.opt[aria-pressed="true"]{border:2px solid var(--accent);background:var(--accent-soft)}
-.opt[disabled]{opacity:.6;cursor:not-allowed}
-.opt b{font-size:14px}
-.opt span{font-size:12px;color:var(--muted)}
-.prof{display:flex;align-items:center;gap:12px;padding:12px 14px}
-.avatar{width:40px;height:40px;flex-shrink:0;border-radius:20px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
-.switch{width:52px;height:32px;flex-shrink:0;border-radius:16px;border:none;padding:3px;display:flex;background:var(--line2)}
-.switch[aria-checked="true"]{background:var(--accent);justify-content:flex-end}
-.switch i{width:26px;height:26px;border-radius:13px;background:#fff;display:block}
-/* tabs */
-nav.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:6;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid var(--line);background:var(--surface);padding:6px 0 max(8px,env(safe-area-inset-bottom))}
-nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;min-height:52px;color:var(--muted);font-size:11px;font-weight:500}
-nav.tabs button[aria-current="page"]{color:var(--accent);font-weight:700}
-nav.tabs svg{width:24px;height:24px}
-/* sheet */
-.scrim{position:fixed;inset:0;z-index:20;background:rgba(10,9,14,.55);display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
-.sheet{width:100%;max-width:480px;max-height:88vh;overflow-y:auto;background:var(--surface);border-radius:22px 22px 0 0;padding:18px 22px 32px;display:flex;flex-direction:column;gap:16px}
-.sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.sheet-title{font-family:var(--serif);font-size:25px;font-weight:600;line-height:1.1}
-.x{width:44px;height:44px;flex-shrink:0;border-radius:22px;border:1px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:center}
-.sec-k{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
-.sec-k.a{color:var(--accent)}.sec-k.r{color:var(--rust)}.sec-k.m{color:var(--muted)}
-.whybox{display:flex;flex-direction:column;gap:6px;background:var(--bg);border-radius:12px;padding:14px;font-size:14px}
-.housebox{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:12px;padding:14px;font-size:14px}
-.empty{text-align:center;padding:40px 10px;color:var(--muted)}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-footer.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
+:focus-visible{outline:3px solid var(--v-accent);outline-offset:2px}
+.s-top{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;padding:14px 24px;border-bottom:1px solid var(--ui-line);background:var(--ui-panel)}
+.s-brand{font-family:var(--serif);font-size:24px;font-weight:600}.s-brand em{color:var(--v-accent)}.s-brand span{font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--v-brass);margin-left:6px}
+.s-month{display:flex;align-items:center;gap:10px;font-size:17px}
+.s-field{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ui-muted)}
+.s-field select,.s-field input{background:var(--ui-bg);border:1px solid var(--ui-line);border-radius:8px;padding:6px 8px;color:var(--ui-ink)}
+.s-field input{width:72px}
+.s-dur{padding:6px 12px;border-radius:20px;font-weight:700;font-size:13px}
+.s-dur.ok{background:rgba(127,209,160,.15);color:var(--ok)}.s-dur.warn{background:rgba(240,179,91,.15);color:var(--warn)}
+.s-tabs{display:flex;gap:4px;padding:0 24px;border-bottom:1px solid var(--ui-line);background:var(--ui-panel)}
+.s-tabs button{background:none;border:none;border-bottom:3px solid transparent;padding:12px 16px;font-weight:600;color:var(--ui-muted)}
+.s-tabs button[aria-current="page"]{color:var(--ui-ink);border-color:var(--v-accent)}
+.s-pad{padding:20px 24px 60px;max-width:1500px;margin:0 auto}
+.s-pad h2{font-family:var(--serif);font-weight:600;margin:24px 0 10px}
+.s-btn{width:40px;height:40px;border-radius:20px;border:1px solid var(--ui-line);background:var(--ui-bg);font-size:20px;line-height:1}
+.s-btn2{min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--ui-line);background:var(--ui-bg);font-weight:600;font-size:14px}
+.s-cta{min-height:40px;padding:0 18px;border-radius:10px;border:none;background:var(--v-accent);color:#14131A;font-weight:700}
+.s-link{background:none;border:none;color:var(--v-accent);font-weight:600;font-size:13px;padding:4px 6px;text-decoration:underline}
+.s-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.s-hint{color:var(--ui-muted);font-size:13px}
+.s-sec{background:var(--ui-panel);border:1px solid var(--ui-line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.s-sechead{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px}
+.s-meta{color:var(--ui-muted);font-size:13px}
+.s-edited{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--v-brass);border:1px solid var(--v-brass);border-radius:10px;padding:1px 8px}
+.s-sec textarea{width:100%;background:var(--ui-bg);border:1px solid var(--ui-line);border-radius:8px;padding:10px 12px;font-size:15px;line-height:1.55;resize:vertical}
+#ytdesc{width:100%;background:var(--ui-panel);border:1px solid var(--ui-line);border-radius:10px;padding:12px;font-size:14px;line-height:1.5}
+.s-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--ui-panel);border:1px solid var(--ui-line);border-radius:10px;margin-bottom:8px}.s-row span:first-child{flex:1;font-weight:600}
+.s-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+.s-timeline{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--ui-panel);margin-bottom:12px;gap:2px}
+.s-timeline button{border:none;padding:0;background:var(--ui-line);height:100%}.s-timeline button.on{background:var(--v-accent)}
+.s-stage{position:relative;width:100%;overflow:hidden;background:var(--v-bg);border-radius:12px;border:1px solid var(--ui-line)}
+.s-canvas{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;background:var(--v-bg)}
+.s-voice{margin-top:14px;background:var(--ui-panel);border:1px solid var(--ui-line);border-radius:12px;padding:12px 16px}.s-voice p{margin:6px 0 0;color:var(--ui-muted)}
+.s-signs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.s-signs button{min-height:38px;padding:0 12px;border-radius:19px;border:1px solid var(--ui-line);background:var(--ui-panel);font-weight:600;font-size:13px}
+.s-signs button[aria-pressed="true"]{background:var(--v-accent);color:#14131A;border-color:var(--v-accent)}
+.s-shortwrap{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}.s-shortside{flex:1;min-width:320px}
+body.clean{overflow:hidden;cursor:none}
+body.clean .s-top,body.clean .s-tabs,body.clean .s-controls,body.clean .s-timeline,body.clean .s-voice,body.clean .s-hint,body.clean .s-signs,body.clean .s-shortside{display:none}
+body.clean .s-pad{padding:0;max-width:none}
+body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !important;border:none;border-radius:0;z-index:50;background:#000}
+/* ----- video scenes ----- */
+.v{position:absolute;inset:0;padding:90px 110px;color:var(--v-ink);font-family:var(--sans);background:var(--v-bg)}
+.v::after{content:"";position:absolute;inset:36px;border:2px solid var(--v-line);border-radius:28px;pointer-events:none}
+.v-title{display:flex;flex-direction:column;justify-content:center;padding-left:160px}
+.v-kicker{font-size:34px;font-weight:700;letter-spacing:6px;text-transform:uppercase;color:var(--v-brass)}
+.v-huge{font-family:var(--serif);font-size:300px;font-weight:600;line-height:1;letter-spacing:-6px}
+.v-year{font-size:52px;color:var(--v-muted);margin-top:10px}
+.v-glyphrow{display:flex;gap:44px;font-size:60px;color:var(--v-accent);margin-top:60px}
+.v-center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;text-align:center}
+.v-brand{font-family:var(--serif);font-weight:600;line-height:1}.v-brand em{font-style:italic;font-weight:500;color:var(--v-accent)}
+.v-sub{font-size:52px;color:var(--v-muted)}
+.v-pills{display:flex;gap:22px}.v-pills span{font-size:34px;border:2px solid var(--v-line);border-radius:40px;padding:12px 30px}
+.v-note{font-size:30px;color:var(--v-muted)}
+.v-sky,.v-sign{display:grid;grid-template-columns:600px 1fr;gap:80px;align-items:start;padding-top:100px}
+.v-left{display:flex;flex-direction:column;align-items:center}
+.v-right{display:flex;flex-direction:column;gap:22px}
+.v-date{font-family:var(--serif);font-size:150px;font-weight:600;line-height:.95;text-align:center}.v-date span{display:block;font-family:var(--sans);font-size:44px;letter-spacing:8px;color:var(--v-brass);font-weight:700}
+.v-wheel{margin-top:20px}
+.v-h1{font-family:var(--serif);font-size:80px;font-weight:600;line-height:1.05}
+.v-block{font-size:30px;line-height:1.4;color:var(--v-ink)}.v-block b{display:block;font-size:22px;letter-spacing:3px;text-transform:uppercase;color:var(--v-brass);margin-bottom:4px}
+.v-fact{margin-top:22px;font-size:23px;line-height:1.4;background:var(--v-panel);border:2px solid var(--v-line);border-radius:18px;padding:16px 22px;color:var(--v-muted);text-align:left}.v-fact b{color:var(--v-accent)}
+.v-bignum{font-family:var(--serif);font-size:340px;font-weight:600;line-height:.9;color:var(--v-accent)}
+.v-work{font-size:34px;color:var(--v-muted);font-variant-numeric:tabular-nums;background:var(--v-panel);border-radius:18px;padding:18px 30px}
+.v-signglyph{font-size:200px;line-height:1;color:var(--v-accent)}
+.v-ev{display:flex;gap:28px;align-items:flex-start;background:var(--v-panel);border:2px solid var(--v-line);border-radius:22px;padding:20px 28px}
+.v-evd{font-family:var(--serif);font-size:72px;font-weight:600;line-height:.95;min-width:110px;text-align:center}.v-evd span{display:block;font-family:var(--sans);font-size:24px;letter-spacing:4px;color:var(--v-brass);font-weight:700}
+.v-ev b{font-size:36px;display:block;line-height:1.2}.v-ev div div{font-size:27px;color:var(--v-muted);line-height:1.35;margin-top:4px}
+.v-recharge{font-size:32px;color:var(--v-muted)}.v-recharge b{color:var(--v-brass);margin-right:10px}
+.v-url{font-size:40px;color:var(--v-accent);font-weight:700;letter-spacing:1px}
+.v-tall{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;padding:140px 90px}
+.v-tall .v-kicker{font-size:48px}
+.v-ev-tall{width:100%;flex-direction:column;gap:14px;padding:40px}.v-ev-tall .v-evd{font-size:110px;text-align:left}.v-ev-tall .v-evd span{font-size:36px}.v-ev-tall b{font-size:58px}.v-ev-tall div div{font-size:42px}
+.a1,.a2,.a3,.a4,.a5,.a6{opacity:0;animation:vin .8s cubic-bezier(.2,.7,.2,1) forwards}
+.a1{animation-delay:.1s}.a2{animation-delay:.4s}.a3{animation-delay:.8s}.a4{animation-delay:1.2s}.a5{animation-delay:1.6s}.a6{animation-delay:2s}
+@keyframes vin{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.a1,.a2,.a3,.a4,.a5,.a6{animation:none;opacity:1}}
 </style>
 </head>
 <body>
-<div class="app" id="app"></div>
+<div id="studio"></div>
 <script>
 // ===== ENGINE START =====
 // Astronomy engine: no dependencies. Accuracy is roughly 1-2 arcminutes for the
@@ -1189,512 +1109,383 @@ function signReading(sky, si) {
 }
 // ===== SIGNS END =====
 
-// ===== APP START =====
-(function () {
-  var KEY = 'chartExplained.v1';
-  var DEFAULT_STORE = { profiles: [], activeId: null, settings: { houses: 'placidus', numSys: 'pyth', masters: true } };
-  function load() {
-    try {
-      var s = JSON.parse(localStorage.getItem(KEY));
-      if (s && Array.isArray(s.profiles)) { s.settings = Object.assign({}, DEFAULT_STORE.settings, s.settings || {}); return s; }
-    } catch (e) {}
-    return JSON.parse(JSON.stringify(DEFAULT_STORE));
-  }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+// ===== STUDIO SCRIPT START =====
+function seeded(n) { var a = n >>> 0; return function () { a = (a + 0x6D2B79F5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function dayOrd(ms) { var d = new Date(ms).getDate(); return ord(d); }
+function monthName(ms) { return new Date(ms).toLocaleDateString('en-AU', { month: 'long' }); }
+function tzCity() { try { var z = Intl.DateTimeFormat().resolvedOptions().timeZone; return z.split('/').pop().replace(/_/g, ' '); } catch (e) { return 'local'; } }
+var EVERY = { jupiter: 'once a year or so', saturn: 'every two and a half years', uranus: 'every seven years', neptune: 'every fourteen years', pluto: 'once in a couple of decades' };
+function wordCount(t) { return (t.trim().match(/\S+/g) || []).length; }
+function lc1(t) { return /^(New|Full|Solar|Lunar|Numerology|A |An |The )/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t; }
+function spokenRange(r) {
+  var a = new Date(r.a), b = new Date(r.b);
+  return a.getDate() === b.getDate() ? 'the ' + ord(a.getDate()) : 'the ' + ord(a.getDate()) + (a.getMonth() !== b.getMonth() ? ' of ' + monthName(r.a) : '') + ' to the ' + ord(b.getDate());
+}
+function stripTags(t) { return t.replace(/<[^>]+>/g, ''); }
 
-  var store = load();
-  var ui = { screen: store.profiles.length ? 'chart' : 'onboard', card: null, range: 30, tag: 'all', lesson: null, editId: null, showAllAsp: false, confirmDel: null, confirmWipe: false, place: null, results: [], searchMsg: '', formErr: '', sign: null, smonth: 0 };
-  (function () { var mm = /sign=([a-z]+)/i.exec(location.hash || ''); if (mm) { var ix = SIGNS.map(function (x) { return x.name.toLowerCase(); }).indexOf(mm[1].toLowerCase()); if (ix >= 0) { ui.sign = ix; ui.screen = 'signs'; } } })();
-  var root = document.getElementById('app');
+var DEPTHS = { tight: { sky: 2, items: 1, facts: false }, standard: { sky: 3, items: 1, facts: 'lead' }, deep: { sky: 4, items: 2, facts: true, second: false, extra: true } };
+
+function topSky(sky, n) { return sky.events.slice().sort(function (a, b) { return b.score - a.score || a.ms - b.ms; }).slice(0, n).sort(function (a, b) { return a.ms - b.ms; }); }
+
+function buildScript(sky, depthKey) {
+  var D = DEPTHS[depthKey] || DEPTHS.standard, rnd = seeded(sky.y * 100 + sky.m), pick = function (a) { return a[Math.floor(rnd() * a.length)]; };
+  var Mon = monthName(sky.start), secs = [];
+  var lead = topSky(sky, 1)[0], chosen = topSky(sky, D.sky);
+  // hook
+  var hook;
+  if (!lead) hook = Mon + ' is a quiet month in the sky, and quiet months are worth understanding too. Here’s what’s going on up there, and what it means for your sign.';
+  else if (lead.type === 'station' && lead.rx) hook = 'On the ' + dayOrd(lead.ms) + ' of ' + Mon + ', ' + pName(lead.p) + ' appears to slam on the brakes and start drifting backwards across the sky. It doesn’t, of course. But people have been blaming retrogrades for crossed wires and broken plans for two thousand years. So what’s actually happening up there, and what does it mean for your sign?';
+  else if (lead.type === 'station') hook = 'On the ' + dayOrd(lead.ms) + ', ' + pName(lead.p) + ' stops dead in the sky and starts moving forward again. Astrologers treat that moment like a green light. Here’s the real story behind it, and what ' + Mon + ' holds for your sign.';
+  else if (lead.ecl) hook = 'On the ' + dayOrd(lead.ms) + ' of ' + Mon + ', the ' + (lead.type === 'new' ? 'Sun' : 'Moon') + ' goes dark for part of the planet. The Babylonians took eclipses so seriously they’d put a stand-in king on the throne until the danger passed. We’re not asking you to go that far, but here’s what this eclipse means for your sign.';
+  else if (lead.type === 'ingress' && EVERY[lead.p]) hook = pName(lead.p) + ' changes sign on the ' + dayOrd(lead.ms) + ', something it only does ' + EVERY[lead.p] + '. When a slow planet moves, astrologers pay attention, because they say it resets the mood for a long while. Here’s what it means for you.';
+  else if (lead.type === 'aspect' && CYCLE_YEARS[lead.p + '|' + lead.q]) hook = 'On the ' + dayOrd(lead.ms) + ', ' + pName(lead.p) + ' and ' + pName(lead.q) + ' lock into ' + (lead.asp.key === 'opp' ? 'an ' : 'a ') + lead.asp.name.toLowerCase() + ', part of a cycle that takes about ' + CYCLE_YEARS[lead.p + '|' + lead.q] + ' years to play out. Astrologers use cycles like this to explain whole eras. So what does this one mean for your sign?';
+  else hook = pick([Mon + ' has ' + sky.events.length + ' shifts in the sky worth knowing about, and each one lands differently depending on your sign. Let’s work through what’s happening, why astrologers care, and what it means for you.',
+    'Every month the sky rearranges itself, and every sign gets a different slice of it. Here’s ' + Mon + ', explained properly: what’s happening, why it matters, and what it means for you.']);
+  secs.push({ id: 'hook', label: 'Cold open', scene: { type: 'title' }, text: hook });
+  secs.push({ id: 'intro', label: 'Intro', scene: { type: 'brand' }, text: pick([
+    'Welcome to Duology: astrology and numerology in plain English. No glyphs, no gatekeeping. Everything here is worked out from where the planets actually are, and we show the reasoning.',
+    'G’day and welcome to Duology: astrology and numerology, explained. No jargon, no mystery, just where the planets really are and the why behind it.']) +
+    ' As always, this is for reflection and a bit of fun, not a crystal ball. All dates are in ' + tzCity() + ' time.' });
+  var leads = ['First up', 'Then', 'Next', 'And finally'];
+  var used = {};
+  chosen.forEach(function (e, i) {
+    var L = i === chosen.length - 1 && chosen.length > 1 ? 'And finally' : leads[Math.min(i, 2)];
+    var real = used[e.sky.real] ? 'Same optical trick as before.' : e.sky.real; used[e.sky.real] = 1;
+    var fact = '';
+    if (D.facts && (D.facts !== 'lead' || e === lead)) { var fk = e.sky.fact.slice(-60); if (!used[fk]) { fact = ' ' + e.sky.fact; used[fk] = 1; } }
+    var t = L + ', on the ' + dayOrd(e.ms) + ': ' + lc1(e.sky.title) + '. ' + e.sky.what + ' ' + real + ' ' + e.sky.why + fact;
+    secs.push({ id: 'sky-' + e.id, label: 'The sky: ' + e.sky.title, scene: { type: 'sky', id: e.id }, text: t });
+  });
+  var um = sky.um, T = PY_THEME[um.n];
+  secs.push({ id: 'numbers', label: 'Numbers', scene: { type: 'numbers' }, text: 'On the numbers side, ' + Mon + ' is a Universal Month ' + um.n + ': the year, ' + sky.y + ', reduces to ' + um.year + ', plus the month. Numerology reads ' + an(um.n) + ' ' + um.n + ' month as ' + lc1(T.title) + ', a month that wants ' + T.wants + '. That’s the backdrop for everyone.' });
+  secs.push({ id: 'signs-intro', label: 'Sign by sign', scene: { type: 'wheel' }, text: 'Now, sign by sign. Without your birth time, astrologers use solar houses: your star sign becomes your first house and the rest follow around the wheel. It’s how every horoscope column is written. I’ll also give you your recharge days: when the Moon passes through your own sign. Let’s go.' });
+  for (var si = 0; si < 12; si++) {
+    var r = signReading(sky, si), S = r.sign, parts = [S.name + '.'];
+    parts.push(pick(['This month leans on your ' + ord(r.theme) + ' house: ' + HOUSE_SHORT[r.theme] + '.', 'Your focus this month is your ' + ord(r.theme) + ' house, ' + HOUSE_SHORT[r.theme] + '.', 'The spotlight is on your ' + ord(r.theme) + ' house: ' + HOUSE_SHORT[r.theme] + '.']));
+    var prevDay = null;
+    r.top.slice(0, D.items).forEach(function (it, k) {
+      var dd = dayOrd(it.ms);
+      parts.push((k === 0 ? 'On the ' + dd : (dd === prevDay ? 'Also on the ' + dd : 'Then on the ' + dd)) + ', ' + lc1(it.title) + '. ' + it.read);
+      prevDay = dd;
+    });
+    if (D.second && r.top[1]) { var d2 = dayOrd(r.top[1].ms); parts.push((d2 === prevDay ? 'Also on the ' : 'Keep an eye on the ') + d2 + (d2 === prevDay ? ': ' : ' too: ') + lc1(r.top[1].title) + ', in your ' + ord(r.top[1].houses[0]) + ' house.'); }
+    if (D.extra) {
+      var ru = r.top.filter(function (it) { var e = sky.events.filter(function (x) { return x.id === it.id; })[0]; return e && (r.rulers.indexOf(e.p) >= 0 || r.rulers.indexOf(e.q) >= 0); })[0];
+      if (ru) parts.push('And because ' + r.rulers.map(pName).join(' and ') + (r.rulers.length > 1 ? ' are your ruling planets' : ' is your ruling planet') + ', astrologers say you’ll feel that one more than most.');
+    }
+    if (r.rechargeRaw.length) parts.push('Recharge days: ' + r.rechargeRaw.map(spokenRange).join(' and ') + '.');
+    secs.push({ id: 'sign-' + si, label: S.name, scene: { type: 'sign', si: si }, text: parts.join(' ') });
+  }
+  secs.push({ id: 'outro', label: 'Outro', scene: { type: 'cta' }, text: pick([
+    'That’s ' + Mon + '. Remember, everything you’ve just heard is the general weather for your sign. Your own chart, with your birth time, puts it into your actual houses and against your own planets. It’s your street, not your state. That’s exactly what the Duology app does, and the link is in the description. If this helped, subscribe, and we’ll see you next month.',
+    'And that’s your ' + Mon + '. Keep in mind this is the big-picture version for every member of your sign. For the one that’s built around your exact birth time and place, with your own houses and your own dates, grab the Duology app. The link’s in the description. Subscribe for next month’s breakdown, and look after yourselves.']) });
+  secs.forEach(function (s) { s.text = stripTags(s.text); });
+  return secs;
+}
+
+function buildShort(sky, si) {
+  var r = signReading(sky, si), S = r.sign, Mon = monthName(sky.start);
+  var p = [];
+  p.push({ id: 'hook', text: S.name + ', here’s your ' + Mon + ' in under a minute.' });
+  p.push({ id: 'theme', text: 'This month leans on your ' + ord(r.theme) + ' house: ' + HOUSES[r.theme].area + '. That’s where the sky is busiest for you.' });
+  var t2 = r.top.slice(0, 2); p.push({ id: 'items', text: t2.map(function (it, k) { var same = k && dayOrd(it.ms) === dayOrd(t2[0].ms); return (k ? (same ? 'Also on the ' : 'Then on the ') : 'On the ') + dayOrd(it.ms) + ', ' + lc1(it.title) + '. ' + it.read; }).join(' ') });
+  p.push({ id: 'cta', text: (r.rechargeRaw.length ? 'Your recharge days are ' + r.rechargeRaw.map(spokenRange).join(' and ') + '. ' : '') + 'That’s the general version for every ' + S.name + '. For yours, built on your exact birth chart, get Duology. The link’s in the bio.' });
+  p.forEach(function (x) { x.text = stripTags(x.text); });
+  return { r: r, parts: p };
+}
+
+function fmtDur(sec) { sec = Math.round(sec); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
+function ytPackage(sky, secs, wpm) {
+  var Mon = monthName(sky.start), t = 0, chapters = [];
+  var lead = topSky(sky, 1)[0];
+  secs.forEach(function (s) {
+    if (s.id === 'hook' || s.id === 'intro') { if (s.id === 'hook') chapters.push('0:00 Intro'); }
+    else if (s.id.indexOf('sky-') === 0 && chapters.indexOf('SKY') < 0) { chapters.push(fmtDur(t) + ' The sky in ' + Mon); chapters.push('SKY'); }
+    else if (s.id === 'numbers') chapters.push(fmtDur(t) + ' Numerology: Universal Month ' + sky.um.n);
+    else if (s.id.indexOf('sign-') === 0) chapters.push(fmtDur(t) + ' ' + s.label);
+    else if (s.id === 'outro') chapters.push(fmtDur(t) + ' Your personal chart');
+    t += wordCount(s.text) / wpm * 60;
+  });
+  chapters = chapters.filter(function (c) { return c !== 'SKY'; });
+  var titles = [
+    Mon + ' ' + sky.y + ' Astrology Forecast for All 12 Signs' + (lead ? ': ' + lead.sky.title : ''),
+    'Your ' + Mon + ' ' + sky.y + ' Horoscope, Explained (All Signs)',
+    (lead ? lead.sky.title + '! ' : '') + 'What ' + Mon + ' Means for Your Sign'
+  ];
+  var desc = 'Your ' + Mon + ' ' + sky.y + ' forecast for every star sign, worked out from where the planets actually are, with the why behind every call. No glyphs, no gatekeeping.\n\n' +
+    'Get the version built on YOUR exact birth chart, with your own houses and dates: https://scvd-app.github.io/duology/\n\n' +
+    'Chapters\n' + chapters.join('\n') + '\n\n' +
+    'Dates are in ' + tzCity() + ' time. This video is for reflection and entertainment, not a prediction. Narration is AI-generated. The script and all calculations are our own.\n\n' +
+    '#astrology #horoscope #numerology #' + Mon.toLowerCase() + sky.y;
+  return { titles: titles, desc: desc };
+}
+// ===== STUDIO SCRIPT END =====
+
+// ===== STUDIO APP START =====
+(function () {
+  var KEY = 'duologyStudio.v1';
+  var st = { edits: {}, shortEdits: {}, depth: 'standard', wpm: 160 };
+  try { var ld = JSON.parse(localStorage.getItem(KEY)); if (ld) st = Object.assign(st, ld); } catch (e) {}
+  function persist() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+  var now = new Date();
+  var ui = { y: now.getFullYear(), m: now.getMonth() + 1, tab: 'script', scene: 0, playing: false, clean: false, shortSign: 0, shortScene: 0 };
+  if (now.getDate() > 15) { ui.m++; if (ui.m > 12) { ui.m = 1; ui.y++; } }
+  var root = document.getElementById('studio');
+  var timer = null;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function active() { return store.profiles.filter(function (p) { return p.id === store.activeId; })[0] || store.profiles[0] || null; }
-  function initials(n) { return (n || '?').split(/\s+/).filter(Boolean).map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase(); }
-  function fmtDate(ms, opts) { return new Date(ms).toLocaleDateString('en-AU', opts || { day: 'numeric', month: 'short', year: 'numeric' }); }
-  function offStr(min) { var s = min < 0 ? '-' : '+'; min = Math.abs(min); return 'UTC' + s + String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
-  function fmtTime(t) { var p = t.split(':').map(Number); var h = p[0] % 12 || 12; return h + ':' + String(p[1]).padStart(2, '0') + (p[0] < 12 ? 'am' : 'pm'); }
-
-  var chartCache = {}, fcCache = {};
-  function getChart(p) {
-    var k = p.id + '|' + p.updated + '|' + store.settings.houses;
-    if (!chartCache[k]) chartCache[k] = buildChart(p, store.settings.houses);
-    return chartCache[k];
+  function mkey() { return ui.y + '-' + ui.m; }
+  function sky() { return skyMonth(ui.y, ui.m); }
+  function sections() {
+    var secs = buildScript(sky(), st.depth), k = mkey();
+    secs.forEach(function (s) { s.generated = s.text; var e = st.edits[k + '|' + s.id]; if (e != null) { s.text = e; s.edited = true; } });
+    return secs;
   }
-  function todayStart() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }
-  function getForecast(c) {
-    var start = todayStart(), k = c.profile.id + '|' + c.profile.updated + '|' + store.settings.houses + '|' + start;
-    if (!fcCache[k]) fcCache[k] = forecast(c, start, 366);
-    return fcCache[k];
+  function secDur(s) { return Math.max(4, wordCount(s.text) / st.wpm * 60); }
+  function short() {
+    var sh = buildShort(sky(), ui.shortSign), k = mkey() + '|' + ui.shortSign;
+    sh.parts.forEach(function (p) { p.generated = p.text; var e = st.shortEdits[k + '|' + p.id]; if (e != null) { p.text = e; p.edited = true; } });
+    return sh;
+  }
+  function download(name, text) {
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' })); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function copy(text, btn) {
+    var done = function () { if (btn) { var o = btn.textContent; btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = o; }, 1400); } };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () { fallback(); }); else fallback();
+    function fallback() { var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (e) {} t.remove(); }
   }
 
-  // ---------- icons ----------
-  var ICON = {
-    chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="12" y1="3" x2="12" y2="21"/></svg>',
-    forecast: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><line x1="3.5" y1="10" x2="20.5" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>',
-    numbers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><line x1="9" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="15" y2="20"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/></svg>',
-    learn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 5.5c3-1.5 6-1.5 9 0v14c-3-1.5-6-1.5-9 0z"/><path d="M21 5.5c-3-1.5-6-1.5-9 0v14c3-1.5 6-1.5 9 0z"/></svg>',
-    settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.3" fill="var(--surface)"/><circle cx="15" cy="17" r="2.3" fill="var(--surface)"/></svg>',
-    x: '<svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>'
-  };
-  var TABS = [['chart', 'Chart'], ['forecast', 'Forecast'], ['numbers', 'Numbers'], ['learn', 'Learn'], ['settings', 'Settings']];
-  var NAMES = { onboard: 'New chart', chart: 'My chart', forecast: 'Forecast', numbers: 'Numbers', learn: 'Learn', settings: 'Settings', signs: 'Star signs' };
-  var ABBR = { sun: 'SUN', moon: 'MOON', mercury: 'MERC', venus: 'VEN', mars: 'MARS', jupiter: 'JUP', saturn: 'SAT', uranus: 'URA', neptune: 'NEP', pluto: 'PLU' };
-
-  // ---------- wheel ----------
-  function wheelSVG(c) {
-    var S = 340, C = 170, R1 = 164, R2 = 134, R3 = 64, o = [];
-    var rot = c.hasTime ? c.asc : 0;
-    function pt(lon, r) { var t = (lon - rot) * Math.PI / 180; return [(C - r * Math.cos(t)).toFixed(1), (C + r * Math.sin(t)).toFixed(1)]; }
-    o.push('<svg viewBox="0 0 ' + S + ' ' + S + '" role="img" aria-label="Birth chart wheel. Every planet is also listed below.">');
-    o.push('<circle class="w-bg" cx="' + C + '" cy="' + C + '" r="' + R1 + '"/><circle class="w-ring" cx="' + C + '" cy="' + C + '" r="' + R2 + '"/><circle class="w-core" cx="' + C + '" cy="' + C + '" r="' + R3 + '"/>');
-    for (var i = 0; i < 12; i++) {
-      var a = pt(i * 30, R2), b = pt(i * 30, R1), g = pt(i * 30 + 15, 152), n = pt(i * 30 + 15, 140);
-      o.push('<line class="w-line" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>');
-      o.push('<text class="w-sg" x="' + g[0] + '" y="' + g[1] + '" text-anchor="middle" dominant-baseline="central">' + SIGNS[i].glyph + VS + '</text>');
-      o.push('<text class="w-sn" x="' + n[0] + '" y="' + n[1] + '" text-anchor="middle" dominant-baseline="central">' + SIGNS[i].name.slice(0, 3).toUpperCase() + '</text>');
+  // ---------- SVG helpers ----------
+  function ringSVG(si, hl, size, lite) {
+    var C = size / 2, R1 = C - 4, R2 = C * 0.62, o = ['<svg viewBox="0 0 ' + size + ' ' + size + '" width="' + size + '" height="' + size + '">'];
+    function pt(a, r) { var t = a * Math.PI / 180; return [(C - r * Math.cos(t)).toFixed(1), (C + r * Math.sin(t)).toFixed(1)]; }
+    for (var h = 0; h < 12; h++) {
+      var a0 = h * 30, a1 = a0 + 30, p0 = pt(a0, R1), p1 = pt(a1, R1), q1 = pt(a1, R2), q0 = pt(a0, R2);
+      var on = hl[h + 1], fill = on === 2 ? 'var(--v-accent)' : on === 1 ? 'var(--v-accent-soft)' : 'transparent';
+      o.push('<path d="M' + p0 + ' A' + R1 + ' ' + R1 + ' 0 0 0 ' + p1 + ' L' + q1 + ' A' + R2 + ' ' + R2 + ' 0 0 1 ' + q0 + ' Z" fill="' + fill + '" stroke="var(--v-line)" stroke-width="' + (size / 260) + '"/>');
+      var g = pt(a0 + 15, (R1 + R2) / 2 + size * 0.045), n = pt(a0 + 15, (R1 + R2) / 2 - size * 0.05);
+      var col = on === 2 ? 'var(--v-bg)' : 'var(--v-ink)';
+      o.push('<text x="' + g[0] + '" y="' + g[1] + '" text-anchor="middle" dominant-baseline="central" font-size="' + (size * 0.06) + '" fill="' + col + '">' + SIGNS[(si + h) % 12].glyph + VS + '</text>');
+      o.push('<text x="' + n[0] + '" y="' + n[1] + '" text-anchor="middle" dominant-baseline="central" font-size="' + (size * 0.05) + '" font-weight="700" fill="' + col + '">' + (h + 1) + '</text>');
     }
-    if (c.hasTime) {
-      for (var h = 0; h < 12; h++) {
-        var cu = c.cusps[h], nx = c.cusps[(h + 1) % 12], span = Astro.norm(nx - cu);
-        var p1 = pt(cu, R3), p2 = pt(cu, R2), hn = pt(cu + span / 2, R3 + 9);
-        o.push('<line class="' + (h % 3 === 0 ? 'w-angle' : 'w-cusp') + '" x1="' + p1[0] + '" y1="' + p1[1] + '" x2="' + p2[0] + '" y2="' + p2[1] + '"/>');
-        o.push('<text class="w-hn" x="' + hn[0] + '" y="' + hn[1] + '" text-anchor="middle" dominant-baseline="central">' + (h + 1) + '</text>');
-      }
-      var ac = pt(c.asc, R2 + 0), mc = pt(c.mc, R2);
-      o.push('<text class="w-ax" x="' + (+ac[0] + 4) + '" y="' + (+ac[1] - 5) + '">AC</text>');
-      o.push('<text class="w-ax" x="' + (+mc[0] + 4) + '" y="' + (+mc[1] + 10) + '">MC</text>');
-    }
-    c.aspects.forEach(function (ap) {
-      if (ap.asp.key === 'conj' || PLANETS[ap.a].isPoint || PLANETS[ap.b].isPoint) return;
-      var x = pt(c.pos[ap.a], R3 - 2), y = pt(c.pos[ap.b], R3 - 2);
-      var cls = ap.asp.easy ? 'stroke:var(--flow)' : 'stroke:var(--tension);stroke-dasharray:4 3';
-      o.push('<line x1="' + x[0] + '" y1="' + x[1] + '" x2="' + y[0] + '" y2="' + y[1] + '" style="' + cls + ';stroke-width:1.3;opacity:' + (ap.orb < 3 ? 0.95 : 0.55) + '"/>');
-    });
-    // spread planet labels
-    var items = CHART_POINTS.map(function (id) { return { id: id, lon: c.pos[id], d: c.pos[id] }; }).sort(function (a, b) { return a.lon - b.lon; });
-    for (var it = 0; it < 80; it++) {
-      var moved = false;
-      for (var k = 0; k < items.length; k++) {
-        var A = items[k], B = items[(k + 1) % items.length];
-        var gap = Astro.norm(B.d - A.d);
-        if (gap < 11) { var push = (11 - gap) / 2; A.d = Astro.norm(A.d - push); B.d = Astro.norm(B.d + push); moved = true; }
-      }
-      if (!moved) break;
-    }
-    items.forEach(function (itm) {
-      var t1 = pt(itm.lon, R2), t2 = pt(itm.lon, R2 - 6), gp = pt(itm.d, 110), np = pt(itm.d, 97), lp = pt(itm.d, 121);
-      o.push('<line class="w-line" x1="' + t1[0] + '" y1="' + t1[1] + '" x2="' + t2[0] + '" y2="' + t2[1] + '" style="stroke-width:1.4"/>');
-      if (Math.abs(((itm.d - itm.lon + 540) % 360) - 180) > 1.5) o.push('<line class="w-line" x1="' + t2[0] + '" y1="' + t2[1] + '" x2="' + lp[0] + '" y2="' + lp[1] + '" style="stroke-width:.6;opacity:.6"/>');
-      var P = PLANETS[itm.id];
-      o.push('<g class="w-planet" role="button" tabindex="0" data-act="card-place:' + itm.id + '" aria-label="' + P.name + ' in ' + SIGNS[signOf(itm.lon)].name + '">' +
-        '<circle cx="' + gp[0] + '" cy="' + (+gp[1] + 5) + '" r="14" style="fill:transparent"/>' +
-        '<text class="w-pg" x="' + gp[0] + '" y="' + gp[1] + '" text-anchor="middle" dominant-baseline="central">' + P.glyph + VS + '</text>' +
-        '<text class="w-pn" x="' + np[0] + '" y="' + np[1] + '" text-anchor="middle" dominant-baseline="central">' + ABBR[itm.id] + (c.retro[itm.id] ? ' R' : '') + '</text></g>');
-    });
+    if (!lite) o.push('<text x="' + C + '" y="' + C + '" text-anchor="middle" dominant-baseline="central" font-size="' + (size * 0.13) + '" fill="var(--v-accent)">' + SIGNS[si].glyph + VS + '</text>');
     o.push('</svg>');
     return o.join('');
   }
-
-  // ---------- screens ----------
-  function birthLine(c) {
-    var p = c.profile, y = +p.date.split('-')[0];
-    var jan = Astro.tzOffsetMin(Date.UTC(y, 0, 15), p.tz), jul = Astro.tzOffsetMin(Date.UTC(y, 6, 15), p.tz);
-    var dst = c.hasTime && c.offsetMin > Math.min(jan, jul);
-    var d = new Date(p.date + 'T00:00:00');
-    return fmtDate(d.getTime()) + ' · ' + (c.hasTime ? fmtTime(p.time) + ' (' + offStr(c.offsetMin) + (dst ? ', daylight saving was on' : '') + ')' : 'time unknown') + ' · ' + esc(p.placeName);
-  }
-
-  function screenOnboard() {
-    var p = ui.editId ? store.profiles.filter(function (x) { return x.id === ui.editId; })[0] : null;
-    var guessTz = ''; try { guessTz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) {}
-    var tzs = []; try { tzs = Intl.supportedValuesOf('timeZone'); } catch (e) { tzs = [guessTz || 'UTC']; }
-    var tzSel = (p && p.manual) ? p.tz : guessTz;
-    var place = ui.place;
-    return '<div class="stack">' +
-      '<div><h1>' + (p ? 'Edit chart' : (store.profiles.length ? 'Add a chart' : "Let's build your chart")) + '</h1><p class="lede">Astrology and numerology, explained. Plain English, no glyph-guessing. Takes about a minute.</p></div>' +
-      '<div class="field"><label for="f-name">Full birth name</label><input class="input" id="f-name" autocomplete="name" value="' + esc(p ? p.name : '') + '"><div class="small">As it’s written on the birth certificate. Numerology works from this, not a nickname.</div></div>' +
-      '<div class="field"><label for="f-date">Birth date</label><input class="input" id="f-date" type="date" min="1800-01-01" max="2050-12-31" value="' + esc(p ? p.date : '') + '"></div>' +
-      '<div class="field"><label for="f-time">Birth time</label><input class="input" id="f-time" type="time" value="' + esc(p && p.time ? p.time : '') + '"' + (p && !p.time ? ' disabled' : '') + '>' +
-      '<div class="check"><input type="checkbox" id="f-notime"' + (p && !p.time ? ' checked' : '') + '><label for="f-notime">I don’t know the birth time</label></div>' +
-      '<div class="small" id="notime-note"' + (p && !p.time ? '' : ' hidden') + '>No drama. We’ll build a noon chart and leave out the houses and Rising sign, because those need the time. We won’t fake them.</div></div>' +
-      '<div class="field"><label for="f-place">Birth place</label>' +
-      (place ? '<div class="chosen"><div style="flex:1"><b>' + esc(place.label) + '</b><br>' + Math.abs(place.lat).toFixed(2) + '°' + (place.lat < 0 ? 'S' : 'N') + ' ' + Math.abs(place.lon).toFixed(2) + '°' + (place.lon < 0 ? 'W' : 'E') + ' · ' + esc(place.tz) + '</div><button type="button" class="btn-ghost" data-act="clear-place">Change</button></div>'
-        : '<input class="input" id="f-place" placeholder="Start typing a town or city" autocomplete="off"><div id="place-results" class="results" aria-live="polite"></div>') +
-      '<div class="small">We look up the coordinates, plus the timezone and daylight saving rules that applied on that day.</div>' +
-      (place ? '' : '<details class="manual"' + (p && p.manual ? ' open' : '') + '><summary>Can’t find it? Enter coordinates yourself</summary><div class="stack-s" style="padding-top:8px">' +
-        '<div class="grid2"><div class="field"><label for="m-lat">Latitude (− for south)</label><input class="input" id="m-lat" inputmode="decimal" value="' + (p && p.manual ? p.lat : '') + '"></div><div class="field"><label for="m-lon">Longitude (− for west)</label><input class="input" id="m-lon" inputmode="decimal" value="' + (p && p.manual ? p.lon : '') + '"></div></div>' +
-        '<div class="field"><label for="m-tz">Timezone</label><select class="input" id="m-tz">' + tzs.map(function (z) { return '<option' + (z === tzSel ? ' selected' : '') + '>' + esc(z) + '</option>'; }).join('') + '</select></div>' +
-        '<div class="field"><label for="m-name">Place name (for your reference)</label><input class="input" id="m-name" value="' + esc(p && p.manual ? p.placeName : '') + '"></div></div></details>') +
-      '</div>' +
-      (ui.formErr ? '<div class="err" role="alert">' + esc(ui.formErr) + '</div>' : '') +
-      '<button type="button" class="btn" data-act="save-profile">' + (p ? 'Save changes' : 'Save to my profile') + '</button>' +
-      (store.profiles.length ? '<button type="button" class="btn-ghost" data-act="tab:' + (p ? 'settings' : 'chart') + '">Cancel</button>' : '') +
-      '<p class="small" style="text-align:center;margin:0">Your details are saved on this device only. Delete them any time in Settings.</p>' +
-      (store.profiles.length ? '' : '<div class="card" style="padding:14px;text-align:center"><div class="small" style="color:var(--ink2)">Just want the general reading for your star sign? No details needed.</div><button type="button" class="link" data-act="tab:signs">See your star sign\u2019s month \u2192</button></div>') + '</div>';
-  }
-
-  function screenChart() {
-    var p = active(); if (!p) return '';
-    var c = getChart(p), out = [];
-    out.push('<div class="stack">');
-    if (store.profiles.length > 1) {
-      out.push('<div class="field"><label for="f-switch" class="sr">Showing chart for</label><select class="input" id="f-switch">' + store.profiles.map(function (x) { return '<option value="' + x.id + '"' + (x.id === p.id ? ' selected' : '') + '>' + esc(x.name) + '</option>'; }).join('') + '</select></div>');
+  function skyWheelSVG(pos, hl, size) {
+    var C = size / 2, R1 = C - 4, R2 = C * 0.8, R3 = C * 0.35, o = ['<svg viewBox="0 0 ' + size + ' ' + size + '" width="' + size + '" height="' + size + '">'];
+    function pt(l, r) { var t = l * Math.PI / 180; return [(C - r * Math.cos(t)).toFixed(1), (C + r * Math.sin(t)).toFixed(1)]; }
+    o.push('<circle cx="' + C + '" cy="' + C + '" r="' + R1 + '" fill="none" stroke="var(--v-line)" stroke-width="2"/><circle cx="' + C + '" cy="' + C + '" r="' + R2 + '" fill="none" stroke="var(--v-line)" stroke-width="2"/><circle cx="' + C + '" cy="' + C + '" r="' + R3 + '" fill="none" stroke="var(--v-line)" stroke-width="1.5"/>');
+    for (var i = 0; i < 12; i++) {
+      var a = pt(i * 30, R2), b = pt(i * 30, R1), g = pt(i * 30 + 15, (R1 + R2) / 2);
+      o.push('<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '" stroke="var(--v-line)" stroke-width="2"/>');
+      o.push('<text x="' + g[0] + '" y="' + g[1] + '" text-anchor="middle" dominant-baseline="central" font-size="' + (size * 0.045) + '" fill="var(--v-accent)">' + SIGNS[i].glyph + VS + '</text>');
     }
-    out.push('<div><h1>' + esc(p.name.split(/\s+/)[0]) + '’s chart</h1><p class="lede">' + birthLine(c) + '</p></div>');
-    if (!c.hasTime) out.push('<div class="note">No birth time, so no houses or Rising sign. Those depend on which bit of sky was on the horizon when you were born, and that changes every few minutes. <button type="button" class="link" data-act="learn:time">Why?</button></div>');
-    if (c.houseFallback) out.push('<div class="note">Placidus houses don’t work this close to the poles (the maths breaks down), so we’ve used Equal houses instead.</div>');
-    out.push('<div class="wheel">' + wheelSVG(c) + '</div>');
-    out.push('<div class="legend"><span><svg width="22" height="4" aria-hidden="true"><line x1="0" y1="2" x2="22" y2="2" style="stroke:var(--flow);stroke-width:2"/></svg>Flowing angle</span><span><svg width="22" height="4" aria-hidden="true"><line x1="0" y1="2" x2="22" y2="2" style="stroke:var(--tension);stroke-width:2;stroke-dasharray:4 3"/></svg>Tension angle</span>' + (c.hasTime ? '<span>AC = Rising · MC = Midheaven</span>' : '') + '</div>');
-    // big three
-    var big = ['sun', 'moon'].concat(c.hasTime ? ['asc'] : []);
-    out.push('<section class="stack-s"><h2>Your Big Three</h2>' + big.map(function (id) {
-      var S = SIGNS[signOf(c.pos[id])], P = PLANETS[id];
-      var title = id === 'asc' ? S.name + ' Rising' : P.name + ' in ' + S.name;
-      return '<button type="button" class="row-btn" data-act="card-place:' + id + '"><div class="orb' + (P.isPoint ? ' pt' : '') + '">' + glyph(id) + '</div><div style="flex:1"><b style="font-size:15px">' + title + '</b><div class="small" style="color:var(--ink2)">' + P.short + ': ' + S.style + '</div></div><span aria-hidden="true" style="color:var(--muted);font-size:18px">›</span></button>';
-    }).join('') + '</section>');
-    // placements
-    out.push('<section class="stack-s"><h2>Every placement</h2><p class="small" style="margin:0">Tap any of them for what it means, and why astrologers say so.</p><div class="grid2">' + c.points.map(function (id) {
-      var P = PLANETS[id], S = SIGNS[signOf(c.pos[id])];
-      var sub = degIn(c.pos[id]) + (c.hasTime && id !== 'asc' ? ' · ' + ord(c.houses[id]) + ' house' : '') + (c.retro[id] ? ' · R' : '');
-      return '<button type="button" class="tile" data-act="card-place:' + id + '"><b><span class="g">' + glyph(id) + '</span> ' + (id === 'asc' ? 'Rising' : (id === 'mc' ? 'MC' : P.name)) + ' in ' + S.name + '</b><span class="small">' + sub + '</span></button>';
-    }).join('') + '</div>' + (!c.hasTime ? '<p class="small" style="margin:0">Moon position is for noon, so it could be a few degrees either side.</p>' : '') + '</section>');
-    // balance
-    var cnt = { fire: 0, earth: 0, air: 0, water: 0 };
-    CHART_POINTS.concat(c.hasTime ? ['asc'] : []).forEach(function (id) { cnt[SIGNS[signOf(c.pos[id])].el]++; });
-    var top = Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; })[0];
-    out.push('<section class="stack-s"><h2>Your element mix</h2><div class="bal">' + ['fire', 'earth', 'air', 'water'].map(function (e) { return '<div><b>' + cnt[e] + '</b><small>' + e[0].toUpperCase() + e.slice(1) + '</small></div>'; }).join('') + '</div><p class="small" style="margin:0;color:var(--ink2)">Counting which element each planet' + (c.hasTime ? ' (plus your Rising sign)' : '') + ' sits in. Yours leans <b>' + top + '</b> (' + ELEMENT[top] + '). Astrologers use this as a quick read on your overall flavour.</p></section>');
-    // aspects
-    var aps = ui.showAllAsp ? c.aspects : c.aspects.slice(0, 10);
-    out.push('<section class="stack-s"><h2>The lines in the middle</h2><p class="small" style="margin:0">Those are aspects: the angles between planets. Some angles are read as easy, some as friction. Tightest first.</p><div>' + aps.map(function (ap) {
-      var idx = c.aspects.indexOf(ap);
-      var col = ap.asp.easy === null ? 'var(--muted)' : (ap.asp.easy ? 'var(--flow)' : 'var(--tension)');
-      var kind = ap.asp.easy === null ? 'Blending' : (ap.asp.easy ? 'Flowing' : 'Tension');
-      return '<button type="button" class="asp" data-act="card-asp:' + idx + '"><b>' + PLANETS[ap.a].name + ' ' + ap.asp.name.toLowerCase() + ' ' + PLANETS[ap.b].name + '</b><span style="color:' + col + '">' + kind + ' · ' + ap.asp.angle + '°</span></button>';
-    }).join('') + '</div>' + (c.aspects.length > 10 && !ui.showAllAsp ? '<button type="button" class="link" data-act="show-all-asp">Show all ' + c.aspects.length + '</button>' : '') + '</section>');
-    out.push('</div>');
-    return out.join('');
+    var items = CHART_POINTS.map(function (id) { return { id: id, lon: pos[id], d: pos[id] }; }).sort(function (a, b) { return a.lon - b.lon; });
+    for (var it = 0; it < 60; it++) { var mv = false; for (var k = 0; k < items.length; k++) { var A = items[k], B = items[(k + 1) % items.length], gap = Astro.norm(B.d - A.d); if (gap < 12) { A.d = Astro.norm(A.d - (12 - gap) / 2); B.d = Astro.norm(B.d + (12 - gap) / 2); mv = true; } } if (!mv) break; }
+    items.forEach(function (x) {
+      var p = pt(x.d, (R2 + R3) / 2 + size * 0.03), n = pt(x.d, (R2 + R3) / 2 - size * 0.055), t1 = pt(x.lon, R2), t2 = pt(x.lon, R2 - size * 0.025);
+      var on = hl.indexOf(x.id) >= 0, col = on ? 'var(--v-brass)' : 'var(--v-ink)';
+      o.push('<line x1="' + t1[0] + '" y1="' + t1[1] + '" x2="' + t2[0] + '" y2="' + t2[1] + '" stroke="' + col + '" stroke-width="3"/>');
+      o.push('<text x="' + p[0] + '" y="' + p[1] + '" text-anchor="middle" dominant-baseline="central" font-size="' + (size * (on ? 0.07 : 0.055)) + '" fill="' + col + '">' + PLANETS[x.id].glyph + VS + '</text>');
+      o.push('<text x="' + n[0] + '" y="' + n[1] + '" text-anchor="middle" dominant-baseline="central" font-size="' + (size * 0.028) + '" font-weight="700" fill="' + col + '" opacity="' + (on ? 1 : 0.7) + '">' + PLANETS[x.id].name.toUpperCase() + '</text>');
+    });
+    o.push('</svg>'); return o.join('');
   }
+  function wordmark(sz) { return '<div class="v-brand" style="font-size:' + sz + 'px">Du<em>ology</em></div>'; }
+  function d(ms, o) { return new Date(ms).toLocaleDateString('en-AU', o); }
 
-  function evHTML(e) {
-    return '<details class="ev"><summary><div class="date"><span class="m">' + fmtDate(e.ms, { month: 'short' }) + '</span><span class="d">' + new Date(e.ms).getDate() + '</span></div><div class="ev-body"><span class="tag ' + e.tag + '">' + e.chip + '</span><span class="ev-title">' + e.title + '</span><span class="ev-read">' + e.read + '</span></div><span class="plus" aria-hidden="true">+</span></summary><div class="why">' + (e.why.indexOf('<b>') === 0 ? '' : '<b>Why they say that</b>') + e.why + '</div></details>';
-  }
-  function fviewSeg(cur) {
-    return '<div class="seg" role="group" aria-label="Forecast type" style="grid-template-columns:repeat(2,minmax(0,1fr))"><button type="button" aria-pressed="' + (cur === 'forecast') + '" data-act="tab:forecast">My forecast</button><button type="button" aria-pressed="' + (cur === 'signs') + '" data-act="tab:signs">Star signs</button></div>';
-  }
-  function screenSigns() {
-    var p = active(), now = new Date(), y = now.getFullYear(), m = now.getMonth() + 1 + ui.smonth;
-    if (m > 12) { m -= 12; y++; }
-    if (ui.sign === null && p) ui.sign = signOf(getChart(p).pos.sun);
-    var sky = skyMonth(y, m), out = ['<div class="stack">'];
-    if (p) out.push(fviewSeg('signs'));
-    else out.push('<button type="button" class="link" data-act="tab:onboard">\u2190 Build your own personal chart</button>');
-    out.push('<div><h1>Your sign this month</h1><p class="lede">No birth details needed. This is the general reading for everyone born under each sign, worked out the same way horoscope columns are, except we show you the working.</p></div>');
-    var n0 = new Date(now.getFullYear(), now.getMonth(), 1), n1 = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    out.push('<div class="seg" role="group" aria-label="Month" style="grid-template-columns:repeat(2,minmax(0,1fr))"><button type="button" aria-pressed="' + (ui.smonth === 0) + '" data-act="smonth:0">' + n0.toLocaleDateString('en-AU', { month: 'long' }) + '</button><button type="button" aria-pressed="' + (ui.smonth === 1) + '" data-act="smonth:1">' + n1.toLocaleDateString('en-AU', { month: 'long' }) + '</button></div>');
-    out.push('<div class="signgrid" role="group" aria-label="Star sign">' + SIGNS.map(function (S, i) { return '<button type="button" aria-pressed="' + (ui.sign === i) + '" data-act="sign:' + i + '"><span class="sg">' + S.glyph + VS + '</span>' + S.name + '</button>'; }).join('') + '</div>');
-    out.push('<div class="field"><label for="f-bday">Not sure of your sign? Pop in your birthday</label><input class="input" type="date" id="f-bday"></div>');
-    if (ui.cusp) out.push('<div class="note"><b>You\u2019re on the cusp.</b> The Sun changed from ' + SIGNS[ui.cusp[0]].name + ' to ' + SIGNS[ui.cusp[1]].name + ' on or right around your birthday, so depending on the time (and place) you were born you could be either. That\u2019s why cusp babies get different answers from different horoscopes. Tap whichever one you are, or build your full chart and we\u2019ll work it out to the minute.</div>');
-    if (ui.sign === null) { out.push('<div class="empty">Pick your sign to see your month.</div></div>'); return out.join(''); }
-    var r = signReading(sky, ui.sign), S = r.sign;
-    out.push('<div class="card" style="padding:16px;display:flex;gap:14px;align-items:center"><div class="orb" style="width:56px;height:56px;border-radius:28px;font-size:28px">' + S.glyph + VS + '</div><div><div style="font-family:var(--serif);font-size:24px;font-weight:600;line-height:1.1">' + S.name + ' \u00B7 ' + sky.label + '</div><div class="small">Born roughly ' + r.dates + ' \u00B7 ruled by ' + r.rulers.map(function (x) { return PLANETS[x].name; }).join(' and ') + '</div></div></div>');
-    out.push('<div class="dark-strip"><div class="k">The theme</div><div class="v">' + r.themeText + '</div><div class="s">' + r.themeWhy + '</div></div>');
-    out.push('<div class="grid2"><div class="card num" style="padding:14px"><div class="k">Recharge days</div><div class="m">' + (r.recharge.length ? r.recharge.join(', ') : 'Not this month') + '</div><div class="small" style="color:var(--ink2)">' + r.rechargeWhy + '</div></div>' +
-      '<div class="card num" style="padding:14px"><div class="k">Universal Month</div><div class="m">' + sky.um.n + ': ' + PY_THEME[sky.um.n].title + '</div><div class="small" style="color:var(--ink2)">Everyone shares this one. ' + sky.um.working.replace('\n', '. ') + '.</div></div></div>');
-    out.push('<h2>The big ones for ' + S.name + '</h2>');
-    r.top.forEach(function (e) { out.push(evHTML(e)); });
-    out.push('<h2>Everything in ' + new Date(sky.start).toLocaleDateString('en-AU', { month: 'long' }) + '</h2>');
-    r.items.forEach(function (e) { out.push(evHTML(e)); });
-    out.push('<h2>The sky this month, explained</h2>');
-    sky.events.slice().sort(function (a, b) { return b.score - a.score || a.ms - b.ms; }).slice(0, 4).sort(function (a, b) { return a.ms - b.ms; }).forEach(function (e) {
-      out.push(evHTML({ ms: e.ms, tag: e.type === 'new' || e.type === 'full' ? 'Moon' : 'Planets', chip: 'For everyone', title: e.sky.title, read: e.sky.what, why: '<b>What\u2019s really going on</b>' + e.sky.real + '<br><br><b>Why astrologers care</b>' + e.sky.why + '<br><br><b>Did you know?</b>' + e.sky.fact }));
-    });
-    out.push('<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px"><b style="font-size:16px">This is the general version for every ' + S.name + '</b><div class="small" style="color:var(--ink2)">Your own chart puts all of this into your actual houses, against your own planets, with your exact dates. It\u2019s the difference between the weather for your state and the weather for your street.</div><button type="button" class="btn" data-act="' + (p ? 'tab:forecast' : 'tab:onboard') + '">' + (p ? 'See my personal forecast' : 'Build my personal chart') + '</button></div>');
-    out.push('<button type="button" class="link" data-act="learn:solar">How horoscope columns are worked out</button></div>');
-    return out.join('');
-  }
-  function screenForecast() {
-    var p = active(); if (!p) return '';
-    var c = getChart(p), all = getForecast(c), now = Date.now(), start = todayStart(), end = start + ui.range * 86400000;
-    var ev = all.filter(function (e) {
-      if (e.ms > end) return false;
-      if (ui.tag !== 'all' && e.tag !== ui.tag) return false;
-      if (ui.range === 30) return true;
-      if (ui.range === 90) return e.tier !== 'all';
-      return e.tier === 'major';
-    });
-    var py = personalYear(p.date, new Date().getFullYear()), pm = personalMonth(py.n, new Date().getMonth() + 1), mt = moonToday(c, now);
-    var out = ['<div class="stack">' + fviewSeg('forecast') + '<div><h1>What’s coming up</h1><p class="lede">Where the planets are heading, compared with where they were when you were born. Astrologers call these transits.</p></div>'];
-    out.push('<div class="seg" role="group" aria-label="Forecast range" style="grid-template-columns:repeat(3,minmax(0,1fr))">' + [[30, '30 days'], [90, '90 days'], [365, '12 months']].map(function (r) { return '<button type="button" aria-pressed="' + (ui.range === r[0]) + '" data-act="range:' + r[0] + '">' + r[1] + '</button>'; }).join('') + '</div>');
-    out.push('<div class="dark-strip"><div class="k">Today</div><div class="v">' + mt.phase + ' in ' + mt.sign + '</div><div class="s">' + mt.text.replace(mt.phase + ' in ' + mt.sign, 'The Moon is here') + '</div></div>');
-    out.push('<div class="dark-strip"><div class="k">Numbers layer</div><div class="v">Personal Year ' + py.n + ' · Personal Month ' + pm.n + '</div><div class="s">Numerology’s timing cycle, running alongside the planets. ' + pm.working + '.</div></div>');
-    out.push('<div class="chips" role="group" aria-label="Filter">' + [['all', 'Everything'], ['Planets', 'Planets'], ['Moon', 'Moon'], ['Numbers', 'Numbers']].map(function (t) { return '<button type="button" class="chip" aria-pressed="' + (ui.tag === t[0]) + '" data-act="tag:' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>');
-    out.push('<p class="small" style="margin:0">' + (ui.range === 30 ? 'Everything, including the quick stuff.' : (ui.range === 90 ? 'Leaving out the quick day-or-two stuff so the bigger themes stand out.' : 'Just the big-ticket items: slow planets, retrogrades, eclipses and your solar return.')) + ' Tap any event for the why.</p>');
-    if (!ev.length) out.push('<div class="empty">Nothing matching in this window.</div>');
-    var lastMonth = '';
-    ev.forEach(function (e) {
-      var mLabel = fmtDate(e.ms, { month: 'long', year: 'numeric' });
-      if (mLabel !== lastMonth) { out.push('<div class="month">' + mLabel + '</div>'); lastMonth = mLabel; }
-      out.push(evHTML(e));
-    });
-    out.push('<p class="small" style="margin:0">Dates are calculated from real planet positions and shown in your current local time. <button type="button" class="link" style="min-height:0" data-act="learn:weigh">How astrologers decide what counts</button></p></div>');
-    return out.join('');
-  }
-
-  function sec(k, html) { return '<div style="font-size:13.5px;color:var(--ink2)"><b style="display:block;color:var(--rust);font-size:12px;text-transform:uppercase;letter-spacing:.8px">' + k + '</b>' + html + '</div>'; }
-  function numCard(label, r, typeWhy, extras, core) {
-    var d = NUM_DETAIL[r.n];
-    return '<div class="card num"><div class="num-head"><div class="big">' + r.n + '</div><div><div class="k">' + label + '</div><div class="m">' + (core ? NUM_MEAN[r.n] : (PY_THEME[r.n] ? PY_THEME[r.n].title : NUM_MEAN[r.n])) + '</div></div></div>' +
-      (core && d ? '<div class="grid2" style="gap:8px"><div class="work" style="white-space:normal"><b style="display:block">At its best</b>' + d.good + '</div><div class="work" style="white-space:normal"><b style="display:block">Watch out for</b>' + d.watch + '</div></div>' : '') +
-      (extras || []).map(function (x) { return sec(x[0], x[1]); }).join('') +
-      sec('Why this number means that', typeWhy + ' ' + NUM_WHY[r.n]) +
-      '<div class="work"><b>How we got there: </b>' + esc(r.working) + '</div></div>';
-  }
-  function screenNumbers() {
-    var p = active(); if (!p) return '';
-    var s = store.settings, out = ['<div class="stack"><div><h1>' + esc(p.name.split(/\s+/)[0]) + '\u2019s numbers</h1><p class="lede">What each number means, why, how they fit together, and the working behind every one.</p></div>'];
-    out.push('<div class="seg" role="group" aria-label="Numerology system" style="grid-template-columns:repeat(2,minmax(0,1fr))"><button type="button" aria-pressed="' + (s.numSys === 'pyth') + '" data-act="numsys:pyth">Pythagorean</button><button type="button" aria-pressed="' + (s.numSys === 'chaldean') + '" data-act="numsys:chaldean">Chaldean</button></div>');
-    var lp = lifePath(p.date, s.masters);
-    var ex = nameNumber(p.name, s.numSys, s.masters, 'all'), so = nameNumber(p.name, s.numSys, s.masters, 'vowels'), pe = nameNumber(p.name, s.numSys, s.masters, 'cons');
-    var yr = new Date().getFullYear(), py = personalYear(p.date, yr), pm = personalMonth(py.n, new Date().getMonth() + 1);
-    var nextPy = personalYear(p.date, yr + 1), fitNow = yearVsLifePath(lp.n, py.n), fitNext = yearVsLifePath(lp.n, nextPy.n);
-    out.push('<h2>Right now</h2>');
-    out.push(numCard('Personal Year ' + yr, py, 'Your birthday plus the current year. It runs in a nine-year cycle, so it changes every 1 January.', [
-      ['What ' + an(py.n) + ' ' + py.n + ' year is about', PY_THEME[py.n].text],
-      ['Why the year number matters', CYCLE_WHY],
-      ['How it plays with your Life Path ' + lp.n + ': ' + fitNow.kind.toLowerCase(), fitNow.text],
-      ['Where you are in the cycle', cyclePosition(py.n, yr)]
-    ]));
-    out.push(numCard('Personal Month', pm, 'Your Personal Year plus the calendar month, a smaller cycle inside the bigger one.', [
-      ['What it means', '' + an(pm.n, true) + ' ' + pm.n + ' month inside ' + an(py.n) + ' ' + py.n + ' year: a touch of ' + PY_THEME[pm.n].title.toLowerCase() + ' within a bigger year of ' + PY_THEME[py.n].title.toLowerCase() + '. If the year is the season, the month is the week\u2019s forecast inside it.']
-    ]));
-    out.push('<div class="card num"><div class="k">Coming up: ' + (yr + 1) + '</div><div class="m">Personal Year ' + nextPy.n + ': ' + PY_THEME[nextPy.n].title + '</div>' + sec('What to expect', PY_THEME[nextPy.n].text) + sec('With your Life Path ' + lp.n + ': ' + fitNext.kind.toLowerCase(), fitNext.text) + '</div>');
-    out.push('<h2>Your core numbers</h2>');
-    out.push(numCard('Life Path', lp, 'Your birth date can never change, so numerology treats it as the main road you\u2019re on.', [['What it\u2019s for', 'Your Life Path is the big one: the overall direction of your life, and the number everything else gets compared against, including your Personal Year.']], true));
-    if (ex) out.push(numCard('Expression', ex, 'Every letter of your full birth name, read as your natural talents: the toolkit you came with.', [], true));
-    if (so) out.push(numCard('Soul Urge', so, 'Just the vowels, the soft sounds inside the name, so they\u2019re read as what you want deep down.', [], true));
-    if (pe) out.push(numCard('Personality', pe, 'Just the consonants, the hard outer shell of the name, so they\u2019re read as how other people see you.', [], true));
-    var pairs = numberPairs(lp, ex, so, pe);
-    if (pairs.length) {
-      out.push('<h2>How your numbers fit together</h2>');
-      pairs.forEach(function (x) { out.push('<div class="card num"><div class="k">' + x.sub + '</div><div class="m">' + x.title + '</div><div style="font-size:13.5px;color:var(--ink2)">' + x.text + '</div></div>'); });
-      out.push('<div class="note"><b>Why some numbers \u2018get along\u2019</b><br>' + FAMILY_WHY + '</div>');
+  // ---------- scenes (16:9, 1920x1080) ----------
+  function scene16(sec, S) {
+    var sk = S, sc = sec.scene, Mon = d(sk.start, { month: 'long' });
+    if (sc.type === 'title') return '<div class="v v-title"><div class="a1 v-kicker">Your sky, explained</div><div class="a2 v-huge">' + Mon + '</div><div class="a3 v-year">' + sk.y + ' · all twelve signs</div><div class="a4 v-glyphrow">' + SIGNS.map(function (x) { return '<span>' + x.glyph + VS + '</span>'; }).join('') + '</div><div class="a4" style="position:absolute;right:90px;bottom:70px">' + wordmark(64) + '</div></div>';
+    if (sc.type === 'brand') return '<div class="v v-center">' + '<div class="a1">' + wordmark(170) + '</div><div class="a2 v-sub">Astrology and numerology, explained.</div><div class="a3 v-pills"><span>No glyphs</span><span>No gatekeeping</span><span>Real planet positions</span></div><div class="a4 v-note">For reflection and entertainment. Dates in ' + esc(tzCity()) + ' time.</div></div>';
+    if (sc.type === 'sky') {
+      var e = sk.events.filter(function (x) { return x.id === sc.id; })[0]; if (!e) return '';
+      var hl = e.p ? [e.p].concat(e.q ? [e.q] : []) : ['sun', 'moon'];
+      var pos = Astro.positions(Astro.jdFromMs(e.ms));
+      var gl = e.p ? PLANETS[e.p].glyph + VS : (e.type === 'new' ? '●' : '○');
+      return '<div class="v v-sky"><div class="v-left"><div class="a1 v-date"><span>' + d(e.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(e.ms).getDate() + '</div><div class="a2 v-wheel">' + skyWheelSVG(pos, hl, 430) + '</div><div class="a3 v-fact"><b>Did you know?</b> ' + esc(e.sky.fact) + '</div></div>' +
+        '<div class="v-right"><div class="a1 v-kicker">The sky this month · ' + gl + '</div><div class="a2 v-h1">' + esc(e.sky.title) + '</div>' +
+        '<div class="a3 v-block"><b>What happens</b>' + esc(e.sky.what) + '</div>' +
+        '<div class="a4 v-block"><b>What’s really going on</b>' + esc(e.sky.real) + '</div>' +
+        '<div class="a5 v-block"><b>Why astrologers care</b>' + esc(e.sky.why) + '</div></div></div>';
     }
-    out.push('<div class="note"><b>Why the two systems disagree</b><br>Pythagorean runs A = 1 to I = 9, then starts again at J. Chaldean is the older system. It gives letters values by their sound and never uses 9, which it treats as sacred. Different rules, different answers, and we\u2019d rather show you both than pretend there\u2019s one truth. Master numbers (11, 22, 33) can be switched on or off in Settings.</div></div>');
-    return out.join('');
-  }
-
-  function screenLearn() {
-    return '<div class="stack-s">' + (active() ? '' : '<button type="button" class="link" data-act="tab:signs">\u2190 Back to star signs</button>') + '<div style="margin-bottom:6px"><h1>Learn the system</h1><p class="lede">Short lessons on how it all works, and where the ideas came from.</p></div>' +
-      LESSONS.map(function (l, i) { return '<details class="lesson" id="lesson-' + l.id + '"' + (ui.lesson === l.id ? ' open' : '') + '><summary><span class="n">' + (i + 1) + '</span><span style="flex:1">' + l.title + '</span><span class="plus" aria-hidden="true">+</span></summary><div class="body">' + l.body + '</div></details>'; }).join('') + '</div>';
-  }
-
-  function screenSettings() {
-    var s = store.settings, p = active(), out = ['<div class="stack">'];
-    out.push('<section class="stack-s"><h2>Saved charts</h2>' + store.profiles.map(function (x) {
-      var isA = p && x.id === p.id;
-      return '<div class="card prof"><div class="avatar">' + esc(initials(x.name)) + '</div><div style="flex:1;min-width:0"><b>' + esc(x.name) + '</b>' + (isA ? ' <span class="small">(showing)</span>' : '') + '<div class="small">' + fmtDate(new Date(x.date + 'T00:00:00').getTime()) + ' · ' + (x.time ? fmtTime(x.time) : 'time unknown') + ' · ' + esc(x.placeName) + '</div>' +
-        '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' + (isA ? '' : '<button type="button" class="btn-ghost" data-act="use-profile:' + x.id + '">Show</button>') + '<button type="button" class="btn-ghost" data-act="edit-profile:' + x.id + '">Edit</button>' +
-        '<button type="button" class="btn-ghost" style="color:var(--danger);border-color:var(--danger)" data-act="del-profile:' + x.id + '">' + (ui.confirmDel === x.id ? 'Tap again to delete' : 'Delete') + '</button></div></div></div>';
-    }).join('') + '<button type="button" class="btn-dashed" data-act="add-profile">+ Add a chart (partner, kids, mates)</button></section>');
-    // astrology
-    out.push('<section class="stack-s"><h2>Astrology system</h2><div class="lbl">Zodiac</div><div class="grid2"><button type="button" class="opt" aria-pressed="true"><b>Tropical</b><span>Western standard</span></button><button type="button" class="opt" disabled><b>Sidereal (Vedic)</b><span>Coming later</span></button></div>');
-    out.push('<button type="button" class="link" data-act="learn:vedic">Why are there two zodiacs?</button><div class="lbl">House system</div>');
-    [['placidus', 'Placidus', 'The most common. Divides the sky by time, not equal slices.'], ['whole', 'Whole Sign', 'The oldest system: one sign = one house. Popular with newer astrologers.'], ['equal', 'Equal', 'Twelve equal 30° slices, starting from your Rising sign.']].forEach(function (o) {
-      out.push('<button type="button" class="opt" aria-pressed="' + (s.houses === o[0]) + '" data-act="houses:' + o[0] + '"><b>' + o[1] + '</b><span>' + o[2] + '</span></button>');
-    });
-    if (p && p.time) {
-      var cur = getChart(p), base = buildChart(p, 'placidus'), moves = [];
-      CHART_POINTS.forEach(function (id) { if (base.houses[id] !== cur.houses[id]) moves.push(PLANETS[id].name + ' ' + ord(base.houses[id]) + ' → ' + ord(cur.houses[id])); });
-      out.push('<div class="note"><b>What this changes for ' + esc(p.name.split(/\s+/)[0]) + ': </b>' + (s.houses === 'placidus' ? 'You’re on the default. Switch systems and we’ll show you exactly which planets change house.' : (moves.length ? 'Compared with Placidus: ' + moves.join(', ') + '. Same sky, different slicing.' : 'Nothing moves house in this chart compared with Placidus.')) + '</div>');
+    if (sc.type === 'numbers') {
+      var um = sk.um, T = PY_THEME[um.n];
+      return '<div class="v v-center"><div class="a1 v-kicker">The numbers layer</div><div class="a2 v-bignum">' + um.n + '</div><div class="a3 v-h1" style="text-align:center">Universal Month ' + um.n + ': ' + T.title + '</div><div class="a4 v-work">' + esc(um.working).replace('\n', '<br>') + '</div><div class="a5 v-sub" style="max-width:1300px;text-align:center">A month that wants ' + T.wants + '.</div></div>';
     }
-    out.push('</section>');
-    // numerology
-    out.push('<section class="stack-s"><h2>Numerology system</h2><div class="grid2"><button type="button" class="opt" aria-pressed="' + (s.numSys === 'pyth') + '" data-act="numsys:pyth"><b>Pythagorean</b><span>Most widely used</span></button><button type="button" class="opt" aria-pressed="' + (s.numSys === 'chaldean') + '" data-act="numsys:chaldean"><b>Chaldean</b><span>Older, sound-based</span></button></div>' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px"><div><b id="mlabel" style="font-size:14px">Keep master numbers</b><div class="small">11, 22 and 33 don’t get reduced</div></div><button type="button" class="switch" role="switch" aria-checked="' + s.masters + '" aria-labelledby="mlabel" data-act="masters"><i></i></button></div></section>');
-    // privacy
-    out.push('<section class="stack-s"><h2>Privacy</h2><p class="small" style="margin:0;color:var(--ink2)">Your charts are stored in this browser only. Nothing is sent to us. The only thing that leaves your device is the place name you type into the search, which goes to Open-Meteo’s free place lookup.</p><button type="button" class="btn-danger" data-act="wipe">' + (ui.confirmWipe ? 'Tap again to delete everything' : 'Delete all my data') + '</button></section>');
-    out.push('<footer class="foot">Duology · astrology and numerology, explained<br>An SCVD app<br>All calculations run on your device.</footer></div>');
-    return out.join('');
+    if (sc.type === 'wheel') return '<div class="v v-sky"><div class="v-left"><div class="a1 v-wheel">' + ringSVG(4, { 1: 2 }, 620) + '</div></div><div class="v-right"><div class="a1 v-kicker">How horoscopes are worked out</div><div class="a2 v-h1">Solar houses</div><div class="a3 v-block"><b>Your sign = your 1st house</b>Without a birth time, your star sign becomes your 1st house and the other signs follow around the wheel.</div><div class="a4 v-block"><b>Same sky, different reading</b>When a planet moves into a sign, it lands in a different house for every star sign. That’s why the same day reads differently for each of you.</div><div class="a5 v-block"><b>Example: Leo</b>Leo is house 1, Virgo is house 2, Libra is house 3, and so on around.</div></div></div>';
+    if (sc.type === 'sign') {
+      var r = signReading(sk, sc.si), Sg = r.sign, hl2 = {}; r.top.forEach(function (t) { t.houses.forEach(function (h) { hl2[h] = hl2[h] || 1; }); }); hl2[r.theme] = 2;
+      return '<div class="v v-sign"><div class="v-left"><div class="a1 v-signglyph">' + Sg.glyph + VS + '</div><div class="a2 v-h1" style="font-size:96px">' + Sg.name + '</div><div class="a3 v-note">' + r.dates + ' · ruled by ' + r.rulers.map(function (x) { return PLANETS[x].name; }).join(' & ') + '</div><div class="a4 v-wheel" style="margin-top:24px">' + ringSVG(sc.si, hl2, 340, true) + '</div></div>' +
+        '<div class="v-right"><div class="a1 v-kicker">' + d(sk.start, { month: 'long' }) + ' focus</div><div class="a2 v-h1" style="font-size:66px">Your ' + ord(r.theme) + ' house: ' + HOUSE_SHORT[r.theme] + '</div>' +
+        r.top.slice(0, 2).map(function (t, i) { return '<div class="a' + (i + 3) + ' v-ev"><div class="v-evd"><span>' + d(t.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(t.ms).getDate() + '</div><div><b>' + esc(t.title) + '</b><div>' + esc(t.read) + '</div></div></div>'; }).join('') +
+        (r.recharge.length ? '<div class="a6 v-recharge"><b>Recharge days</b> ' + r.recharge.join(', ') + '</div>' : '') + '</div></div>';
+    }
+    if (sc.type === 'cta') return '<div class="v v-center"><div class="a1 v-kicker">That’s the general weather for your sign</div><div class="a2 v-h1" style="text-align:center;font-size:96px;max-width:1500px">Your chart is your street,<br>not your state.</div><div class="a3" style="margin-top:40px">' + wordmark(120) + '</div><div class="a4 v-sub">Your exact birth chart, houses and dates · link in the description</div><div class="a5 v-url">scvd-app.github.io/duology</div></div>';
+    return '';
+  }
+  // ---------- scenes (9:16, 1080x1920) ----------
+  function scene916(i, sh, S) {
+    var r = sh.r, Sg = r.sign, Mon = d(S.start, { month: 'long' }), hl = {}; r.top.forEach(function (t) { t.houses.forEach(function (h) { hl[h] = hl[h] || 1; }); }); hl[r.theme] = 2;
+    if (i === 0) return '<div class="v v-tall"><div class="a1 v-signglyph" style="font-size:420px">' + Sg.glyph + VS + '</div><div class="a2 v-h1" style="font-size:150px;text-align:center">' + Sg.name + '</div><div class="a3 v-sub" style="font-size:64px">' + Mon + ' in under a minute</div><div class="a4" style="margin-top:80px">' + wordmark(90) + '</div></div>';
+    if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">Your focus</div><div class="a2 v-h1" style="text-align:center;font-size:92px">Your ' + ord(r.theme) + ' house</div><div class="a3 v-sub" style="font-size:60px;text-align:center">' + HOUSE_SHORT[r.theme] + '</div><div class="a4" style="margin-top:60px">' + ringSVG(r.si, hl, 820) + '</div></div>';
+    if (i === 2) return '<div class="v v-tall" style="justify-content:flex-start;padding-top:260px"><div class="a1 v-kicker">Key dates</div>' + r.top.slice(0, 2).map(function (t, k) { return '<div class="a' + (k + 2) + ' v-ev v-ev-tall"><div class="v-evd"><span>' + d(t.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(t.ms).getDate() + '</div><div><b>' + esc(t.title) + '</b><div>' + esc(t.read) + '</div></div></div>'; }).join('') + '</div>';
+    return '<div class="v v-tall">' + (r.recharge.length ? '<div class="a1 v-kicker">Recharge days</div><div class="a2 v-h1" style="font-size:110px;text-align:center">' + r.recharge.join('<br>') + '</div>' : '') + '<div class="a3" style="margin-top:120px">' + wordmark(130) + '</div><div class="a4 v-sub" style="font-size:54px;text-align:center">Your version, built on your exact birth chart</div><div class="a5 v-url" style="font-size:44px">Link in bio</div></div>';
   }
 
-  function sheet() {
-    var p = active(); if (!ui.card || !p) return '';
-    var c = getChart(p), cd;
-    if (ui.card.type === 'place') cd = placementCard(c, ui.card.id); else { var ap = c.aspects[ui.card.idx]; if (!ap) return ''; cd = aspectCard(c, ap); }
-    return '<div class="scrim" data-act="close-card"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">' +
-      '<div class="sheet-head"><div style="display:flex;gap:14px;align-items:center"><div class="orb' + (cd.glyph.length > 2 ? ' pt' : '') + '" style="width:52px;height:52px;border-radius:26px;font-size:24px">' + cd.glyph + '</div><div><div class="sheet-title" id="sheet-title">' + cd.title + '</div><div class="small">' + cd.meta + '</div></div></div><button type="button" class="x" aria-label="Close" data-act="close-card" id="sheet-close">' + ICON.x + '</button></div>' +
-      '<div class="stack-s" style="gap:6px"><div class="sec-k a">What it means</div><div style="font-size:15px;line-height:1.55">' + cd.what + '</div></div>' +
-      '<div class="whybox"><div class="sec-k r">Why they say that</div><div><b>' + cd.whyLabel + ': </b>' + cd.whyPlanet + '</div><div><b>' + (cd.whySignLabel || 'The sign') + ': </b>' + cd.whySign + '</div>' + (cd.dignity ? '<div><b>Home ground: </b>' + cd.dignity + '</div>' : '') + '</div>' +
-      (cd.hasHouse ? '<div class="housebox"><div class="sec-k a">' + cd.houseTitle + '</div><div>Covers ' + cd.houseArea + '.</div><div style="color:var(--ink2)"><b>Why: </b>' + cd.houseWhy + '</div><button type="button" class="link" data-act="learn:houses">Lesson: why are there 12 houses?</button></div>' : '') +
-      (cd.links && (cd.links.connections || cd.links.ruler || cd.links.rules) ? '<div class="housebox"><div class="sec-k a">How it fits the rest of your chart</div>' +
-        (cd.links.ruler ? '<div><b>Who\u2019s steering it: </b>' + cd.links.ruler + '</div>' : '') +
-        (cd.links.rules ? '<div><b>What it has a say in: </b>' + cd.links.rules + '</div>' : '') +
-        (cd.links.connections ? '<div><b>Its connections</b><br>' + cd.links.connections + '</div>' : '') +
-        '<button type="button" class="link" data-act="learn:ruler">Lesson: who steers who in a chart</button></div>' : '') +
-      (cd.retro ? '<div class="note">' + cd.retro + '</div>' : '') +
-      '<div class="stack-s" style="gap:6px"><div class="sec-k m">Keep in mind</div><div style="font-size:14px;color:var(--ink2)">' + cd.keep + '</div></div>' +
-      '</div></div>';
+  // ---------- views ----------
+  function header(secs) {
+    var tot = secs.reduce(function (a, s) { return a + secDur(s); }, 0), words = secs.reduce(function (a, s) { return a + wordCount(s.text); }, 0);
+    var inBand = tot >= 300 && tot <= 435;
+    return '<header class="s-top"><div class="s-brand">Du<em>ology</em> <span>Studio</span></div>' +
+      '<div class="s-month"><button class="s-btn" data-act="mprev" aria-label="Previous month">‹</button><b>' + sky().label + '</b><button class="s-btn" data-act="mnext" aria-label="Next month">›</button></div>' +
+      '<label class="s-field">Depth <select id="depth"><option value="tight"' + (st.depth === 'tight' ? ' selected' : '') + '>Tight (~6 min)</option><option value="standard"' + (st.depth === 'standard' ? ' selected' : '') + '>Standard (~7 min)</option><option value="deep"' + (st.depth === 'deep' ? ' selected' : '') + '>Deep (10+ min)</option></select></label>' +
+      '<label class="s-field">Voice pace <input id="wpm" type="number" min="120" max="200" step="5" value="' + st.wpm + '"> wpm</label>' +
+      '<div class="s-dur ' + (inBand ? 'ok' : 'warn') + '" id="durbadge">' + fmtDur(tot) + ' · ' + words + ' words' + (inBand ? '' : (tot < 300 ? ' · under 5 min' : ' · over 7 min')) + '</div></header>' +
+      '<nav class="s-tabs">' + [['script', 'Script'], ['video', 'Video'], ['shorts', 'Shorts'], ['youtube', 'YouTube']].map(function (t) { return '<button data-act="tab:' + t[0] + '" aria-current="' + (ui.tab === t[0] ? 'page' : 'false') + '">' + t[1] + '</button>'; }).join('') + '</nav>';
+  }
+  function viewScript(secs) {
+    var t = 0;
+    return '<div class="s-pad"><div class="s-actions"><button class="s-cta" data-act="copy-voice">Copy voice script</button><button class="s-btn2" data-act="dl-script">Download script with scene notes (.txt)</button><span class="s-hint">Edit anything below. Your changes are saved in this browser, and marked ‘edited’.</span></div>' +
+      secs.map(function (s, i) {
+        var start = t; t += secDur(s);
+        return '<section class="s-sec"><div class="s-sechead"><b>' + (i + 1) + '. ' + esc(s.label) + '</b><span class="s-meta" id="meta-' + i + '">' + fmtDur(start) + ' · ' + wordCount(s.text) + ' words · ' + fmtDur(secDur(s)) + '</span>' + (s.edited ? '<span class="s-edited">edited</span><button class="s-link" data-act="reset:' + s.id + '">Reset</button>' : '') + '<button class="s-link" data-act="goto:' + i + '">Preview scene</button></div>' +
+          '<textarea data-sec="' + s.id + '" data-idx="' + i + '" rows="' + Math.max(3, Math.ceil(s.text.length / 110)) + '">' + esc(s.text) + '</textarea></section>';
+      }).join('') + '</div>';
+  }
+  function stageControls(n, idx, label, dur) {
+    return '<div class="s-controls"><button class="s-btn" data-act="prev" aria-label="Previous scene">‹</button><button class="s-cta" data-act="play">' + (ui.playing ? 'Pause' : 'Play') + '</button><button class="s-btn" data-act="next" aria-label="Next scene">›</button>' +
+      '<span class="s-meta">Scene ' + (idx + 1) + ' of ' + n + ' · ' + esc(label) + ' · ' + fmtDur(dur) + '</span><span style="flex:1"></span>' +
+      '<button class="s-btn2" data-act="clean">Clean mode for recording (H)</button><button class="s-btn2" data-act="fs">Full screen (F)</button></div>';
+  }
+  function viewVideo(secs) {
+    var i = Math.min(ui.scene, secs.length - 1), s = secs[i];
+    var total = secs.reduce(function (a, x) { return a + secDur(x); }, 0), acc = 0;
+    return '<div class="s-pad">' + stageControls(secs.length, i, s.label, secDur(s)) +
+      '<div class="s-timeline">' + secs.map(function (x, k) { var w = secDur(x) / total * 100; acc += w; return '<button style="width:' + w + '%" class="' + (k === i ? 'on' : '') + '" data-act="goto:' + k + '" title="' + esc(x.label) + '"></button>'; }).join('') + '</div>' +
+      '<div class="s-stage" id="stage" data-w="1920" data-h="1080"><div class="s-canvas" style="width:1920px;height:1080px">' + scene16(s, sky()) + '</div></div>' +
+      '<div class="s-voice"><b>Voiceover for this scene</b><p>' + esc(s.text) + '</p></div>' +
+      '<p class="s-hint">To record: start your screen recorder (OBS, or Windows Game Bar with Win + Alt + R), hit Clean mode, then press Space to play. Each scene holds for as long as its voiceover takes at ' + st.wpm + ' words a minute. Drop the AI voice track over the top in your editor.</p></div>';
+  }
+  function viewShorts() {
+    var sh = short(), S = sky(), i = Math.min(ui.shortScene, 3), p = sh.parts[i], all = sh.parts.map(function (x) { return x.text; }).join(' ');
+    return '<div class="s-pad"><div class="s-signs">' + SIGNS.map(function (x, k) { return '<button data-act="ssign:' + k + '" aria-pressed="' + (ui.shortSign === k) + '">' + x.glyph + VS + ' ' + x.name + '</button>'; }).join('') + '</div>' +
+      '<div class="s-shortwrap"><div><div class="s-stage s-tall" id="stage" data-w="1080" data-h="1920"><div class="s-canvas" style="width:1080px;height:1920px">' + scene916(i, sh, S) + '</div></div></div>' +
+      '<div class="s-shortside">' + stageControls(4, i, ['Hook', 'Focus', 'Key dates', 'Recharge + CTA'][i], Math.max(4, wordCount(p.text) / st.wpm * 60)) +
+      '<div class="s-dur ' + (wordCount(all) / st.wpm * 60 <= 60 ? 'ok' : 'warn') + '">' + fmtDur(wordCount(all) / st.wpm * 60) + ' · ' + wordCount(all) + ' words (Shorts max 60s for best reach)</div>' +
+      sh.parts.map(function (x, k) { return '<section class="s-sec"><div class="s-sechead"><b>' + ['Hook', 'Focus', 'Key dates', 'Recharge + CTA'][k] + '</b>' + (x.edited ? '<span class="s-edited">edited</span><button class="s-link" data-act="sreset:' + x.id + '">Reset</button>' : '') + '</div><textarea data-short="' + x.id + '" rows="' + Math.max(2, Math.ceil(x.text.length / 70)) + '">' + esc(x.text) + '</textarea></section>'; }).join('') +
+      '<div class="s-actions"><button class="s-cta" data-act="copy-short">Copy this Short’s script</button><button class="s-btn2" data-act="dl-shorts">Download all 12 Shorts scripts</button></div></div></div></div>';
+  }
+  function viewYouTube(secs) {
+    var pk = ytPackage(sky(), secs, st.wpm);
+    return '<div class="s-pad"><h2>Title ideas</h2>' + pk.titles.map(function (t, i) { return '<div class="s-row"><span>' + esc(t) + '</span><span class="s-meta">' + t.length + '/100</span><button class="s-btn2" data-act="copyt:' + i + '">Copy</button></div>'; }).join('') +
+      '<h2>Description</h2><p class="s-hint">Chapter times are estimates at ' + st.wpm + ' wpm. Once you’ve got the real voice track, nudge them to match.</p><textarea id="ytdesc" rows="24">' + esc(pk.desc) + '</textarea><div class="s-actions"><button class="s-cta" data-act="copy-desc">Copy description</button></div></div>';
   }
 
-  // ---------- render ----------
+  function fit() {
+    var stg = document.getElementById('stage'); if (!stg) return;
+    var cw = +stg.getAttribute('data-w'), ch = +stg.getAttribute('data-h'), cv = stg.firstChild;
+    var W = stg.clientWidth, H = ui.clean ? window.innerHeight : (cw > ch ? W * ch / cw : Math.min(window.innerHeight * 0.78, 900));
+    if (ui.clean) W = window.innerWidth;
+    var sc = (!ui.clean && cw < ch) ? H / ch : Math.min(W / cw, H / ch);
+    stg.style.height = (ui.clean ? window.innerHeight : ch * sc) + 'px';
+    if (!ui.clean && cw < ch) stg.style.width = (cw * sc) + 'px';
+    cv.style.transform = 'scale(' + sc + ')';
+    cv.style.left = ((!ui.clean && cw < ch) ? 0 : (W - cw * sc) / 2) + 'px'; cv.style.top = ((ui.clean ? window.innerHeight - ch * sc : 0) / 2) + 'px';
+  }
+
+  var secsCache = null;
   function render() {
-    var scr = ui.screen;
-    if (scr !== 'onboard' && scr !== 'signs' && scr !== 'learn' && !active()) scr = ui.screen = 'onboard';
-    var body = scr === 'onboard' ? screenOnboard() : scr === 'chart' ? screenChart() : scr === 'forecast' ? screenForecast() : scr === 'numbers' ? screenNumbers() : scr === 'learn' ? screenLearn() : scr === 'signs' ? screenSigns() : screenSettings();
-    var tabs = (scr === 'onboard' || !active()) ? '' : '<nav class="tabs" aria-label="Main">' + TABS.map(function (t) { return '<button type="button" data-act="tab:' + t[0] + '"' + (scr === t[0] || (scr === 'signs' && t[0] === 'forecast') ? ' aria-current="page"' : '') + '>' + ICON[t[0]] + t[1] + '</button>'; }).join('') + '</nav>';
-    root.innerHTML = '<header class="top"><div class="brand">Du<em>ology</em></div><div class="screen-name">' + NAMES[scr] + '</div></header><main id="main">' + body + '</main>' + tabs + sheet();
-    document.body.style.overflow = ui.card ? 'hidden' : '';
-    if (ui.card) { var cb = document.getElementById('sheet-close'); if (cb) cb.focus(); }
-    if (scr === 'onboard') wireOnboard();
-    if (scr === 'learn' && ui.lesson) { var el = document.getElementById('lesson-' + ui.lesson); if (el) el.scrollIntoView({ block: 'center' }); }
+    var secs = secsCache = sections();
+    var body = ui.tab === 'script' ? viewScript(secs) : ui.tab === 'video' ? viewVideo(secs) : ui.tab === 'shorts' ? viewShorts() : viewYouTube(secs);
+    root.innerHTML = header(secs) + body;
+    document.body.classList.toggle('clean', ui.clean);
+    fit();
   }
-  function go(screen) { ui.screen = screen; ui.card = null; ui.confirmDel = null; ui.confirmWipe = false; render(); window.scrollTo(0, 0); }
-
-  // ---------- onboarding wiring ----------
-  var searchTimer = null, searchSeq = 0;
-  function wireOnboard() {
-    var nt = document.getElementById('f-notime'), ti = document.getElementById('f-time'), note = document.getElementById('notime-note');
-    nt.addEventListener('change', function () { ti.disabled = nt.checked; note.hidden = !nt.checked; });
-    var pl = document.getElementById('f-place');
-    if (!pl) return;
-    pl.addEventListener('input', function () {
-      clearTimeout(searchTimer);
-      var q = pl.value.trim();
-      if (q.length < 2) { ui.results = []; drawResults(''); return; }
-      searchTimer = setTimeout(function () { searchPlace(q); }, 350);
-    });
+  function schedule() {
+    clearTimeout(timer); if (!ui.playing) return;
+    var dur;
+    if (ui.tab === 'video') dur = secDur(secsCache[ui.scene]);
+    else { var sh = short(); dur = Math.max(4, wordCount(sh.parts[ui.shortScene].text) / st.wpm * 60); }
+    timer = setTimeout(function () {
+      if (ui.tab === 'video') { if (ui.scene < secsCache.length - 1) { ui.scene++; render(); schedule(); } else { ui.playing = false; render(); } }
+      else { if (ui.shortScene < 3) { ui.shortScene++; render(); schedule(); } else { ui.playing = false; render(); } }
+    }, dur * 1000);
   }
-  function drawResults(msg) {
-    var box = document.getElementById('place-results'); if (!box) return;
-    box.innerHTML = (msg ? '<div class="small">' + esc(msg) + '</div>' : '') + ui.results.map(function (r, i) {
-      return '<button type="button" class="result" data-act="pick-place:' + i + '"><b>' + esc(r.name) + '</b><span class="small">' + esc([r.admin1, r.country].filter(Boolean).join(', ')) + '</span></button>';
-    }).join('');
+  function step(dlt) {
+    if (ui.tab === 'video') ui.scene = Math.max(0, Math.min(secsCache.length - 1, ui.scene + dlt));
+    else if (ui.tab === 'shorts') ui.shortScene = Math.max(0, Math.min(3, ui.shortScene + dlt));
+    render(); schedule();
   }
-  function searchPlace(q) {
-    var seq = ++searchSeq;
-    drawResults('Searching…');
-    fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) + '&count=6&language=en&format=json')
-      .then(function (r) { if (!r.ok) throw new Error('bad'); return r.json(); })
-      .then(function (d) {
-        if (seq !== searchSeq) return;
-        ui.results = (d.results || []).filter(function (r) { return r.timezone; });
-        drawResults(ui.results.length ? '' : 'No matches. Try a bigger town nearby, or enter coordinates below.');
-      })
-      .catch(function () { if (seq !== searchSeq) return; ui.results = []; drawResults('Couldn’t reach the place search. You can enter coordinates below instead.'); });
-  }
-  function readForm() {
-    return {
-      name: document.getElementById('f-name').value.trim(),
-      date: document.getElementById('f-date').value,
-      noTime: document.getElementById('f-notime').checked,
-      time: document.getElementById('f-time').value
-    };
-  }
-  function saveProfile() {
-    var f = readForm(), err = '';
-    if (!f.name) err = 'Add a name. Numerology needs the full birth name.';
-    else if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) err = 'Add the birth date.';
-    else if (+f.date.slice(0, 4) < 1800 || +f.date.slice(0, 4) > 2050) err = 'The calculations are built for births between 1800 and 2050.';
-    else if (!f.noTime && !f.time) err = 'Add the birth time, or tick “I don’t know the birth time”.';
-    var place = ui.place;
-    if (!err && !place) {
-      var lat = parseFloat((document.getElementById('m-lat') || {}).value), lon = parseFloat((document.getElementById('m-lon') || {}).value);
-      if (!isNaN(lat) && !isNaN(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
-        place = { label: (document.getElementById('m-name').value.trim() || (lat.toFixed(2) + ', ' + lon.toFixed(2))), lat: lat, lon: lon, tz: document.getElementById('m-tz').value, manual: true };
-      } else err = 'Pick the birth place from the search, or enter coordinates.';
-    }
-    if (err) {
-      ui.formErr = err;
-      var keep = readForm(); render();
-      document.getElementById('f-name').value = keep.name; document.getElementById('f-date').value = keep.date;
-      document.getElementById('f-notime').checked = keep.noTime; document.getElementById('f-time').value = keep.time;
-      document.getElementById('f-time').disabled = keep.noTime; document.getElementById('notime-note').hidden = !keep.noTime;
-      return;
-    }
-    var rec = { name: f.name, date: f.date, time: f.noTime ? null : f.time, placeName: place.label, lat: place.lat, lon: place.lon, tz: place.tz, manual: !!place.manual, updated: Date.now() };
-    if (ui.editId) {
-      store.profiles = store.profiles.map(function (x) { return x.id === ui.editId ? Object.assign({ id: x.id }, rec) : x; });
-      store.activeId = ui.editId;
-    } else {
-      rec.id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-      store.profiles.push(rec); store.activeId = rec.id;
-    }
-    save(); ui.editId = null; ui.place = null; ui.formErr = ''; ui.showAllAsp = false;
-    go('chart');
+  function scriptTxt(secs) {
+    var t = 0, out = ['DUOLOGY · ' + sky().label.toUpperCase() + ' FORECAST', 'Estimated ' + fmtDur(secs.reduce(function (a, s) { return a + secDur(s); }, 0)) + ' at ' + st.wpm + ' wpm · ' + secs.reduce(function (a, s) { return a + wordCount(s.text); }, 0) + ' words', ''];
+    secs.forEach(function (s, i) { out.push('[SCENE ' + (i + 1) + ' · ' + s.label + ' · starts ' + fmtDur(t) + ' · ' + fmtDur(secDur(s)) + ']'); out.push(s.text); out.push(''); t += secDur(s); });
+    return out.join('\n');
   }
 
-  // ---------- events ----------
   root.addEventListener('click', function (e) {
     var el = e.target.closest('[data-act]'); if (!el) return;
-    if (el.classList.contains('scrim') && e.target !== el) return;
-    var parts = el.getAttribute('data-act').split(':'), act = parts[0], arg = parts.slice(1).join(':');
-    var s = store.settings;
-    switch (act) {
-      case 'tab': ui.editId = null; ui.place = null; ui.formErr = ''; go(arg); break;
-      case 'card-place': ui.card = { type: 'place', id: arg }; render(); break;
-      case 'card-asp': ui.card = { type: 'asp', idx: +arg }; render(); break;
-      case 'close-card': ui.card = null; render(); break;
-      case 'range': ui.range = +arg; render(); break;
-      case 'tag': ui.tag = arg; render(); break;
-      case 'houses': s.houses = arg; save(); render(); break;
-      case 'numsys': s.numSys = arg; save(); render(); break;
-      case 'masters': s.masters = !s.masters; save(); render(); break;
-      case 'show-all-asp': ui.showAllAsp = true; render(); break;
-      case 'learn': ui.lesson = arg; go('learn'); break;
-      case 'add-profile': ui.editId = null; ui.place = null; go('onboard'); break;
-      case 'edit-profile':
-        var ep = store.profiles.filter(function (x) { return x.id === arg; })[0];
-        ui.editId = arg; ui.place = ep && !ep.manual ? { label: ep.placeName, lat: ep.lat, lon: ep.lon, tz: ep.tz } : null; go('onboard'); break;
-      case 'use-profile': store.activeId = arg; save(); ui.showAllAsp = false; go('chart'); break;
-      case 'del-profile':
-        if (ui.confirmDel !== arg) { ui.confirmDel = arg; render(); break; }
-        store.profiles = store.profiles.filter(function (x) { return x.id !== arg; });
-        if (store.activeId === arg) store.activeId = store.profiles.length ? store.profiles[0].id : null;
-        ui.confirmDel = null; save(); render(); break;
-      case 'wipe':
-        if (!ui.confirmWipe) { ui.confirmWipe = true; render(); break; }
-        try { localStorage.removeItem(KEY); } catch (err) {}
-        store = JSON.parse(JSON.stringify(DEFAULT_STORE)); ui.confirmWipe = false; go('onboard'); break;
-      case 'pick-place':
-        var r = ui.results[+arg]; if (!r) break;
-        var keep = readForm();
-        ui.place = { label: [r.name, r.admin1, r.country].filter(Boolean).join(', '), lat: r.latitude, lon: r.longitude, tz: r.timezone };
-        ui.results = []; render();
-        document.getElementById('f-name').value = keep.name; document.getElementById('f-date').value = keep.date;
-        document.getElementById('f-notime').checked = keep.noTime; document.getElementById('f-time').value = keep.time;
-        document.getElementById('f-time').disabled = keep.noTime; document.getElementById('notime-note').hidden = !keep.noTime;
-        break;
-      case 'clear-place':
-        var kp = readForm(); ui.place = null; render();
-        document.getElementById('f-name').value = kp.name; document.getElementById('f-date').value = kp.date;
-        document.getElementById('f-notime').checked = kp.noTime; document.getElementById('f-time').value = kp.time;
-        document.getElementById('f-time').disabled = kp.noTime; document.getElementById('notime-note').hidden = !kp.noTime;
-        document.getElementById('f-place').focus();
-        break;
-      case 'save-profile': saveProfile(); break;
-      case 'sign': ui.sign = +arg; try { history.replaceState(null, '', '#sign=' + SIGNS[+arg].name.toLowerCase()); } catch (err) {} render(); break;
-      case 'smonth': ui.smonth = +arg; render(); break;
+    var a = el.getAttribute('data-act').split(':'), act = a[0], arg = a[1];
+    if (act === 'tab') { ui.tab = arg; ui.playing = false; clearTimeout(timer); render(); }
+    else if (act === 'mprev' || act === 'mnext') { ui.m += act === 'mnext' ? 1 : -1; if (ui.m > 12) { ui.m = 1; ui.y++; } if (ui.m < 1) { ui.m = 12; ui.y--; } ui.scene = 0; ui.shortScene = 0; render(); }
+    else if (act === 'goto') { ui.scene = +arg; if (ui.tab !== 'video') ui.tab = 'video'; render(); schedule(); }
+    else if (act === 'prev') step(-1);
+    else if (act === 'next') step(1);
+    else if (act === 'play') { ui.playing = !ui.playing; render(); schedule(); }
+    else if (act === 'clean') { ui.clean = true; render(); }
+    else if (act === 'fs') { var s = document.getElementById('stage'); if (s && s.requestFullscreen) { ui.clean = true; render(); document.documentElement.requestFullscreen().catch(function () {}); } }
+    else if (act === 'reset') { delete st.edits[mkey() + '|' + arg]; persist(); render(); }
+    else if (act === 'sreset') { delete st.shortEdits[mkey() + '|' + ui.shortSign + '|' + arg]; persist(); render(); }
+    else if (act === 'ssign') { ui.shortSign = +arg; ui.shortScene = 0; render(); }
+    else if (act === 'copy-voice') copy(secsCache.map(function (s) { return s.text; }).join('\n\n'), el);
+    else if (act === 'dl-script') download('duology-' + mkey() + '-script.txt', scriptTxt(secsCache));
+    else if (act === 'copy-short') copy(short().parts.map(function (p) { return p.text; }).join(' '), el);
+    else if (act === 'dl-shorts') {
+      var keep = ui.shortSign, out = [];
+      for (var k = 0; k < 12; k++) { ui.shortSign = k; var sh = short(), tx = sh.parts.map(function (p) { return p.text; }).join(' '); out.push('=== ' + SIGNS[k].name.toUpperCase() + ' · ' + fmtDur(wordCount(tx) / st.wpm * 60) + ' ===\n' + tx + '\n'); }
+      ui.shortSign = keep; download('duology-' + mkey() + '-shorts.txt', out.join('\n'));
     }
+    else if (act === 'copyt') copy(ytPackage(sky(), secsCache, st.wpm).titles[+arg], el);
+    else if (act === 'copy-desc') copy(document.getElementById('ytdesc').value, el);
   });
-  root.addEventListener('keydown', function (e) {
-    var el = e.target.closest && e.target.closest('g[data-act]');
-    if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); el.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
+  var saveT = null;
+  root.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t.hasAttribute('data-sec')) {
+      var id = t.getAttribute('data-sec'), i = +t.getAttribute('data-idx'), s = secsCache[i];
+      s.text = t.value; if (t.value === s.generated) delete st.edits[mkey() + '|' + id]; else st.edits[mkey() + '|' + id] = t.value;
+      var m = document.getElementById('meta-' + i); if (m) m.textContent = wordCount(t.value) + ' words · ' + fmtDur(secDur(s));
+      var tot = secsCache.reduce(function (a, x) { return a + secDur(x); }, 0), b = document.getElementById('durbadge');
+      if (b) { b.textContent = fmtDur(tot) + ' · ' + secsCache.reduce(function (a, x) { return a + wordCount(x.text); }, 0) + ' words'; b.className = 's-dur ' + (tot >= 300 && tot <= 435 ? 'ok' : 'warn'); }
+      clearTimeout(saveT); saveT = setTimeout(persist, 400);
+    } else if (t.hasAttribute('data-short')) {
+      st.shortEdits[mkey() + '|' + ui.shortSign + '|' + t.getAttribute('data-short')] = t.value;
+      clearTimeout(saveT); saveT = setTimeout(persist, 400);
+    }
   });
   root.addEventListener('change', function (e) {
-    if (e.target.id === 'f-bday' && e.target.value) {
-      var bp = e.target.value.split('-').map(Number);
-      var sl = Astro.positions(Astro.jdFromMs(Date.UTC(bp[0], bp[1] - 1, bp[2], 12))).sun, dd = sl % 30;
-      ui.sign = signOf(sl);
-      ui.cusp = dd < 1.2 ? [(ui.sign + 11) % 12, ui.sign] : dd > 28.8 ? [ui.sign, (ui.sign + 1) % 12] : null;
-      render(); return;
-    }
-    if (e.target.id === 'f-switch') { store.activeId = e.target.value; save(); ui.showAllAsp = false; render(); }
+    if (e.target.id === 'depth') { st.depth = e.target.value; persist(); ui.scene = 0; render(); }
+    if (e.target.id === 'wpm') { st.wpm = Math.max(100, Math.min(220, +e.target.value || 160)); persist(); render(); }
   });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ui.card) { ui.card = null; render(); } });
-
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    if (ui.tab !== 'video' && ui.tab !== 'shorts') return;
+    if (e.key === 'ArrowRight') step(1);
+    else if (e.key === 'ArrowLeft') step(-1);
+    else if (e.key === ' ') { e.preventDefault(); ui.playing = !ui.playing; render(); schedule(); }
+    else if (e.key === 'h' || e.key === 'H') { ui.clean = !ui.clean; render(); }
+    else if (e.key === 'Escape' && ui.clean) { ui.clean = false; if (document.fullscreenElement) document.exitFullscreen(); render(); }
+    else if (e.key === 'f' || e.key === 'F') { if (!document.fullscreenElement) { ui.clean = true; render(); document.documentElement.requestFullscreen().catch(function () {}); } else document.exitFullscreen(); }
+  });
+  document.addEventListener('fullscreenchange', function () { if (!document.fullscreenElement && ui.clean) { ui.clean = false; render(); } else fit(); });
+  window.addEventListener('resize', fit);
   render();
 })();
-// ===== APP END =====
+// ===== STUDIO APP END =====
 
 </script>
 </body>
