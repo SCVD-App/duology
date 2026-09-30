@@ -124,7 +124,7 @@ details.ev summary::-webkit-details-marker{display:none}
 .plus{font-size:18px;color:var(--muted);line-height:1}
 details[open] .plus{transform:rotate(45deg)}
 .why{margin:0 14px 14px 72px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink2)}
-.why b{color:var(--rust);font-size:12px;text-transform:uppercase;letter-spacing:.8px;display:block}
+.why b{color:var(--rust);font-size:12px;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:2px}
 /* numbers */
 .num{padding:16px;display:flex;flex-direction:column;gap:10px}
 .num-head{display:flex;align-items:center;gap:14px}
@@ -500,6 +500,10 @@ var LESSONS = [
     body: "An aspect is the angle between two planets, measured around the chart.\n\n0° (conjunction): blending.\n60° (sextile) and 120° (trine): flowing, easy.\n90° (square) and 180° (opposition): friction, tension.\n\nThe meanings come from ancient Greek geometry and number symbolism. Triangles were seen as harmonious and squares as hard.\n\nAngles don't have to be exact. The 'orb' is how far off exact is allowed. The tighter the orb, the stronger the aspect is read." },
   { id: 'retro', title: "What does 'retrograde' actually mean?",
     body: "No planet ever really goes backwards. Earth is moving too, and when we overtake a slower outer planet (or a faster inner one swings past us), it looks like it's reversing against the stars, the same way a car you're passing on the highway seems to slide backwards.\n\nAstrologers read that apparent going-back as a time for review, delays and do-overs in whatever the planet stands for. That's why Mercury retrograde (Mercury is thinking and talking) gets blamed for mix-ups." },
+  { id: 'ruler', title: 'Your chart ruler, and who steers who',
+    body: "Every sign has a ruling planet: Aries is ruled by Mars, Taurus by Venus, and so on. That creates a chain of command in your chart.\n\nThe planet that rules your Rising sign is your chart ruler, the captain of the whole chart. Wherever it sits (sign and house) is read as where your life tends to steer.\n\nThe same goes for every planet. Your Mars in Taurus answers to Venus, because Venus rules Taurus, so astrologers look at your Venus to see how your Mars plays out. It's like a company org chart: to understand one person, you check who they report to.\n\nEach planet also 'owns' the houses whose starting line falls in its signs. So a planet can have a say in parts of your life it doesn't even sit in." },
+  { id: 'weigh', title: 'How astrologers weigh a transit',
+    body: "Not every transit counts the same. Astrologers weigh them on three things.\n\nHow slow the moving planet is. The Sun, Mercury and Venus race past in a day or two. Saturn, Uranus, Neptune and Pluto can sit on the same spot for months, so they count for more.\n\nWhat it hits. Your Sun, Moon, Rising and Midheaven are the most personal points in your chart.\n\nThe angle. Conjunctions, squares and oppositions are read as louder than trines and sextiles.\n\nSlow planets often hit the same spot three times because of retrograde. Astrologers read that as a story: the first pass raises the issue, the second revisits it, and the third settles it.\n\nThat's why the 12-month forecast only shows the big stuff, and the 30-day one shows everything." },
   { id: 'vedic', title: 'Why is my Vedic sign different?',
     body: "Western astrology ties the signs to the seasons: Aries always starts at the March equinox. Vedic astrology ties them to the actual star constellations.\n\nThe two lined up about 2,000 years ago. Since then Earth's slow wobble (precession) has shifted them apart by roughly 24°. So in Vedic astrology your Sun sign is usually one sign earlier.\n\nNeither is 'wrong'. They're different rulebooks." },
   { id: 'numerology', title: 'How numerology works',
@@ -581,6 +585,7 @@ function placementCard(chart, id) {
     dignity: dignityNote(id, si), keep: P.keep, hasHouse: false,
     retro: chart.retro[id] ? P.name + " was retrograde when you were born: from Earth it looked like it was moving backwards. Astrologers read that as its energy turned inward, more reflective and less straightforward." : ''
   };
+  card.links = chartLinks(chart, id);
   if (id === 'moon' && !chart.hasTime) card.keep = "Without a birth time we've used noon. The Moon moves about 13° a day, so it could be up to 6 or 7 degrees either side, and if it's near the edge of a sign it might even be in the next one.";
   if (chart.hasTime && id !== 'asc') {
     card.hasHouse = true; card.houseTitle = 'In your ' + ord(h) + ' house'; card.houseArea = HOUSES[h].area; card.houseWhy = HOUSES[h].why;
@@ -646,12 +651,142 @@ function personalMonth(py, month) {
   return { n: r.n, working: 'Personal Year ' + py + ' + month ' + month + (month > 9 ? ' (→ ' + mm + ')' : '') + ' = ' + sum + r.txt };
 }
 
+// ---------- numerology depth ----------
+var NUM_SHORT = { 1: 'leader', 2: 'peacemaker', 3: 'communicator', 4: 'builder', 5: 'free spirit', 6: 'carer', 7: 'thinker', 8: 'achiever', 9: 'humanitarian', 11: 'intuitive', 22: 'master builder', 33: 'master teacher' };
+var NUM_DETAIL = {
+  1: { good: 'Drive, independence and originality. Happy to go first.', watch: 'Stubbornness, impatience, or going it alone when help is on offer.' },
+  2: { good: 'Tact, patience, reading people and bringing them together.', watch: 'Dodging conflict, people-pleasing, or underselling yourself.' },
+  3: { good: 'Humour, creativity, a way with words and a knack for lifting a room.', watch: 'Scattering your energy, skipping the boring bits, or skating past the deep stuff.' },
+  4: { good: 'Reliability, hard graft, organisation and seeing things through.', watch: 'Getting rigid, stuck in a rut, or all work and no play.' },
+  5: { good: 'Adaptability, curiosity, courage and a love of new experiences.', watch: 'Restlessness, getting bored easily, and struggling to commit.' },
+  6: { good: 'Loyalty, care, responsibility and making a home for people.', watch: 'Over-giving, meddling, or carrying everyone else’s load.' },
+  7: { good: 'Depth, insight and a sharp, analytical mind.', watch: 'Withdrawing, overthinking, or keeping people at arm’s length.' },
+  8: { good: 'Ambition, authority, business sense and getting results.', watch: 'Making it all about status, control or the bottom line.' },
+  9: { good: 'Compassion, wisdom, generosity and seeing the big picture.', watch: 'Struggling to let go, or giving until there’s nothing left.' },
+  11: { good: 'Intuition, inspiration and a knack for lifting others.', watch: 'Nervous energy, self-doubt, and sky-high expectations of yourself.' },
+  22: { good: 'Vision plus practicality: turning big plans into real things.', watch: 'The weight of big ambitions. Can freeze up or overwork.' },
+  33: { good: 'Deep care, and teaching others on a bigger scale.', watch: 'Taking on everyone’s problems as your own.' }
+};
+var PY_THEME = {
+  1: { title: 'New beginnings', wants: 'you to lead and start things',
+    text: 'A 1 year kicks off a brand-new nine-year cycle. Numerology reads it as the time to plant seeds: start things, back yourself, make the first move. What you begin now is said to shape the next nine years.' },
+  2: { title: 'Patience and partnership', wants: 'patience and teamwork',
+    text: 'A 2 year follows the big push of a 1 year. The seeds are in the ground and now they need time. Numerology reads it as a slower, quieter year for cooperation, relationships and fine detail, letting things grow rather than forcing them. Impatience is the classic trap.' },
+  3: { title: 'Expression and social life', wants: 'you to open up and express yourself',
+    text: 'In a 3 year the shoots come up. It’s read as a lighter, more social and creative year: talking, making things, being seen. The watch-out is spreading yourself across too many things.' },
+  4: { title: 'Hard work and foundations', wants: 'steady graft and routine',
+    text: 'A 4 year is time to build properly: structure, routines, graft. It’s read as a year where effort pays off slowly and shortcuts don’t. Not glamorous, but it’s where the slab gets poured for the rest of the cycle.' },
+  5: { title: 'Change and freedom', wants: 'flexibility and a willingness to change',
+    text: 'A 5 year is the halfway point of the cycle, and the shake-up. It’s read as a year of movement: travel, change, new experiences and the unexpected. Good for breaking out of ruts, bad for rigid plans.' },
+  6: { title: 'Home and responsibility', wants: 'you to put others first',
+    text: 'In a 6 year things swing back towards home, family and the people who rely on you. It’s read as a year of commitments, looking after others, and putting your house in order, literally and otherwise.' },
+  7: { title: 'Reflection and study', wants: 'quiet and reflection',
+    text: 'A 7 year is a quieter, inward year. It’s read as time to step back, study, think and work out what you really want. Numerology says don’t force big outward moves in a 7 year. It’s for understanding, not pushing.' },
+  8: { title: 'Harvest and power', wants: 'ambition and taking charge',
+    text: 'An 8 year is the payoff year. It’s read as when the work of the cycle turns into results: career, money, recognition, authority. It’s also said to be when you find out what you’ve actually built.' },
+  9: { title: 'Completion and letting go', wants: 'you to let go and finish things off',
+    text: 'A 9 year is the end of the cycle. It’s read as a year for finishing, clearing out and letting go of whatever has run its course, to make room for the next 1 year. Endings in a 9 year are treated as normal housekeeping, not failure.' }
+};
+var CYCLE_WHY = 'Numerology sees life running in nine-year cycles, a bit like seasons. Your Personal Year swaps your birth year for the current year, so it tells you where you are in that cycle right now. A handy way to think of it: your Life Path is the climate you live in, and your Personal Year is this year’s weather.';
+var FAMILY = { 1: 'a', 5: 'a', 7: 'a', 2: 'b', 4: 'b', 8: 'b', 3: 'c', 6: 'c', 9: 'c' };
+var FAMILY_NAME = { a: 'independent, head-first numbers (1, 5, 7)', b: 'practical, steady numbers (2, 4, 8)', c: 'creative, people-focused numbers (3, 6, 9)' };
+var FAMILY_WHY = 'Numerologists traditionally sort 1 to 9 into three families that get along: 1, 5 and 7 (independent), 2, 4 and 8 (practical), and 3, 6 and 9 (creative). Numbers in the same family are read as working together easily. Numbers from different families are read as pulling in different directions.';
+function an(n, cap) { var w = (n === 8 || n === 11 || n === 18) ? 'an' : 'a'; return cap ? w[0].toUpperCase() + w.slice(1) : w; }
+function rootNum(n) { return n === 11 ? 2 : n === 22 ? 4 : n === 33 ? 6 : n; }
+function masterNote(n) { return n > 9 ? ' (Master numbers are compared at their root: ' + n + ' → ' + rootNum(n) + '.)' : ''; }
+
+// How a Personal Year (or Month) plays against the Life Path
+function yearVsLifePath(lp, py) {
+  var r = rootNum(lp), fa = FAMILY[r], fb = FAMILY[py];
+  if (r === py) return { kind: 'Doubled up', text: 'Your Life Path is ' + an(lp) + ' ' + lp + ' and this is ' + an(py) + ' ' + py + ' year, so the year’s theme matches your natural setting. Numerologists read that as a year where you’re very much in your element. The catch: your usual blind spots get louder too.' + masterNote(lp) };
+  if (fa === fb) return { kind: 'A good fit', text: 'Life Path ' + lp + ' and ' + an(py) + ' ' + py + ' year are in the same family, the ' + FAMILY_NAME[fa] + '. So numerologists read this year’s theme as working with your natural style, not against it. As a ' + NUM_SHORT[lp] + ', what the year asks for (' + PY_THEME[py].wants + ') should come fairly easily.' + masterNote(lp) };
+  return { kind: 'A stretch', text: 'Your Life Path ' + lp + ' belongs to the ' + FAMILY_NAME[fa] + ', while ' + an(py) + ' ' + py + ' year belongs to the ' + FAMILY_NAME[fb] + '. Numerologists read that as a year that asks you to work outside your comfort zone. As a natural ' + NUM_SHORT[lp] + ', a year that wants ' + PY_THEME[py].wants + ' can feel like driving someone else’s car: doable, just not automatic. That’s also where the growth is supposed to be.' + masterNote(lp) };
+}
+function cyclePosition(py, year) {
+  var start = year - (py - 1), next = year + (10 - py);
+  if (py === 1) return 'This is year 1 of 9: the start of a fresh cycle. The next one begins in ' + next + '.';
+  return 'This is year ' + py + ' of 9. Your current cycle started in ' + start + ' (your last 1 year), and the next fresh start is ' + next + '.';
+}
+// Pairs on the Numbers screen
+function numberPairs(lp, ex, so, pe) {
+  var out = [];
+  if (ex) {
+    var same = FAMILY[rootNum(lp.n)] === FAMILY[rootNum(ex.n)], dbl = rootNum(lp.n) === rootNum(ex.n);
+    out.push({ title: 'Your road vs your toolkit', sub: 'Life Path ' + lp.n + ' and Expression ' + ex.n,
+      text: dbl ? 'They’re the same number, so numerologists read your talents as built for exactly the road you’re on. Things can come very naturally. Just watch for leaning too hard on the one trick.'
+        : same ? 'They’re in the same family, so numerologists read your natural talents (the ' + NUM_SHORT[ex.n] + ') as well suited to your life’s road (the ' + NUM_SHORT[lp.n] + ').'
+        : 'They’re from different families. Numerologists read that as a life where you use your talents (the ' + NUM_SHORT[ex.n] + ') in unexpected ways, or have to build up the skills your road (the ' + NUM_SHORT[lp.n] + ') calls for.' });
+  }
+  if (so && pe) {
+    var s2 = FAMILY[rootNum(so.n)] === FAMILY[rootNum(pe.n)];
+    out.push({ title: 'Inside vs outside', sub: 'Soul Urge ' + so.n + ' and Personality ' + pe.n,
+      text: s2 ? 'What you want deep down (the ' + NUM_SHORT[so.n] + ') and how you come across (the ' + NUM_SHORT[pe.n] + ') are in the same family. Numerologists read that as people generally reading you right.'
+        : 'What you want deep down (the ' + NUM_SHORT[so.n] + ') and how you come across (the ' + NUM_SHORT[pe.n] + ') come from different families. Numerologists say that can mean people misread you: they see the ' + NUM_SHORT[pe.n] + ' and miss the ' + NUM_SHORT[so.n] + ' underneath.' });
+  }
+  return out;
+}
+
 // ---------- forecast ----------
 var DUR = { sun: 'about a month', mercury: 'about three weeks', venus: 'about a month', mars: 'about six weeks', jupiter: 'about a year', saturn: 'two to three years', uranus: 'about seven years', neptune: 'about fourteen years', pluto: 'a decade or more' };
 var RX_DUR = { mercury: 'about three weeks', venus: 'about six weeks', mars: 'about two and a half months', jupiter: 'about four months', saturn: 'about four and a half months', uranus: 'about five months', neptune: 'about five months', pluto: 'about five months' };
 var SPEED_NOTE = { sun: "Fast-moving, so it's a day or two thing.", mercury: "Fast-moving, so it's a day or two thing.", venus: "Fast-moving, so it's a day or two thing.", mars: 'Mars takes a few days to pass through.', jupiter: 'Jupiter is slow, so this is a theme for a few weeks.', saturn: 'Saturn is slow, so this is a theme for a few weeks, and can come back around.', uranus: 'Very slow. This can build for months and hit exact more than once.', neptune: 'Very slow. This can build for months and hit exact more than once.', pluto: 'Very slow. This can build for months and hit exact more than once.' };
 var FAST = { sun: 1, mercury: 1, venus: 1 };
 var SLOW = { jupiter: 1, saturn: 1, uranus: 1, neptune: 1, pluto: 1 };
+
+// ---------- chart context helpers ----------
+var HOUSE_SHORT = [null, 'you and your body', 'money and possessions', 'communication and your local patch', 'home and family', 'creativity, fun and romance', 'work routines and health', 'partners', 'shared money and big changes', 'travel, study and beliefs', 'career and reputation', 'friends and future plans', 'rest and the hidden stuff'];
+var SIGN_RULER = ['mars', 'venus', 'mercury', 'moon', 'sun', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'saturn', 'jupiter'];
+var MODERN_RULES = { uranus: [10], neptune: [11], pluto: [7] };
+var ORB_W = { sun: 1, mercury: 1, venus: 1, mars: 1, jupiter: 1.5, saturn: 1.5, uranus: 1, neptune: 1, pluto: 1 };
+var SPEED_W = { sun: 1, mercury: 1, venus: 1, mars: 2, jupiter: 2, saturn: 3, uranus: 3, neptune: 3, pluto: 3 };
+var TARGET_W = { sun: 2, moon: 2, asc: 2, mc: 2 };
+var WEIGH_WHY = 'Astrologers weigh a transit two ways: how slow the moving planet is (slow means it hangs around, so it counts for more), and how personal the point it hits is (your Sun, Moon, Rising and Midheaven are the most personal).';
+
+function natalWhere(chart, id) {
+  var P = PLANETS[id], S = SIGNS[signOf(chart.pos[id])];
+  if (id === 'asc') return 'your Rising point in ' + S.name + ' (how you come across)';
+  if (id === 'mc') return 'your Midheaven in ' + S.name + ' (career and reputation)';
+  return 'your ' + P.name + ' in ' + S.name + (chart.hasTime ? ', in your ' + ord(chart.houses[id]) + ' house (' + HOUSE_SHORT[chart.houses[id]] + ')' : '');
+}
+function natalLands(chart, id) {
+  var P = PLANETS[id], h = chart.hasTime && id !== 'asc' && id !== 'mc' ? chart.houses[id] : 0;
+  return 'This lands on ' + natalWhere(chart, id) + ', so astrologers would expect it to show up around your ' + P.theme + (h ? ', and in the ' + HOUSE_SHORT[h] + ' side of life' : '') + '.';
+}
+function nearbyNatal(chart, lon, orb) {
+  return chart.points.filter(function (id) { return sepDeg(chart.pos[id], lon) <= orb; });
+}
+function listNames(ids) {
+  var n = ids.map(function (id) { return id === 'asc' ? 'Rising point' : id === 'mc' ? 'Midheaven' : PLANETS[id].name; });
+  return n.length < 2 ? n.join('') : n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1];
+}
+function fmtShort(ms) { return new Date(ms).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }); }
+
+// Natal card extras: connections, who's steering it, what it has a say in
+function chartLinks(chart, id) {
+  var out = {};
+  var aps = chart.aspects.filter(function (a) { return (a.a === id || a.b === id) && a.orb <= 6; }).slice(0, 5);
+  if (aps.length) out.connections = aps.map(function (a) {
+    var o = a.a === id ? a.b : a.a, O = PLANETS[o];
+    return '<b>' + a.asp.name + ' ' + (o === 'asc' ? 'Rising' : O.name) + ':</b> ' + a.asp.flavour + ' with your ' + O.theme + (a.orb < 2 ? ' (tight, so it counts for more)' : '') + '.';
+  }).join('<br>');
+  var si = signOf(chart.pos[id]), rid = SIGN_RULER[si], R = PLANETS[rid], S = SIGNS[si];
+  var rWhere = natalWhere(chart, rid).replace(/^your (\S+) in /, 'your $1 sits in ');
+  if (id === 'asc') out.ruler = 'The planet that rules your Rising sign is called your <b>chart ruler</b>. ' + S.name + ' is ruled by ' + R.name + ', and ' + rWhere + ', so astrologers treat ' + R.name + ' as the captain of your whole chart. Wherever it sits is read as where your life tends to steer.';
+  else if (id === 'mc') out.ruler = S.name + ' is ruled by ' + R.name + ', and ' + rWhere + '. Astrologers look there to see how your career and public life actually play out.';
+  else if (rid === id) out.ruler = P0(id) + ' is in its own sign, so it answers to no one. Astrologers read that as its energy coming through pure and undiluted.';
+  else out.ruler = S.name + ' is ruled by ' + R.name + ', and ' + rWhere + '. Astrologers say a planet takes its lead from the ruler of the sign it’s in, so ' + R.name + ' is read as steering how your ' + PLANETS[id].name + ' plays out.';
+  if (chart.hasTime && id !== 'asc' && id !== 'mc') {
+    var ruled = []; SIGN_RULER.forEach(function (r, i) { if (r === id) ruled.push(i); });
+    (MODERN_RULES[id] || []).forEach(function (i) { ruled.push(i); });
+    var hs = [];
+    for (var h = 0; h < 12; h++) if (ruled.indexOf(signOf(chart.cusps[h])) >= 0) hs.push(h + 1);
+    if (ruled.length) out.rules = P0(id) + ' rules ' + ruled.map(function (i) { return SIGNS[i].name; }).join(' and ') + '. ' +
+      (hs.length ? 'In your chart ' + (hs.length > 1 ? 'those signs sit' : 'that sign sits') + ' on the start of your ' + hs.map(ord).join(' and ') + ' house' + (hs.length > 1 ? 's' : '') + ', so astrologers say ' + PLANETS[id].name + ' has a say in ' + hs.map(function (x) { return HOUSE_SHORT[x]; }).join(', and ') + '.'
+        : 'Neither starts one of your houses in this house system, so its say is mostly through where it sits.');
+  }
+  return out;
+}
+function P0(id) { return PLANETS[id].name; }
 
 function forecast(chart, startMs, days) {
   var N = days + 2, P = [];
@@ -661,6 +796,8 @@ function forecast(chart, startMs, days) {
   function wrap(x) { return ((x % 360) + 540) % 360 - 180; }
   function at(i, frac) { return startMs + (i + frac) * 86400000; }
   function houseTxt(lon) { return chart.hasTime ? Astro.houseOf(lon, chart.cusps) : 0; }
+  function B(t) { return '<b>' + t + '</b>'; }
+  var series = {};
   // aspects to natal
   TR.forEach(function (tp) {
     targets.forEach(function (np) {
@@ -668,49 +805,88 @@ function forecast(chart, startMs, days) {
       ASPECTS.forEach(function (A) {
         var tg = A.angle === 0 || A.angle === 180 ? [A.angle] : [A.angle, 360 - A.angle];
         tg.forEach(function (t) {
+          function f(j) { return wrap(P[j][tp] - nl - t); }
           for (var i = 0; i < N - 1; i++) {
-            var f0 = wrap(P[i][tp] - nl - t), f1 = wrap(P[i + 1][tp] - nl - t);
+            var f0 = f(i), f1 = f(i + 1);
             if (Math.abs(f0) < 20 && Math.abs(f1) < 20 && ((f0 <= 0 && f1 > 0) || (f0 >= 0 && f1 < 0))) {
               var fr = f0 / (f0 - f1), ms = at(i, fr);
               var TPl = PLANETS[tp], NPl = PLANETS[np], tl = Astro.norm(nl + t);
               var tier = SLOW[tp] ? (A.key === 'sext' ? 'mid' : 'major') : (FAST[tp] ? 'all' : (A.key === 'sext' ? 'all' : 'mid'));
-              ev.push({ ms: ms, tag: 'Planets', tier: tier, glyph: glyph(tp),
-                chip: A.name + ' · ' + A.angle + '°',
+              // in-orb window
+              var ow = ORB_W[tp], a = i, b = i + 1;
+              while (a > 0 && Math.abs(f(a - 1)) < ow) a--;
+              while (b < N - 1 && Math.abs(f(b + 1)) < ow) b++;
+              var winTxt = (a === 0 ? 'Already building' : 'Building from ' + fmtShort(at(a, 0))) + ', exact ' + fmtShort(ms) + ', ' + (b === N - 1 ? 'and still in play at the end of this forecast.' : 'fading by ' + fmtShort(at(b, 0)) + '.');
+              var score = SPEED_W[tp] + (TARGET_W[np] || 1) + (A.key === 'sext' || A.key === 'tri' ? 0 : 1);
+              var weight = score >= 5 ? 'Big one' : score >= 3 ? 'Medium' : 'Minor';
+              var th = houseTxt(P[i][tp]);
+              var e = { ms: ms, tag: 'Planets', tier: tier, glyph: glyph(tp), chip: A.name + ' · ' + weight,
                 title: TPl.name + ' ' + A.verb + ' your ' + NPl.name,
                 read: 'Astrologers would read this as ' + A.flavour + ' between ' + TPl.theme + ' and your ' + NPl.theme + '. ' + SPEED_NOTE[tp],
-                why: TPl.name + ' will be at ' + degIn(tl) + ' ' + SIGNS[signOf(tl)].name + ', exactly ' + A.angle + '° from where your ' + NPl.name + ' sat at birth (' + degIn(nl) + ' ' + SIGNS[signOf(nl)].name + '). ' + A.why });
+                whyParts: [
+                  [B('Where it lands in your chart'), natalLands(chart, np) + (th ? ' ' + TPl.name + ' itself is passing through your ' + ord(th) + ' house (' + HOUSE_SHORT[th] + '), so that’s where astrologers would say the push is coming from.' : '')],
+                  [B('The angle'), TPl.name + ' will be at ' + degIn(tl) + ' ' + SIGNS[signOf(tl)].name + ', exactly ' + A.angle + '° from where your ' + NPl.name + ' sat at birth. ' + A.why],
+                  [B('How long it lasts'), winTxt],
+                  [B('How much it counts: ' + weight.toLowerCase()), WEIGH_WHY + ' This one is ' + (SPEED_W[tp] === 3 ? 'a slow planet' : SPEED_W[tp] === 2 ? 'a medium-speed planet' : 'a fast planet') + ' hitting ' + (TARGET_W[np] ? 'one of your most personal points' : 'one of your other planets') + '.']
+                ] };
+              var key = tp + '|' + np + '|' + t;
+              (series[key] = series[key] || []).push(e);
+              ev.push(e);
             }
           }
         });
       });
     });
   });
+  Object.keys(series).forEach(function (k) {
+    var s = series[k], grp = [];
+    s.forEach(function (e, i) {
+      if (i === 0 || e.ms - s[i - 1].ms > 250 * 86400000) grp.push([]);
+      grp[grp.length - 1].push(e);
+    });
+    grp.forEach(function (g) {
+      if (g.length < 2) return;
+      g.forEach(function (e, i) {
+        e.chip += ' · pass ' + (i + 1) + ' of ' + g.length;
+        e.whyParts.splice(3, 0, [B('Pass ' + (i + 1) + ' of ' + g.length), 'Retrograde makes planets cross the same spot more than once: forward, back, then forward for good. Astrologers read the passes as a story: the first raises the issue, the middle one revisits it, and the last settles it.' + (i === g.length - 1 ? ' This is the settling one.' : '')]);
+      });
+    });
+  });
+  ev.forEach(function (e) { if (e.whyParts) { e.why = e.whyParts.map(function (p) { return p[0] + p[1]; }).join('<br><br>'); delete e.whyParts; } });
   // ingresses and stations
   TR.forEach(function (tp) {
     for (var i = 0; i < N - 1; i++) {
       var s0 = signOf(P[i][tp]), s1 = signOf(P[i + 1][tp]);
       if (s0 !== s1) {
-        var TPl = PLANETS[tp], S = SIGNS[s1], h = houseTxt(s1 * 30 + 0.01);
+        var TPl = PLANETS[tp], S = SIGNS[s1];
         var goingBack = wrap(P[i + 1][tp] - P[i][tp]) < 0;
-        if (goingBack) { S = SIGNS[s1]; }
         var bound = goingBack ? s0 * 30 : s1 * 30;
         var f0 = wrap(P[i][tp] - bound), f1 = wrap(P[i + 1][tp] - bound), fr = f0 / (f0 - f1);
-        h = houseTxt(P[i + 1][tp]);
+        var h = houseTxt(P[i + 1][tp]);
+        var inSign = chart.points.filter(function (id) { return signOf(chart.pos[id]) === s1; });
+        var why = [B('Why the sign matters') + 'Planets take on the flavour of the sign they pass through. ' + S.name + ' is ' + S.el + ' (' + ELEMENT[S.el] + ') and ' + S.mode + ' (' + MODE[S.mode] + ').'];
+        if (h) why.push(B('Where it lands in your chart') + 'It’s entering your ' + ord(h) + ' house, which covers ' + HOUSES[h].area + '. ' + HOUSES[h].why);
+        if (inSign.length) why.push(B('Who it meets on the way') + 'You have your ' + listNames(inSign) + ' in ' + S.name + ', so over ' + DUR[tp] + ' ' + TPl.name + ' will pass over ' + (inSign.length > 1 ? 'them' : 'it') + ', and astrologers would read ' + (inSign.length > 1 ? 'those parts' : 'that part') + ' of your chart as getting a nudge.');
+        if (SIGN_RULER[s1] === tp) why.push(B('Home ground') + TPl.name + ' rules ' + S.name + ', so astrologers say it’s at full strength while it’s here.');
         ev.push({ ms: at(i, fr), tag: 'Planets', tier: SLOW[tp] ? 'major' : (FAST[tp] && tp !== 'sun' ? 'all' : 'mid'), glyph: glyph(tp),
           chip: 'Changes sign',
           title: TPl.name + (goingBack ? ' slips back into ' : ' moves into ') + S.name,
-          read: h ? "That's your " + ord(h) + ' house, so astrologers would read your ' + TPl.theme + ' as turning towards ' + HOUSES[h].area + ' for ' + DUR[tp] + '.'
+          read: h ? 'That’s your ' + ord(h) + ' house, so astrologers would read your ' + TPl.theme + ' as turning towards ' + HOUSES[h].area + ' for ' + DUR[tp] + '.'
             : 'Astrologers would read ' + TPl.theme + ' as taking on ' + (S.el === 'earth' || S.el === 'air' ? 'an ' : 'a ') + S.el + ' flavour (' + S.style + ') for ' + DUR[tp] + '.',
-          why: 'Planets take on the flavour of the sign they pass through. ' + S.name + ' is ' + S.el + ' (' + ELEMENT[S.el] + ') and ' + S.mode + ' (' + MODE[S.mode] + ').' + (h ? ' ' + HOUSES[h].why : '') });
+          why: why.join('<br><br>') });
       }
       if (tp !== 'sun' && i > 0) {
         var d0 = wrap(P[i][tp] - P[i - 1][tp]), d1 = wrap(P[i + 1][tp] - P[i][tp]);
         if ((d0 > 0 && d1 <= 0) || (d0 < 0 && d1 >= 0)) {
-          var rx = d1 <= 0, TP2 = PLANETS[tp], sg = SIGNS[signOf(P[i][tp])].name;
-          ev.push({ ms: at(i, 0), tag: 'Planets', tier: 'major', glyph: glyph(tp), chip: rx ? 'Retrograde' : 'Direct',
+          var rx = d1 <= 0, TP2 = PLANETS[tp], sg = SIGNS[signOf(P[i][tp])].name, sh = houseTxt(P[i][tp]);
+          var near = nearbyNatal(chart, P[i][tp], 3);
+          var sw = [B('What’s actually happening') + TP2.name + ' doesn’t really change direction. Earth and ' + TP2.name + ' are both moving, and from where we stand it looks like it ' + (rx ? 'starts sliding backwards' : 'stops and heads forwards again') + ' against the stars, like a car you pass on the highway. Astrologers read that apparent going-back as review, delays and do-overs.'];
+          if (sh) sw.push(B('Where it lands in your chart') + 'It ' + (rx ? 'turns' : 'goes direct') + ' in your ' + ord(sh) + ' house, so the review is read as being about ' + HOUSES[sh].area + '.');
+          if (near.length) sw.push(B('Parked on your ' + listNames(near)) + 'A planet looks like it’s standing still when it changes direction, and this one stops within 3° of your ' + listNames(near) + '. Astrologers treat a planet parked on one of yours as extra potent.');
+          ev.push({ ms: at(i, 0), tag: 'Planets', tier: 'major', glyph: glyph(tp), chip: (rx ? 'Retrograde' : 'Direct') + (near.length ? ' · on your ' + listNames(near) : ''),
             title: TP2.name + (rx ? ' turns retrograde in ' : ' goes direct in ') + sg,
-            read: rx ? "A classic 'slow down and double-check' stretch for " + TP2.theme + '. It lasts ' + RX_DUR[tp] + '.' : 'Things tied to ' + TP2.theme + ' are read as moving forward again after the review period.',
-            why: TP2.name + " doesn't really change direction. Earth and " + TP2.name + ' are both moving, and from where we stand it looks like it ' + (rx ? 'starts sliding backwards' : 'stops and heads forwards again') + ' against the stars, like a car you pass on the highway. Astrologers read that apparent going-back as review, delays and do-overs.' });
+            read: rx ? 'A classic ‘slow down and double-check’ stretch for ' + TP2.theme + '. It lasts ' + RX_DUR[tp] + '.' : 'Things tied to ' + TP2.theme + ' are read as moving forward again after the review period.',
+            why: sw.join('<br><br>') });
         }
       }
     }
@@ -724,21 +900,36 @@ function forecast(chart, startMs, days) {
         var lon = t === 0 ? p.sun : p.moon, S = SIGNS[signOf(lon)], h = houseTxt(lon);
         var nd = Math.min(sepDeg(p.sun, p.node), sepDeg(p.sun, p.node + 180));
         var ecl = t === 0 ? nd < 15.4 : nd < 11.5;
+        var near = nearbyNatal(chart, lon, ecl ? 5 : 3);
         var nm = ecl ? (t === 0 ? 'Solar eclipse' : 'Lunar eclipse') : (t === 0 ? 'New Moon' : 'Full Moon');
-        ev.push({ ms: ms, tag: 'Moon', tier: ecl ? 'major' : 'mid', glyph: t === 0 ? '●' : '○', chip: ecl ? 'Eclipse' : (t === 0 ? 'New Moon' : 'Full Moon'),
+        var w = [B('Why they say that') + (ecl ? 'An eclipse happens when a New or Full Moon lands near the point where the Moon’s path crosses the Sun’s. Ancient skywatchers saw the light going out as a sign of big change, and the idea stuck. Whether you can see it depends on where you are.'
+          : (t === 0 ? 'The New Moon is when the Moon sits between us and the Sun, the start of its monthly cycle, so it has always been read as a reset.' : 'The Full Moon is when Earth sits between the Sun and the Moon, so the Moon is fully lit, halfway through its cycle. Hence culmination.'))];
+        if (h) w.push(B('Where it lands in your chart') + 'Your ' + ord(h) + ' house: ' + HOUSES[h].area + '. ' + HOUSES[h].why);
+        if (t === 180 && h) { var oh = houseTxt(p.sun); w.push(B('The see-saw') + 'At a Full Moon the Sun sits opposite, in your ' + ord(oh) + ' house (' + HOUSE_SHORT[oh] + '). Astrologers read it as a balancing act between ' + HOUSE_SHORT[h] + ' and ' + HOUSE_SHORT[oh] + '.'); }
+        if (near.length) w.push(B('Personal for you') + 'It lands within a few degrees of your ' + listNames(near) + ', so astrologers would read this one as hitting closer to home than usual.');
+        w.push(B('How much it counts') + (ecl ? 'Eclipses are the big ones: their effects are said to play out over about six months.' : 'New and Full Moons happen every month, so on their own they’re minor. They count for more when they land on one of your planets.'));
+        ev.push({ ms: ms, tag: 'Moon', tier: ecl ? 'major' : (near.length ? 'mid' : 'all'), glyph: t === 0 ? '●' : '○', chip: (ecl ? 'Eclipse' : (t === 0 ? 'New Moon' : 'Full Moon')) + (near.length ? ' · on your ' + listNames(near) : ''),
           title: nm + ' in ' + S.name + (h ? ' · ' + ord(h) + ' house' : ''),
           read: (ecl ? 'Eclipses are read as turning points, a supercharged ' + (t === 0 ? 'New' : 'Full') + ' Moon. ' : '') + (t === 0 ? 'Read as a fresh start' : 'Read as a peak, when things come to a head') + (h ? ' for ' + HOUSES[h].area + '.' : ', with a ' + S.name + ' flavour: ' + S.style + '.'),
-          why: ecl ? "An eclipse happens when a New or Full Moon lands near the point where the Moon's path crosses the Sun's. Ancient skywatchers saw the light going out as a sign of big change, and the idea stuck. Whether you can see it depends on where you are."
-            : (t === 0 ? 'The New Moon is when the Moon sits between us and the Sun, the start of its monthly cycle, so it has always been read as a reset.' : 'The Full Moon is when Earth sits between the Sun and the Moon, so the Moon is fully lit, halfway through its cycle. Hence culmination.') });
+          why: w.join('<br><br>') });
       }
     });
     // solar return
     var g0 = wrap(P[i].sun - chart.pos.sun), g1 = wrap(P[i + 1].sun - chart.pos.sun);
     if (g0 <= 0 && g1 > 0 && Math.abs(g0) < 5) {
-      var srMs = at(i, g0 / (g0 - g1));
+      var srMs = at(i, g0 / (g0 - g1)), srJd = Astro.jdFromMs(srMs), srp = Astro.positions(srJd);
+      var sw2 = [B('What it is') + 'It’s the exact moment the Sun gets back to where it was when you were born (' + degIn(chart.pos.sun) + ' ' + SIGNS[signOf(chart.pos.sun)].name + '). That isn’t always on your birthday itself. Astrologers draw up a whole new chart for that moment and read it as the theme-setter for your next 12 months.'];
+      var srMoon = SIGNS[signOf(srp.moon)];
+      sw2.push(B('The year’s mood: Moon in ' + srMoon.name) + 'The Moon’s sign in your solar return is read as the emotional tone of the year: ' + srMoon.style + '.');
+      if (chart.hasTime) {
+        var sra = Astro.angles(srJd, chart.profile.lat, chart.profile.lon), srAsc = SIGNS[signOf(sra.asc)];
+        var srHc = Astro.cusps('placidus', sra, chart.profile.lat).cusps, sunH = Astro.houseOf(srp.sun, srHc);
+        sw2.push(B('The year’s front door: ' + srAsc.name + ' Rising') + 'Worked out for your birthplace. The Rising sign of the solar return is read as how the year comes at you, and how you come at it: ' + srAsc.style + '.');
+        sw2.push(B('Where the Sun sits: ' + ord(sunH) + ' house') + 'In the solar return chart, the Sun’s house is read as the main focus for the year: ' + HOUSES[sunH].area + '.');
+      }
       ev.push({ ms: srMs, tag: 'Planets', tier: 'major', glyph: glyph('sun'), chip: 'Solar return', title: 'Your solar return',
-        read: 'Your birthday chart for the year ahead. Astrologers treat it as the theme-setter for the next 12 months.',
-        why: "It's the exact moment the Sun gets back to where it was when you were born (" + degIn(chart.pos.sun) + ' ' + SIGNS[signOf(chart.pos.sun)].name + '). That isn’t always on your birthday itself.' });
+        read: 'Your birthday chart for the year ahead. Astrologers treat it as the theme-setter for the next 12 months.' + (chart.hasTime ? '' : ' (Add a birth time for the full version.)'),
+        why: sw2.join('<br><br>') });
     }
   }
   // numerology cycle changes
@@ -748,12 +939,16 @@ function forecast(chart, startMs, days) {
     if (mDate.getTime() > endMs) break;
     var yr = mDate.getFullYear(), mo = mDate.getMonth() + 1;
     var py = personalYear(chart.profile.date, yr), pm = personalMonth(py.n, mo);
+    var lpN = lifePath(chart.profile.date, true).n;
     if (mo === 1) {
-      ev.push({ ms: mDate.getTime(), tag: 'Numbers', tier: 'major', glyph: '#', chip: 'Personal Year', title: 'Personal Year ' + py.n + ' begins',
-        read: 'Numerology reads a ' + py.n + ' year as: ' + NUM_MEAN[py.n].toLowerCase() + '.', why: py.working.replace('\n', '. ') + '.' });
+      var fit = yearVsLifePath(lpN, py.n);
+      ev.push({ ms: mDate.getTime(), tag: 'Numbers', tier: 'major', glyph: '#', chip: 'Personal Year', title: 'Personal Year ' + py.n + ' begins: ' + PY_THEME[py.n].title.toLowerCase(),
+        read: PY_THEME[py.n].text + ' ' + fit.kind + ' for your Life Path ' + lpN + '.',
+        why: '<b>Why it matters</b>' + CYCLE_WHY + '<br><br><b>How it plays with your Life Path: ' + fit.kind.toLowerCase() + '</b>' + fit.text + '<br><br><b>Where you are</b>' + cyclePosition(py.n, yr) + '<br><br><b>The working</b>' + py.working.replace('\n', '. ') + '.' });
     }
-    ev.push({ ms: mDate.getTime() + 1, tag: 'Numbers', tier: 'mid', glyph: '#', chip: 'Personal Month', title: 'Personal Month ' + pm.n,
-      read: 'Numerology reads a ' + pm.n + ' month as: ' + NUM_MEAN[pm.n].toLowerCase() + '.', why: pm.working + '.' });
+    ev.push({ ms: mDate.getTime() + 1, tag: 'Numbers', tier: 'mid', glyph: '#', chip: 'Personal Month', title: 'Personal Month ' + pm.n + ': ' + PY_THEME[pm.n].title.toLowerCase(),
+      read: '' + an(pm.n, true) + ' ' + pm.n + ' month inside your ' + py.n + ' year: a touch of ' + PY_THEME[pm.n].title.toLowerCase() + ' within a bigger year of ' + PY_THEME[py.n].title.toLowerCase() + '.',
+      why: '<b>Why it matters</b>Personal Months run through the same 1 to 9 themes as years, just smaller. If the Personal Year is the season, the month is the week\u2019s forecast inside it.<br><br><b>What ' + an(pm.n) + ' ' + pm.n + ' month is about</b>' + 'Same flavour as ' + an(pm.n) + ' ' + pm.n + ' year, just for a few weeks: ' + PY_THEME[pm.n].title.toLowerCase() + '. It\u2019s read as a month that wants ' + PY_THEME[pm.n].wants + '.' + '<br><br><b>The working</b>' + pm.working + '.' });
   }
   ev = ev.filter(function (e) { return e.ms >= startMs && e.ms <= endMs; });
   ev.sort(function (a, b) { return a.ms - b.ms; });
@@ -976,29 +1171,52 @@ function moonToday(chart, nowMs) {
     ev.forEach(function (e) {
       var mLabel = fmtDate(e.ms, { month: 'long', year: 'numeric' });
       if (mLabel !== lastMonth) { out.push('<div class="month">' + mLabel + '</div>'); lastMonth = mLabel; }
-      out.push('<details class="ev"><summary><div class="date"><span class="m">' + fmtDate(e.ms, { month: 'short' }) + '</span><span class="d">' + new Date(e.ms).getDate() + '</span></div><div class="ev-body"><span class="tag ' + e.tag + '">' + e.chip + '</span><span class="ev-title">' + e.title + '</span><span class="ev-read">' + e.read + '</span></div><span class="plus" aria-hidden="true">+</span></summary><div class="why"><b>Why they say that</b>' + e.why + '</div></details>');
+      out.push('<details class="ev"><summary><div class="date"><span class="m">' + fmtDate(e.ms, { month: 'short' }) + '</span><span class="d">' + new Date(e.ms).getDate() + '</span></div><div class="ev-body"><span class="tag ' + e.tag + '">' + e.chip + '</span><span class="ev-title">' + e.title + '</span><span class="ev-read">' + e.read + '</span></div><span class="plus" aria-hidden="true">+</span></summary><div class="why">' + (e.why.indexOf('<b>') === 0 ? '' : '<b>Why they say that</b>') + e.why + '</div></details>');
     });
-    out.push('<p class="small" style="margin:0">Dates are calculated from real planet positions and shown in your current local time.</p></div>');
+    out.push('<p class="small" style="margin:0">Dates are calculated from real planet positions and shown in your current local time. <button type="button" class="link" style="min-height:0" data-act="learn:weigh">How astrologers decide what counts</button></p></div>');
     return out.join('');
   }
 
-  function numCard(label, r, typeWhy) {
-    return '<div class="card num"><div class="num-head"><div class="big">' + r.n + '</div><div><div class="k">' + label + '</div><div class="m">' + NUM_MEAN[r.n] + '</div></div></div><div class="work"><b>How we got there: </b>' + esc(r.working) + '</div><div style="font-size:13.5px;color:var(--ink2)"><b style="color:var(--rust)">Why: </b>' + typeWhy + ' ' + NUM_WHY[r.n] + '</div></div>';
+  function sec(k, html) { return '<div style="font-size:13.5px;color:var(--ink2)"><b style="display:block;color:var(--rust);font-size:12px;text-transform:uppercase;letter-spacing:.8px">' + k + '</b>' + html + '</div>'; }
+  function numCard(label, r, typeWhy, extras, core) {
+    var d = NUM_DETAIL[r.n];
+    return '<div class="card num"><div class="num-head"><div class="big">' + r.n + '</div><div><div class="k">' + label + '</div><div class="m">' + (core ? NUM_MEAN[r.n] : (PY_THEME[r.n] ? PY_THEME[r.n].title : NUM_MEAN[r.n])) + '</div></div></div>' +
+      (core && d ? '<div class="grid2" style="gap:8px"><div class="work" style="white-space:normal"><b style="display:block">At its best</b>' + d.good + '</div><div class="work" style="white-space:normal"><b style="display:block">Watch out for</b>' + d.watch + '</div></div>' : '') +
+      (extras || []).map(function (x) { return sec(x[0], x[1]); }).join('') +
+      sec('Why this number means that', typeWhy + ' ' + NUM_WHY[r.n]) +
+      '<div class="work"><b>How we got there: </b>' + esc(r.working) + '</div></div>';
   }
   function screenNumbers() {
     var p = active(); if (!p) return '';
-    var s = store.settings, out = ['<div class="stack"><div><h1>' + esc(p.name.split(/\s+/)[0]) + '’s numbers</h1><p class="lede">Every number shows the working. No mystery maths.</p></div>'];
+    var s = store.settings, out = ['<div class="stack"><div><h1>' + esc(p.name.split(/\s+/)[0]) + '\u2019s numbers</h1><p class="lede">What each number means, why, how they fit together, and the working behind every one.</p></div>'];
     out.push('<div class="seg" role="group" aria-label="Numerology system" style="grid-template-columns:repeat(2,minmax(0,1fr))"><button type="button" aria-pressed="' + (s.numSys === 'pyth') + '" data-act="numsys:pyth">Pythagorean</button><button type="button" aria-pressed="' + (s.numSys === 'chaldean') + '" data-act="numsys:chaldean">Chaldean</button></div>');
-    out.push(numCard('Life Path', lifePath(p.date, s.masters), "Your birth date can never change, so numerology treats it as the main road you’re on."));
+    var lp = lifePath(p.date, s.masters);
     var ex = nameNumber(p.name, s.numSys, s.masters, 'all'), so = nameNumber(p.name, s.numSys, s.masters, 'vowels'), pe = nameNumber(p.name, s.numSys, s.masters, 'cons');
-    if (ex) out.push(numCard('Expression', ex, 'Every letter of your full birth name, read as your natural talents: the toolkit you came with.'));
-    if (so) out.push(numCard('Soul Urge', so, 'Just the vowels, the soft sounds inside the name, so they’re read as what you want deep down.'));
-    if (pe) out.push(numCard('Personality', pe, 'Just the consonants, the hard outer shell of the name, so they’re read as how other people see you.'));
     var yr = new Date().getFullYear(), py = personalYear(p.date, yr), pm = personalMonth(py.n, new Date().getMonth() + 1);
+    var nextPy = personalYear(p.date, yr + 1), fitNow = yearVsLifePath(lp.n, py.n), fitNext = yearVsLifePath(lp.n, nextPy.n);
     out.push('<h2>Right now</h2>');
-    out.push(numCard('Personal Year ' + yr, py, 'Your birthday plus the current year. It runs in a nine-year cycle, so it changes every 1 January.'));
-    out.push(numCard('Personal Month', pm, 'Your Personal Year plus the calendar month, a smaller cycle inside the bigger one.'));
-    out.push('<div class="note"><b>Why the two systems disagree</b><br>Pythagorean runs A = 1 to I = 9, then starts again at J. Chaldean is the older system. It gives letters values by their sound and never uses 9, which it treats as sacred. Different rules, different answers, and we’d rather show you both than pretend there’s one truth. Master numbers (11, 22, 33) can be switched on or off in Settings.</div></div>');
+    out.push(numCard('Personal Year ' + yr, py, 'Your birthday plus the current year. It runs in a nine-year cycle, so it changes every 1 January.', [
+      ['What ' + an(py.n) + ' ' + py.n + ' year is about', PY_THEME[py.n].text],
+      ['Why the year number matters', CYCLE_WHY],
+      ['How it plays with your Life Path ' + lp.n + ': ' + fitNow.kind.toLowerCase(), fitNow.text],
+      ['Where you are in the cycle', cyclePosition(py.n, yr)]
+    ]));
+    out.push(numCard('Personal Month', pm, 'Your Personal Year plus the calendar month, a smaller cycle inside the bigger one.', [
+      ['What it means', '' + an(pm.n, true) + ' ' + pm.n + ' month inside ' + an(py.n) + ' ' + py.n + ' year: a touch of ' + PY_THEME[pm.n].title.toLowerCase() + ' within a bigger year of ' + PY_THEME[py.n].title.toLowerCase() + '. If the year is the season, the month is the week\u2019s forecast inside it.']
+    ]));
+    out.push('<div class="card num"><div class="k">Coming up: ' + (yr + 1) + '</div><div class="m">Personal Year ' + nextPy.n + ': ' + PY_THEME[nextPy.n].title + '</div>' + sec('What to expect', PY_THEME[nextPy.n].text) + sec('With your Life Path ' + lp.n + ': ' + fitNext.kind.toLowerCase(), fitNext.text) + '</div>');
+    out.push('<h2>Your core numbers</h2>');
+    out.push(numCard('Life Path', lp, 'Your birth date can never change, so numerology treats it as the main road you\u2019re on.', [['What it\u2019s for', 'Your Life Path is the big one: the overall direction of your life, and the number everything else gets compared against, including your Personal Year.']], true));
+    if (ex) out.push(numCard('Expression', ex, 'Every letter of your full birth name, read as your natural talents: the toolkit you came with.', [], true));
+    if (so) out.push(numCard('Soul Urge', so, 'Just the vowels, the soft sounds inside the name, so they\u2019re read as what you want deep down.', [], true));
+    if (pe) out.push(numCard('Personality', pe, 'Just the consonants, the hard outer shell of the name, so they\u2019re read as how other people see you.', [], true));
+    var pairs = numberPairs(lp, ex, so, pe);
+    if (pairs.length) {
+      out.push('<h2>How your numbers fit together</h2>');
+      pairs.forEach(function (x) { out.push('<div class="card num"><div class="k">' + x.sub + '</div><div class="m">' + x.title + '</div><div style="font-size:13.5px;color:var(--ink2)">' + x.text + '</div></div>'); });
+      out.push('<div class="note"><b>Why some numbers \u2018get along\u2019</b><br>' + FAMILY_WHY + '</div>');
+    }
+    out.push('<div class="note"><b>Why the two systems disagree</b><br>Pythagorean runs A = 1 to I = 9, then starts again at J. Chaldean is the older system. It gives letters values by their sound and never uses 9, which it treats as sacred. Different rules, different answers, and we\u2019d rather show you both than pretend there\u2019s one truth. Master numbers (11, 22, 33) can be switched on or off in Settings.</div></div>');
     return out.join('');
   }
 
@@ -1045,6 +1263,11 @@ function moonToday(chart, nowMs) {
       '<div class="stack-s" style="gap:6px"><div class="sec-k a">What it means</div><div style="font-size:15px;line-height:1.55">' + cd.what + '</div></div>' +
       '<div class="whybox"><div class="sec-k r">Why they say that</div><div><b>' + cd.whyLabel + ': </b>' + cd.whyPlanet + '</div><div><b>' + (cd.whySignLabel || 'The sign') + ': </b>' + cd.whySign + '</div>' + (cd.dignity ? '<div><b>Home ground: </b>' + cd.dignity + '</div>' : '') + '</div>' +
       (cd.hasHouse ? '<div class="housebox"><div class="sec-k a">' + cd.houseTitle + '</div><div>Covers ' + cd.houseArea + '.</div><div style="color:var(--ink2)"><b>Why: </b>' + cd.houseWhy + '</div><button type="button" class="link" data-act="learn:houses">Lesson: why are there 12 houses?</button></div>' : '') +
+      (cd.links && (cd.links.connections || cd.links.ruler || cd.links.rules) ? '<div class="housebox"><div class="sec-k a">How it fits the rest of your chart</div>' +
+        (cd.links.ruler ? '<div><b>Who\u2019s steering it: </b>' + cd.links.ruler + '</div>' : '') +
+        (cd.links.rules ? '<div><b>What it has a say in: </b>' + cd.links.rules + '</div>' : '') +
+        (cd.links.connections ? '<div><b>Its connections</b><br>' + cd.links.connections + '</div>' : '') +
+        '<button type="button" class="link" data-act="learn:ruler">Lesson: who steers who in a chart</button></div>' : '') +
       (cd.retro ? '<div class="note">' + cd.retro + '</div>' : '') +
       '<div class="stack-s" style="gap:6px"><div class="sec-k m">Keep in mind</div><div style="font-size:14px;color:var(--ink2)">' + cd.keep + '</div></div>' +
       '</div></div>';
