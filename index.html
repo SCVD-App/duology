@@ -191,6 +191,17 @@ footer.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
 .report .r-foot{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
 .r-entry{padding:16px;display:flex;flex-direction:column;gap:8px}
 .print-only{display:none}
+.r-glance{display:flex;flex-direction:column;gap:12px}
+.r-chart{display:flex;flex-direction:column;gap:12px}
+.r-wheel svg{width:100%;max-width:340px;height:auto;display:block;margin:0 auto}
+.r-tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.r-tbl th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);padding:6px 6px 6px 0;border-bottom:1px solid var(--line2)}
+.r-tbl td{padding:6px 6px 6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.r-tbl small{color:var(--muted);font-size:11.5px}
+.r-tbl .g{color:var(--accent)}
+.r-num td.n{font-family:var(--serif);font-size:22px;font-weight:600;padding-right:10px;line-height:1.1}
+.r-num td.w{font-size:12px;color:var(--ink2);white-space:pre-line;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.report .r-note{font-size:12px;color:var(--muted);margin:0}
 .r-cta{border:1.5px solid #2E3A8C;border-radius:10px;padding:12px 14px;font-size:11pt;line-height:1.5;margin-top:10px;break-inside:avoid}
 .r-entry b.t{font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.2}
 @media print{
@@ -201,6 +212,15 @@ footer.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
   .print-only{display:block!important}
   .r-foot{display:none!important}
   .r-letter{margin-bottom:4mm}
+  .r-chart{flex-direction:column;align-items:stretch;gap:5mm}
+  .r-wheel{display:flex;justify-content:center;padding:2mm 0 1mm;break-after:page}
+  .r-wheel svg{width:128mm;max-width:128mm}
+  .r-chart .r-tbl{font-size:9.5pt}
+  .r-tbl td,.r-tbl th{padding:0.9mm 2mm 0.9mm 0}
+  .r-glance h2{margin-top:4mm}
+  .r-num{font-size:9.5pt}
+  .r-num td.w{font-size:8.5pt}
+  .r-tbl tr{break-inside:avoid}
   :root{--bg:#fff;--surface:#fff;--ink:#1D1B26;--ink2:#3E3947;--muted:#5E5869}
   body{background:#fff!important}
   header.top,nav.tabs,.no-print,.scrim,.pro-card{display:none!important}
@@ -1793,6 +1813,7 @@ function buildReport(p, c, settings) {
     out.push(letterhead());
     out.push('<div class="r-head"><div class="k">Duology reading</div><h1>' + r.title + '</h1><div class="m"><b>' + esc(p.name) + '</b><br>' + r.meta + '<br>' + birthLine(getChart(p)) + '</div></div>');
     if (pro) out.push('<button type="button" class="btn-ghost no-print" data-act="print-report">Save as PDF</button>');
+    out.push(glance(p, getChart(p)));
     r.sections.forEach(function (sct, i) {
       if (!pro && !sct.free) return;
       out.push('<h2>' + sct.h + '</h2>' + sct.paras.map(function (t) { return '<p>' + t + '</p>'; }).join(''));
@@ -1814,6 +1835,26 @@ function buildReport(p, c, settings) {
       '<text x="91" y="66" font-family="Instrument Sans, Arial, sans-serif" font-size="11.5" fill="#D2CCDA">Astrology and numerology, explained.</text>' +
       '<text x="578" y="40" text-anchor="end" font-family="Instrument Sans, Arial, sans-serif" font-weight="700" font-size="10" letter-spacing="1.5" fill="#E4A673">PERSONAL READING</text>' +
       '<text x="578" y="58" text-anchor="end" font-family="Instrument Sans, Arial, sans-serif" font-size="11" fill="#A9B6FF">scvd-app.github.io/duology</text></svg></div>';
+  }
+  function glance(p, c) {
+    var s = store.settings, o = ['<section class="r-glance">'];
+    // the wheel, with the tap targets stripped so it's just a picture here
+    var w = wheelSVG(c).replace(/ role="button"| tabindex="0"| data-act="[^"]*"/g, '');
+    o.push('<h2>Your chart at a glance</h2><div class="r-chart"><div class="r-wheel">' + w + '</div>');
+    o.push('<table class="r-tbl"><thead><tr><th>Placement</th><th>Sign</th>' + (c.hasTime ? '<th>House</th>' : '') + '</tr></thead><tbody>' + c.points.map(function (id) {
+      var P = PLANETS[id], S = SIGNS[signOf(c.pos[id])];
+      return '<tr><td><span class="g">' + glyph(id) + '</span> ' + (id === 'asc' ? 'Rising' : P.name) + (c.retro[id] ? ' <small>R</small>' : '') + '</td><td>' + S.name + ' <small>' + degIn(c.pos[id]) + '</small></td>' + (c.hasTime ? '<td>' + (id === 'asc' ? '1st' : ord(c.houses[id])) + '</td>' : '') + '</tr>';
+    }).join('') + '</tbody></table></div>');
+    o.push('<p class="r-note">' + (c.hasTime ? houseSys()[0].toUpperCase() + houseSys().slice(1).replace('whole', 'Whole Sign') + ' houses. ' : 'No birth time, so no Rising sign or houses, and the Moon is for noon. ') + 'R = retrograde when you were born.</p>');
+    var lp = lifePath(p.date, s.masters), yr = new Date().getFullYear(), py = personalYear(p.date, yr);
+    var rows = [['Life Path', lp, 'Full birth date'], ['Expression', nameNumber(p.name, s.numSys, s.masters, 'all'), 'Every letter of the name'],
+      ['Soul Urge', nameNumber(p.name, s.numSys, s.masters, 'vowels'), 'The vowels'], ['Personality', nameNumber(p.name, s.numSys, s.masters, 'cons'), 'The consonants'],
+      ['Personal Year ' + yr, py, 'Birthday + this year']].filter(function (r) { return r[1]; });
+    o.push('<h2>Your numbers at a glance</h2><table class="r-tbl r-num"><thead><tr><th>Number</th><th></th><th>How we got there</th></tr></thead><tbody>' + rows.map(function (r) {
+      return '<tr><td><b>' + r[0] + '</b><br><small>' + r[2] + '</small></td><td class="n">' + r[1].n + '</td><td class="w">' + esc(r[1].working) + '</td></tr>';
+    }).join('') + '</tbody></table>');
+    o.push('<p class="r-note">' + (s.numSys === 'pyth' ? 'Pythagorean' : 'Chaldean') + ' system' + (s.masters ? ', master numbers kept' : ', master numbers reduced') + '. Name: ' + esc(p.name) + '.</p></section>');
+    return o.join('');
   }
   function printReport() {
     var p = active(), old = document.title;
