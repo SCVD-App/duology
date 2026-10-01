@@ -68,6 +68,16 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 .s-vlist summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--v-accent);margin:6px 0}
 .s-recmsg{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(127,209,160,.12);color:var(--ok);font-weight:600;font-size:14px}
 .s-fname{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--v-brass);background:var(--ui-bg);border:1px solid var(--ui-line);border-radius:6px;padding:2px 8px}
+/* music + sting */
+.s-music{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--ui-line)}
+.s-music input[type=range]{width:140px;accent-color:#A9B6FF}
+.v-sting{gap:26px}
+.st-ring{stroke-dasharray:1194;stroke-dashoffset:1194;transform-origin:210px 210px;transform:rotate(-90deg);animation:stdraw 1.1s cubic-bezier(.4,0,.2,1) forwards}
+.st-tick{opacity:0;animation:stfade .35s ease .95s forwards}
+.st-du{opacity:0;animation:stfade .5s ease .45s forwards}
+.st-word{opacity:0;transform:translateY(16px);animation:stpop .7s cubic-bezier(.2,.7,.2,1) 1.1s forwards}
+.st-tag{opacity:0;animation:stfade .6s ease 1.5s forwards}
+@keyframes stdraw{to{stroke-dashoffset:0}}@keyframes stfade{to{opacity:1}}@keyframes stpop{to{opacity:1;transform:none}}
 /* ----- video scenes ----- */
 .v{position:absolute;inset:0;padding:90px 110px;color:var(--v-ink);font-family:var(--sans);background:var(--v-bg)}
 .v::after{content:"";position:absolute;inset:36px;border:2px solid var(--v-line);border-radius:28px;pointer-events:none}
@@ -1334,19 +1344,47 @@ function buildNumShort(sky, which) {
     Promise.all(set.map(function (a) { return new Promise(function (res) { if (a.el.readyState >= 1) { a.dur = a.el.duration; return res(); } a.el.addEventListener('loadedmetadata', function () { a.dur = a.el.duration; res(); }, { once: true }); a.el.addEventListener('error', function () { res(); }, { once: true }); }); })).then(render);
     render();
   }
+  var music = null, musicGain = null;
+  function ensureCtx() { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume().catch(function () {}); return audioCtx; }
+  function musicLevel() { return (st.musicVol == null ? 12 : st.musicVol) / 100; }
+  function loadMusic(f) {
+    if (music) { try { music.el.pause(); URL.revokeObjectURL(music.url); } catch (e) {} }
+    var url = URL.createObjectURL(f), el = new Audio(url); el.loop = true; el.preload = 'auto';
+    music = { name: f.name, url: url, el: el };
+    var ctx = ensureCtx(); music.node = ctx.createMediaElementSource(el);
+    musicGain = musicGain || ctx.createGain(); musicGain.gain.value = 0; musicGain.connect(ctx.destination);
+    music.node.connect(musicGain);
+    render();
+  }
+  function clearMusic() { if (music) { try { music.el.pause(); URL.revokeObjectURL(music.url); music.node.disconnect(); } catch (e) {} } music = null; render(); }
+  function musicRamp(level, secs) { if (!music || !musicGain) return; var t = audioCtx.currentTime; musicGain.gain.cancelScheduledValues(t); musicGain.gain.setValueAtTime(musicGain.gain.value, t); musicGain.gain.linearRampToValueAtTime(level, t + (secs || 0.6)); }
+  function musicStart() { if (!music) return; ensureCtx(); music.el.currentTime = 0; musicGain.gain.value = 0; var p = music.el.play(); if (p && p.catch) p.catch(function () {}); musicRamp(musicLevel(), 1.5); }
+  function musicStop(fade) { if (!music) return; musicRamp(0, fade || 0.4); setTimeout(function () { if (!ui.playing) try { music.el.pause(); } catch (e) {} }, (fade || 0.4) * 1000 + 100); }
+  function stingHTML() {
+    return '<div class="v v-center v-sting"><svg width="340" height="340" viewBox="0 0 420 420" aria-hidden="true"><circle class="st-ring" cx="210" cy="210" r="190" fill="none" stroke="#A9B6FF" stroke-width="10"></circle><line class="st-tick" x1="210" y1="14" x2="210" y2="66" stroke="#E4A673" stroke-width="14" stroke-linecap="round"></line>' +
+      '<text class="st-du" x="210" y="215" text-anchor="middle" dominant-baseline="central" font-family="Fraunces, Georgia, serif" font-weight="600" font-size="170" fill="#EEEAF2" letter-spacing="-4">Du</text></svg>' +
+      '<div class="st-word">' + wordmark(120) + '</div><div class="st-tag v-sub">Astrology and numerology, explained.</div></div>';
+  }
+  function showSting(record) { var cv = document.querySelector('#stage .s-canvas'); if (!record && !cv) { render(); cv = document.querySelector('#stage .s-canvas'); } if (cv) cv.innerHTML = stingHTML(); }
   function clearVoice() { (audioSets[audioKey()] || []).forEach(function (a) { try { URL.revokeObjectURL(a.url); } catch (e) {} }); delete audioSets[audioKey()]; render(); }
   function renderStage() {
     var cv = document.querySelector('#stage .s-canvas'); if (!cv) return render();
     var i = curIndex();
     cv.innerHTML = ui.tab === 'video' ? scene16(secsCache[i], sky()) : curShort().scene(i);
   }
-  function stopRun() { if (run) { run.cancelled = true; clearTimeout(run.t); if (run.audio) { try { run.audio.pause(); } catch (e) {} } run = null; } ui.playing = false; }
+  function stopRun() { if (run) { run.cancelled = true; clearTimeout(run.t); if (run.audio) { try { run.audio.pause(); } catch (e) {} } run = null; } ui.playing = false; musicStop(0.3); }
   function playFrom(start, opts) {
     opts = opts || {}; stopRun();
     var r = run = { cancelled: false }; ui.playing = true;
+    if (music) musicStart();
     function step(i) {
       if (r.cancelled) return;
-      if (i >= sceneCount()) { ui.playing = false; run = null; if (opts.onDone) opts.onDone(); else render(); return; }
+      if (i >= sceneCount()) { ui.playing = false; run = null; musicStop(1.8); if (opts.onDone) opts.onDone(); else render(); return; }
+      if (i === 1 && ui.tab === 'video' && st.sting !== false && !r.stung && start === 0) {
+        r.stung = true; showSting(opts.record); musicRamp(Math.min(1, musicLevel() * 3), 0.5);
+        r.t = setTimeout(function () { musicRamp(musicLevel(), 0.8); step(1); }, 3000);
+        return;
+      }
       setIndex(i);
       if (opts.record) renderStage(); else render();
       var a = curAudio()[i];
@@ -1397,15 +1435,16 @@ function buildNumShort(sky, which) {
     await sleep(900); fit();
     try { if (window.CropTarget && vt.cropTo) { var ct = await CropTarget.fromElement(document.querySelector('#stage .s-canvas')); await vt.cropTo(ct); } } catch (e) {}
     var tracks = [vt];
-    if (set.length) {
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      try { await audioCtx.resume(); } catch (e) {}
-      var dest = audioCtx.createMediaStreamDestination();
+    var dest = null;
+    if (set.length || music) {
+      ensureCtx(); try { await audioCtx.resume(); } catch (e) {}
+      dest = audioCtx.createMediaStreamDestination();
+      if (music) musicGain.connect(dest);
       set.forEach(function (a) { if (!a.node) { a.node = audioCtx.createMediaElementSource(a.el); a.node.connect(audioCtx.destination); } a.node.connect(dest); });
       tracks = tracks.concat(dest.stream.getAudioTracks());
     }
     var mixed = new MediaStream(tracks);
-    var types = ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+    var types = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
     var mime = types.filter(function (t) { try { return MediaRecorder.isTypeSupported(t); } catch (e) { return false; } })[0] || '';
     var rec = new MediaRecorder(mixed, mime ? { mimeType: mime, videoBitsPerSecond: 10000000, audioBitsPerSecond: 192000 } : {});
     var chunks = [];
@@ -1416,6 +1455,7 @@ function buildNumShort(sky, which) {
       if (chunks.length) downloadBlob(recName(ext), new Blob(chunks, { type: type }));
       stream.getTracks().forEach(function (t) { t.stop(); });
       set.forEach(function (a) { try { a.node.disconnect(); a.node.connect(audioCtx.destination); } catch (e) {} });
+      if (music && dest) { try { musicGain.disconnect(dest); } catch (e) {} }
       recording = null; ui.clean = false;
       if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
       ui.recMsg = (R.msg || 'Done!') + ' Your video (' + ext.toUpperCase() + ') is in your Downloads folder as ' + recName(ext) + '.';
@@ -1434,11 +1474,15 @@ function buildNumShort(sky, which) {
     }).join('');
     var extra = set.length > n ? '<div class="s-vwarn">' + (set.length - n) + ' extra file(s) won’t be used. Check you loaded the right set.</div>' : '';
     var miss = set.length && set.length < n ? '<div class="s-vwarn">' + (n - set.length) + ' scene(s) have no voice file. They’ll play silent for their estimated time.</div>' : '';
-    var tot = 0; for (var i = 0; i < n; i++) tot += sceneDur(i);
+    var tot = (ui.tab === 'video' && st.sting !== false) ? 3 : 0; for (var i = 0; i < n; i++) tot += sceneDur(i);
     return '<div class="s-voicepanel"><div class="s-vhead"><b>Scotty’s voice files</b><span class="s-meta">' + (set.length ? set.length + ' loaded · video runs about ' + fmtDur(tot) : 'Load the MP3s for this ' + (ui.tab === 'video' ? 'video' : 'Short') + ', named in scene order') + '</span></div>' +
       '<div class="s-actions" style="margin:8px 0"><label class="s-btn2 s-file">Load voice files<input type="file" id="voicefiles" accept="audio/*,.mp3,.wav,.m4a" multiple></label>' + (set.length ? '<button class="s-btn2" data-act="clearvoice">Clear</button>' : '') +
       '<button class="s-rec" data-act="record">● Record finished video</button></div>' + extra + miss +
       '<details class="s-vlist"' + (set.length ? ' open' : '') + '><summary>Which file goes with which scene</summary>' + rows + '</details>' +
+      '<div class="s-music"><b>Background music</b> <span class="s-meta">' + (music ? esc(music.name) : 'optional, loops quietly under Scotty') + '</span>' +
+      '<label class="s-btn2 s-file">' + (music ? 'Change track' : 'Load music') + '<input type="file" id="musicfile" accept="audio/*,.mp3,.wav,.m4a"></label>' + (music ? '<button class="s-btn2" data-act="clearmusic">Remove</button>' : '') +
+      '<label class="s-field">Volume <input type="range" id="musicvol" min="0" max="40" value="' + Math.round(musicLevel() * 100) + '"> <span id="musicvoltxt">' + Math.round(musicLevel() * 100) + '%</span></label>' +
+      (ui.tab === 'video' ? '<label class="s-field"><input type="checkbox" id="sting"' + (st.sting !== false ? ' checked' : '') + '> 3-second logo sting after the hook</label>' : '') + '</div>' +
       (ui.recMsg ? '<div class="s-recmsg">' + esc(ui.recMsg) + '</div>' : '') +
       '<p class="s-hint">How it works: click Record, pick <b>This tab</b> when Chrome asks, then hands off. The Studio goes full screen, plays every scene in time with Scotty, and downloads the finished video when it’s done. Keep this tab on screen while it records, and press F11 first for the sharpest picture. Press Esc to stop early.</p></div>';
   }
@@ -1629,10 +1673,11 @@ function buildNumShort(sky, which) {
     var W = stg.clientWidth, H = ui.clean ? window.innerHeight : (cw > ch ? W * ch / cw : Math.min(window.innerHeight * 0.78, 900));
     if (ui.clean) W = window.innerWidth;
     var sc = (!ui.clean && cw < ch) ? H / ch : Math.min(W / cw, H / ch);
+    if (ui.clean) { var dpr = window.devicePixelRatio || 1, step = cw > ch ? 32 : 144, pw = Math.floor(cw * sc * dpr / step) * step; if (pw > 0) sc = pw / dpr / cw; }
     stg.style.height = (ui.clean ? window.innerHeight : ch * sc) + 'px';
     if (!ui.clean && cw < ch) stg.style.width = (cw * sc) + 'px';
     cv.style.transform = 'scale(' + sc + ')';
-    cv.style.left = ((!ui.clean && cw < ch) ? 0 : (W - cw * sc) / 2) + 'px'; cv.style.top = ((ui.clean ? window.innerHeight - ch * sc : 0) / 2) + 'px';
+    cv.style.left = Math.round((!ui.clean && cw < ch) ? 0 : (W - cw * sc) / 2) + 'px'; cv.style.top = Math.round((ui.clean ? window.innerHeight - ch * sc : 0) / 2) + 'px';
   }
 
   var secsCache = null;
@@ -1666,6 +1711,7 @@ function buildNumShort(sky, which) {
     else if (act === 'play') togglePlay();
     else if (act === 'record') startRecording();
     else if (act === 'clearvoice') clearVoice();
+    else if (act === 'clearmusic') clearMusic();
     else if (act === 'clean') { ui.clean = true; render(); }
     else if (act === 'fs') { var s = document.getElementById('stage'); if (s && s.requestFullscreen) { ui.clean = true; render(); document.documentElement.requestFullscreen().catch(function () {}); } }
     else if (act === 'reset') { delete st.edits[mkey() + '|' + arg]; persist(); render(); }
@@ -1694,6 +1740,7 @@ function buildNumShort(sky, which) {
   var saveT = null;
   root.addEventListener('input', function (e) {
     var t = e.target;
+    if (t.id === 'musicvol') { var lb = document.getElementById('musicvoltxt'); if (lb) lb.textContent = t.value + '%'; st.musicVol = +t.value; if (ui.playing) musicRamp(musicLevel(), 0.2); return; }
     if (t.hasAttribute('data-sec')) {
       var id = t.getAttribute('data-sec'), i = +t.getAttribute('data-idx'), s = secsCache[i];
       s.text = t.value; if (t.value === s.generated) delete st.edits[mkey() + '|' + id]; else st.edits[mkey() + '|' + id] = t.value;
@@ -1708,6 +1755,9 @@ function buildNumShort(sky, which) {
   });
   root.addEventListener('change', function (e) {
     if (e.target.id === 'voicefiles' && e.target.files && e.target.files.length) { loadVoiceFiles(e.target.files); return; }
+    if (e.target.id === 'musicfile' && e.target.files && e.target.files[0]) { loadMusic(e.target.files[0]); return; }
+    if (e.target.id === 'sting') { st.sting = e.target.checked; persist(); render(); return; }
+    if (e.target.id === 'musicvol') { st.musicVol = +e.target.value; persist(); if (ui.playing) musicRamp(musicLevel(), 0.2); render(); return; }
     if (e.target.id === 'depth') { st.depth = e.target.value; persist(); ui.scene = 0; render(); }
     if (e.target.id === 'order') { st.order = e.target.value; persist(); ui.scene = 0; render(); }
     if (e.target.id === 'wpm') { st.wpm = Math.max(100, Math.min(220, +e.target.value || 160)); persist(); render(); }
