@@ -89,10 +89,14 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 .v-tall{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;padding:140px 90px}
 .v-tall .v-kicker{font-size:48px}
 .v-ev-tall{width:100%;flex-direction:column;gap:14px;padding:40px}.v-ev-tall .v-evd{font-size:110px;text-align:left}.v-ev-tall .v-evd span{font-size:36px}.v-ev-tall b{font-size:58px}.v-ev-tall div div{font-size:42px}
+.v-calc{font-family:var(--serif);font-size:84px;font-weight:600;text-align:center;font-variant-numeric:tabular-nums;color:var(--v-ink);line-height:1.15}.v-calc.big{font-size:104px;color:var(--v-accent)}
+.v-numrow{display:flex;align-items:center;gap:36px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:24px;padding:18px 36px}.v-numrow b{font-family:var(--serif);font-size:84px;color:var(--v-accent);min-width:60px;text-align:center;line-height:1}.v-numrow span{font-size:50px}
 .a1,.a2,.a3,.a4,.a5,.a6{opacity:0;animation:vin .8s cubic-bezier(.2,.7,.2,1) forwards}
 .a1{animation-delay:.1s}.a2{animation-delay:.4s}.a3{animation-delay:.8s}.a4{animation-delay:1.2s}.a5{animation-delay:1.6s}.a6{animation-delay:2s}
 @keyframes vin{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.a1,.a2,.a3,.a4,.a5,.a6{animation:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.v-calc{font-family:var(--serif);font-size:84px;font-weight:600;text-align:center;font-variant-numeric:tabular-nums;color:var(--v-ink);line-height:1.15}.v-calc.big{font-size:104px;color:var(--v-accent)}
+.v-numrow{display:flex;align-items:center;gap:36px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:24px;padding:18px 36px}.v-numrow b{font-family:var(--serif);font-size:84px;color:var(--v-accent);min-width:60px;text-align:center;line-height:1}.v-numrow span{font-size:50px}
+.a1,.a2,.a3,.a4,.a5,.a6{animation:none;opacity:1}}
 </style>
 </head>
 <body>
@@ -1113,7 +1117,15 @@ function signReading(sky, si) {
 function seeded(n) { var a = n >>> 0; return function () { a = (a + 0x6D2B79F5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function dayOrd(ms) { var d = new Date(ms).getDate(); return ord(d); }
 function monthName(ms) { return new Date(ms).toLocaleDateString('en-AU', { month: 'long' }); }
-function tzCity() { try { var z = Intl.DateTimeFormat().resolvedOptions().timeZone; return z.split('/').pop().replace(/_/g, ' '); } catch (e) { return 'local'; } }
+function tzCity() {
+  try {
+    var z = Intl.DateTimeFormat().resolvedOptions().timeZone, parts = z.split('/'), city = parts[parts.length - 1].replace(/_/g, ' ');
+    var where = { Australia: 'Australia', Pacific: '', America: '', Europe: '', Asia: '', Africa: '' }[parts[0]];
+    if (z === 'Pacific/Auckland') where = 'New Zealand';
+    return where ? city + ', ' + where : city;
+  } catch (e) { return 'local'; }
+}
+function tzOffsetLabel() { var m = -new Date().getTimezoneOffset(), s = m < 0 ? '-' : '+'; m = Math.abs(m); return 'UTC' + s + Math.floor(m / 60) + (m % 60 ? ':' + String(m % 60).padStart(2, '0') : ''); }
 var EVERY = { jupiter: 'once a year or so', saturn: 'every two and a half years', uranus: 'every seven years', neptune: 'every fourteen years', pluto: 'once in a couple of decades' };
 function wordCount(t) { return (t.trim().match(/\S+/g) || []).length; }
 function lc1(t) { return /^(New|Full|Solar|Lunar|Numerology|A |An |The )/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t; }
@@ -1121,13 +1133,13 @@ function spokenRange(r) {
   var a = new Date(r.a), b = new Date(r.b);
   return a.getDate() === b.getDate() ? 'the ' + ord(a.getDate()) : 'the ' + ord(a.getDate()) + (a.getMonth() !== b.getMonth() ? ' of ' + monthName(r.a) : '') + ' to the ' + ord(b.getDate());
 }
-function stripTags(t) { return t.replace(/<[^>]+>/g, ''); }
+function stripTags(t) { return t.replace(/<[^>]+>/g, '').replace(/(\d+)°(\d+)'/g, function (m, d) { return d + (d === '1' ? ' degree' : ' degrees'); }).replace(/(\d+)°/g, '$1 degrees'); }
 
 var DEPTHS = { tight: { sky: 2, items: 1, facts: false }, standard: { sky: 3, items: 1, facts: 'lead' }, deep: { sky: 4, items: 2, facts: true, second: false, extra: true } };
 
 function topSky(sky, n) { return sky.events.slice().sort(function (a, b) { return b.score - a.score || a.ms - b.ms; }).slice(0, n).sort(function (a, b) { return a.ms - b.ms; }); }
 
-function buildScript(sky, depthKey) {
+function buildScript(sky, depthKey, order) {
   var D = DEPTHS[depthKey] || DEPTHS.standard, rnd = seeded(sky.y * 100 + sky.m), pick = function (a) { return a[Math.floor(rnd() * a.length)]; };
   var Mon = monthName(sky.start), secs = [];
   var lead = topSky(sky, 1)[0], chosen = topSky(sky, D.sky);
@@ -1142,10 +1154,22 @@ function buildScript(sky, depthKey) {
   else hook = pick([Mon + ' has ' + sky.events.length + ' shifts in the sky worth knowing about, and each one lands differently depending on your sign. Let’s work through what’s happening, why astrologers care, and what it means for you.',
     'Every month the sky rearranges itself, and every sign gets a different slice of it. Here’s ' + Mon + ', explained properly: what’s happening, why it matters, and what it means for you.']);
   secs.push({ id: 'hook', label: 'Cold open', scene: { type: 'title' }, text: hook });
-  secs.push({ id: 'intro', label: 'Intro', scene: { type: 'brand' }, text: pick([
-    'Welcome to Duology: astrology and numerology in plain English. No glyphs, no gatekeeping. Everything here is worked out from where the planets actually are, and we show the reasoning.',
-    'G’day and welcome to Duology: astrology and numerology, explained. No jargon, no mystery, just where the planets really are and the why behind it.']) +
-    ' As always, this is for reflection and a bit of fun, not a crystal ball. All dates are in ' + tzCity() + ' time.' });
+  var TIME_LINES = [
+    'I know your time is precious, so I won\u2019t waste any more of it.',
+    'We\u2019re all flat out these days, so I\u2019ll keep this tight.',
+    'I know you\u2019ve got places to be and things to do, so thanks for spending a few minutes here.',
+    'Life\u2019s busy, and I appreciate you giving us a little bit of it.',
+    'Time\u2019s the one thing none of us can make more of, so I\u2019ll make these minutes count.',
+    'Whether you\u2019re on a lunch break or winding down for the night, thanks for spending some of it with me.',
+    'I know there\u2019s a hundred things fighting for your attention, so cheers for picking this one.',
+    'Your time matters, so no waffle, just the good stuff.',
+    'Between work, family and everything else, spare minutes are rare. Thanks for spending a few here.',
+    'Your time\u2019s valuable, and I\u2019m grateful you\u2019re spending some of it here.',
+    'You\u2019ve got a life to get on with, so let\u2019s make this worth your while.',
+    'Thanks for carving out a few minutes. I know they don\u2019t come easy.'
+  ];
+  secs.push({ id: 'intro', label: 'Greeting', scene: { type: 'brand' }, text: 'Welcome to the channel. My name\u2019s Scotty, and this is Duology: astrology and numerology, explained. ' + TIME_LINES[(sky.m - 1) % 12] + ' Let\u2019s get straight into this month\u2019s events. As always, it\u2019s for reflection, not a crystal ball, and all dates are in ' + tzCity() + ' time.' });
+  if (order === 'greet') secs.reverse();
   var leads = ['First up', 'Then', 'Next', 'And finally'];
   var used = {};
   chosen.forEach(function (e, i) {
@@ -1215,11 +1239,48 @@ function ytPackage(sky, secs, wpm) {
   var desc = 'Your ' + Mon + ' ' + sky.y + ' forecast for every star sign, worked out from where the planets actually are, with the why behind every call. No glyphs, no gatekeeping.\n\n' +
     'Get the version built on YOUR exact birth chart, with your own houses and dates: https://scvd-app.github.io/duology/\n\n' +
     'Chapters\n' + chapters.join('\n') + '\n\n' +
-    'Dates are in ' + tzCity() + ' time. This video is for reflection and entertainment, not a prediction. Narration is AI-generated. The script and all calculations are our own.\n\n' +
+    'Dates are in ' + tzCity() + ' time (' + tzOffsetLabel() + '). If you\u2019re in the Americas or Europe, some events land the day before for you. This video is for reflection and entertainment, not a prediction. Narration is AI-generated. The script and all calculations are our own.\n\n' +
     '#astrology #horoscope #numerology #' + Mon.toLowerCase() + sky.y;
   return { titles: titles, desc: desc };
 }
 // ===== STUDIO SCRIPT END =====
+// ===== NUMBERS SHORT START =====
+var PM_SHORT = { 1: 'fresh starts, back yourself', 2: 'slow down and team up', 3: 'speak up, get social', 4: 'head down and build', 5: 'expect change, stay flexible', 6: 'home and your people', 7: 'step back and think', 8: 'push for results', 9: 'finish up and let go' };
+var EX_BDAYS = [[14, 8], [3, 11], [27, 4], [9, 2], [21, 6], [30, 12], [5, 9], [18, 1], [25, 3], [12, 7]];
+var MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function digitsSum(n) { var d = String(n).split('').map(Number); return { txt: d.join(' + '), n: d.reduce(function (a, b) { return a + b; }, 0) }; }
+function reduceSteps(n) { var steps = [String(n)], v = n; while (v > 9) { var s = digitsSum(v); steps.push(s.txt + ' = ' + s.n); v = s.n; } return { n: v, steps: steps }; }
+function spokenReduce(n) { var v = n, out = []; while (v > 9) { var s = digitsSum(v); out.push(s.txt.replace(/ \+ /g, ' plus ') + ' is ' + s.n); v = s.n; } return out.join(', then '); }
+
+function buildNumShort(sky, which) {
+  var rnd = seeded(sky.y * 131 + sky.m), ex = EX_BDAYS[Math.floor(rnd() * EX_BDAYS.length)];
+  var Mon = MONTHS_LONG[sky.m - 1], d = ex[0], mo = ex[1];
+  var dR = reduceSteps(d), moR = reduceSteps(mo), a0 = dR.n + moR.n, aR = reduceSteps(a0), yR = reduceSteps(sky.y), py0 = aR.n + yR.n, pyR = reduceSteps(py0), mR = reduceSteps(sky.m), pm0 = pyR.n + mR.n, pmR = reduceSteps(pm0);
+  var calc = { d: d, mo: mo, moName: MONTHS_LONG[mo - 1], dR: dR, moR: moR, a0: a0, aR: aR, yR: yR, py0: py0, pyR: pyR, mR: mR, pm0: pm0, pmR: pmR, Mon: Mon, y: sky.y, m: sky.m };
+  var parts, labels;
+  if (!which) {
+    labels = ['Hook', 'Step 1', 'Step 2', 'Step 3', 'Meanings', 'CTA'];
+    parts = [
+      { id: 'hook', text: 'What’s your ' + Mon + ' number? Work it out in ten seconds.' },
+      { id: 'step1', text: 'Step one: add your birth day and month, down to one digit. Say you were born on the ' + ord(d) + ' of ' + calc.moName + '. ' + (d > 9 ? d + ' becomes ' + dR.n + ', ' : '') + (mo > 9 ? calc.moName + ' is month ' + mo + ', which becomes ' + moR.n + ', ' : calc.moName + ' is ' + mo + ', ') + 'and ' + dR.n + ' plus ' + moR.n + ' is ' + a0 + (a0 > 9 ? ', which reduces to ' + aR.n : '') + '.' },
+      { id: 'step2', text: 'Step two: add the year. ' + sky.y + ' reduces to ' + yR.n + '. So ' + aR.n + ' plus ' + yR.n + ' is ' + py0 + (py0 > 9 ? ', which is ' + pyR.n : '') + '. That’s your Personal Year.' },
+      { id: 'step3', text: 'Step three: add the month. ' + Mon + ' is ' + (sky.m > 9 ? 'month ' + sky.m + ', which is ' + mR.n : mR.n) + '. ' + pyR.n + ' plus ' + mR.n + ' is ' + pm0 + (pm0 > 9 ? ', which is ' + pmR.n : '') + '. So for this birthday, ' + Mon + ' is a ' + pmR.n + '.' },
+      { id: 'meanings', text: 'Here’s what yours means. ' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return n + ': ' + PM_SHORT[n] + '.'; }).join(' ') },
+      { id: 'cta', text: 'Comment your number. Your star sign and numbers together? That’s Duology. Link in bio.' }
+    ];
+  } else {
+    var T = PY_THEME[which], D = NUM_DETAIL[which];
+    labels = ['Hook', 'Quick check', 'Meaning', 'CTA'];
+    parts = [
+      { id: 'hook', text: 'In a Personal Month ' + which + ' this ' + Mon + '? Here’s what that means, and how to check.' },
+      { id: 'calc', text: 'Quick check: add your birth day and month and reduce it to one digit. Add ' + yR.n + ' for ' + sky.y + ', then ' + mR.n + ' for ' + Mon + '. Keep reducing until you’ve got a single number.' },
+      { id: 'meaning', text: 'Numerology reads ' + an(which) + ' ' + which + ' month as ' + T.title.toLowerCase() + ': a month that wants ' + T.wants + '. At its best, think ' + D.good.charAt(0).toLowerCase() + D.good.slice(1) + ' The watch-out: ' + D.watch.charAt(0).toLowerCase() + D.watch.slice(1) },
+      { id: 'cta', text: 'Tell me in the comments if that sounds like your month. For your star sign and numbers together, get Duology. Link in bio.' }
+    ];
+  }
+  return { which: which, calc: calc, parts: parts, labels: labels };
+}
+// ===== NUMBERS SHORT END =====
 
 // ===== STUDIO APP START =====
 (function () {
@@ -1228,7 +1289,7 @@ function ytPackage(sky, secs, wpm) {
   try { var ld = JSON.parse(localStorage.getItem(KEY)); if (ld) st = Object.assign(st, ld); } catch (e) {}
   function persist() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
   var now = new Date();
-  var ui = { y: now.getFullYear(), m: now.getMonth() + 1, tab: 'script', scene: 0, playing: false, clean: false, shortSign: 0, shortScene: 0 };
+  var ui = { y: now.getFullYear(), m: now.getMonth() + 1, tab: 'script', scene: 0, playing: false, clean: false, shortSign: 0, shortScene: 0, shortMode: 'sign', numWhich: 0 };
   if (now.getDate() > 15) { ui.m++; if (ui.m > 12) { ui.m = 1; ui.y++; } }
   var root = document.getElementById('studio');
   var timer = null;
@@ -1237,7 +1298,7 @@ function ytPackage(sky, secs, wpm) {
   function mkey() { return ui.y + '-' + ui.m; }
   function sky() { return skyMonth(ui.y, ui.m); }
   function sections() {
-    var secs = buildScript(sky(), st.depth), k = mkey();
+    var secs = buildScript(sky(), st.depth, st.order), k = mkey();
     secs.forEach(function (s) { s.generated = s.text; var e = st.edits[k + '|' + s.id]; if (e != null) { s.text = e; s.edited = true; } });
     return secs;
   }
@@ -1246,6 +1307,17 @@ function ytPackage(sky, secs, wpm) {
     var sh = buildShort(sky(), ui.shortSign), k = mkey() + '|' + ui.shortSign;
     sh.parts.forEach(function (p) { p.generated = p.text; var e = st.shortEdits[k + '|' + p.id]; if (e != null) { p.text = e; p.edited = true; } });
     return sh;
+  }
+  function numShort() {
+    var ns = buildNumShort(sky(), ui.numWhich), k = mkey() + '|n' + ui.numWhich;
+    st.numEdits = st.numEdits || {};
+    ns.parts.forEach(function (p) { p.generated = p.text; var e = st.numEdits[k + '|' + p.id]; if (e != null) { p.text = e; p.edited = true; } });
+    return ns;
+  }
+  function curShort() {
+    if (ui.shortMode === 'num') { var ns = numShort(); return { parts: ns.parts, labels: ns.labels, scene: function (i) { return scene916num(i, ns); }, store: st.numEdits, key: mkey() + '|n' + ui.numWhich, name: ui.numWhich ? 'Personal Month ' + ui.numWhich : 'All numbers' }; }
+    var sh = short(), S = sky();
+    return { parts: sh.parts, labels: ['Hook', 'Focus', 'Key dates', 'Recharge + CTA'], scene: function (i) { return scene916(i, sh, S); }, store: st.shortEdits, key: mkey() + '|' + ui.shortSign, name: SIGNS[ui.shortSign].name };
   }
   function download(name, text) {
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' })); a.download = name; document.body.appendChild(a); a.click();
@@ -1337,6 +1409,25 @@ function ytPackage(sky, secs, wpm) {
     return '<div class="v v-tall">' + (r.recharge.length ? '<div class="a1 v-kicker">Recharge days</div><div class="a2 v-h1" style="font-size:110px;text-align:center">' + r.recharge.join('<br>') + '</div>' : '') + '<div class="a3" style="margin-top:120px">' + wordmark(130) + '</div><div class="a4 v-sub" style="font-size:54px;text-align:center">Your version, built on your exact birth chart</div><div class="a5 v-url" style="font-size:44px">Link in bio</div></div>';
   }
 
+  function scene916num(i, ns) {
+    var c = ns.calc, Mon = c.Mon;
+    function line(t, big) { return '<div class="v-calc' + (big ? ' big' : '') + '">' + t + '</div>'; }
+    if (!ns.which) {
+      if (i === 0) return '<div class="v v-tall"><div class="a1 v-kicker">Numerology</div><div class="a2 v-bignum" style="font-size:520px">?</div><div class="a3 v-h1" style="font-size:120px;text-align:center">Your ' + Mon + '<br>number</div><div class="a4 v-sub" style="font-size:60px">in 10 seconds</div></div>';
+      if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">Step 1 · Birth day + month</div><div class="a2 v-sub" style="font-size:56px;text-align:center">Example: ' + ord(c.d) + ' of ' + c.moName + '</div>' +
+        '<div class="a3">' + line(c.dR.steps.join(' → ')) + '</div><div class="a4">' + line(c.moName + ' = ' + c.moR.steps.join(' → ')) + '</div><div class="a5">' + line(c.dR.n + ' + ' + c.moR.n + ' = ' + c.aR.steps.join(' → '), true) + '</div></div>';
+      if (i === 2) return '<div class="v v-tall"><div class="a1 v-kicker">Step 2 · Add the year</div><div class="a2">' + line(c.y + ' → ' + c.yR.steps.slice(1).join(' → ')) + '</div><div class="a3">' + line(c.aR.n + ' + ' + c.yR.n + ' = ' + c.pyR.steps.join(' → '), true) + '</div><div class="a4 v-sub" style="font-size:60px">Personal Year ' + c.pyR.n + '</div></div>';
+      if (i === 3) return '<div class="v v-tall"><div class="a1 v-kicker">Step 3 · Add the month</div><div class="a2">' + line(Mon + ' = ' + c.mR.steps.join(' → ')) + '</div><div class="a3">' + line(c.pyR.n + ' + ' + c.mR.n + ' = ' + c.pmR.steps.join(' → ')) + '</div><div class="a4 v-bignum" style="font-size:380px">' + c.pmR.n + '</div><div class="a5 v-sub" style="font-size:54px">(for this example birthday)</div></div>';
+      if (i === 4) return '<div class="v v-tall" style="gap:14px"><div class="a1 v-kicker" style="margin-bottom:20px">What yours means</div>' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n, k) { return '<div class="a' + Math.min(6, 2 + Math.floor(k / 2)) + ' v-numrow"><b>' + n + '</b><span>' + PM_SHORT[n] + '</span></div>'; }).join('') + '</div>';
+      return '<div class="v v-tall"><div class="a1 v-h1" style="font-size:120px;text-align:center">Comment<br>your number</div><div class="a2 v-sub" style="font-size:56px;text-align:center">Star sign + numbers together?</div><div class="a3" style="margin-top:60px">' + wordmark(140) + '</div><div class="a4 v-url" style="font-size:48px">Link in bio</div></div>';
+    }
+    var n = ns.which, T = PY_THEME[n], D = NUM_DETAIL[n];
+    if (i === 0) return '<div class="v v-tall"><div class="a1 v-kicker">' + Mon + ' · Personal Month</div><div class="a2 v-bignum" style="font-size:560px">' + n + '</div><div class="a3 v-h1" style="font-size:110px;text-align:center">' + T.title + '</div></div>';
+    if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">Quick check</div><div class="a2">' + line('Birth day + month → 1 digit') + '</div><div class="a3">' + line('+ ' + c.yR.n + ' for ' + c.y) + '</div><div class="a4">' + line('+ ' + c.mR.n + ' for ' + Mon) + '</div><div class="a5">' + line('Reduce to 1 digit', true) + '</div></div>';
+    if (i === 2) return '<div class="v v-tall"><div class="a1 v-bignum" style="font-size:300px">' + n + '</div><div class="a2 v-h1" style="font-size:96px;text-align:center">' + T.title + '</div><div class="a3 v-ev v-ev-tall"><div><b>At its best</b><div>' + D.good + '</div></div></div><div class="a4 v-ev v-ev-tall"><div><b>Watch out for</b><div>' + D.watch + '</div></div></div></div>';
+    return '<div class="v v-tall"><div class="a1 v-h1" style="font-size:110px;text-align:center">Sound like<br>your month?</div><div class="a2 v-sub" style="font-size:56px">Tell me in the comments</div><div class="a3" style="margin-top:60px">' + wordmark(140) + '</div><div class="a4 v-url" style="font-size:48px">Link in bio</div></div>';
+  }
+
   // ---------- views ----------
   function header(secs) {
     var tot = secs.reduce(function (a, s) { return a + secDur(s); }, 0), words = secs.reduce(function (a, s) { return a + wordCount(s.text); }, 0);
@@ -1344,6 +1435,7 @@ function ytPackage(sky, secs, wpm) {
     return '<header class="s-top"><div class="s-brand">Du<em>ology</em> <span>Studio</span></div>' +
       '<div class="s-month"><button class="s-btn" data-act="mprev" aria-label="Previous month">‹</button><b>' + sky().label + '</b><button class="s-btn" data-act="mnext" aria-label="Next month">›</button></div>' +
       '<label class="s-field">Depth <select id="depth"><option value="tight"' + (st.depth === 'tight' ? ' selected' : '') + '>Tight (~6 min)</option><option value="standard"' + (st.depth === 'standard' ? ' selected' : '') + '>Standard (~7 min)</option><option value="deep"' + (st.depth === 'deep' ? ' selected' : '') + '>Deep (10+ min)</option></select></label>' +
+      '<label class="s-field">Open with <select id="order"><option value="hook"' + (st.order !== 'greet' ? ' selected' : '') + '>Hook, then greeting</option><option value="greet"' + (st.order === 'greet' ? ' selected' : '') + '>Greeting first</option></select></label>' +
       '<label class="s-field">Voice pace <input id="wpm" type="number" min="120" max="200" step="5" value="' + st.wpm + '"> wpm</label>' +
       '<div class="s-dur ' + (inBand ? 'ok' : 'warn') + '" id="durbadge">' + fmtDur(tot) + ' · ' + words + ' words' + (inBand ? '' : (tot < 300 ? ' · under 5 min' : ' · over 7 min')) + '</div></header>' +
       '<nav class="s-tabs">' + [['script', 'Script'], ['video', 'Video'], ['shorts', 'Shorts'], ['youtube', 'YouTube']].map(function (t) { return '<button data-act="tab:' + t[0] + '" aria-current="' + (ui.tab === t[0] ? 'page' : 'false') + '">' + t[1] + '</button>'; }).join('') + '</nav>';
@@ -1372,13 +1464,20 @@ function ytPackage(sky, secs, wpm) {
       '<p class="s-hint">To record: start your screen recorder (OBS, or Windows Game Bar with Win + Alt + R), hit Clean mode, then press Space to play. Each scene holds for as long as its voiceover takes at ' + st.wpm + ' words a minute. Drop the AI voice track over the top in your editor.</p></div>';
   }
   function viewShorts() {
-    var sh = short(), S = sky(), i = Math.min(ui.shortScene, 3), p = sh.parts[i], all = sh.parts.map(function (x) { return x.text; }).join(' ');
-    return '<div class="s-pad"><div class="s-signs">' + SIGNS.map(function (x, k) { return '<button data-act="ssign:' + k + '" aria-pressed="' + (ui.shortSign === k) + '">' + x.glyph + VS + ' ' + x.name + '</button>'; }).join('') + '</div>' +
-      '<div class="s-shortwrap"><div><div class="s-stage s-tall" id="stage" data-w="1080" data-h="1920"><div class="s-canvas" style="width:1080px;height:1920px">' + scene916(i, sh, S) + '</div></div></div>' +
-      '<div class="s-shortside">' + stageControls(4, i, ['Hook', 'Focus', 'Key dates', 'Recharge + CTA'][i], Math.max(4, wordCount(p.text) / st.wpm * 60)) +
-      '<div class="s-dur ' + (wordCount(all) / st.wpm * 60 <= 60 ? 'ok' : 'warn') + '">' + fmtDur(wordCount(all) / st.wpm * 60) + ' · ' + wordCount(all) + ' words (Shorts max 60s for best reach)</div>' +
-      sh.parts.map(function (x, k) { return '<section class="s-sec"><div class="s-sechead"><b>' + ['Hook', 'Focus', 'Key dates', 'Recharge + CTA'][k] + '</b>' + (x.edited ? '<span class="s-edited">edited</span><button class="s-link" data-act="sreset:' + x.id + '">Reset</button>' : '') + '</div><textarea data-short="' + x.id + '" rows="' + Math.max(2, Math.ceil(x.text.length / 70)) + '">' + esc(x.text) + '</textarea></section>'; }).join('') +
-      '<div class="s-actions"><button class="s-cta" data-act="copy-short">Copy this Short’s script</button><button class="s-btn2" data-act="dl-shorts">Download all 12 Shorts scripts</button></div></div></div></div>';
+    var cs = curShort(), n = cs.parts.length, i = Math.min(ui.shortScene, n - 1), p = cs.parts[i], all = cs.parts.map(function (x) { return x.text; }).join(' ');
+    var picker = ui.shortMode === 'sign'
+      ? SIGNS.map(function (x, k) { return '<button data-act="ssign:' + k + '" aria-pressed="' + (ui.shortSign === k) + '">' + x.glyph + VS + ' ' + x.name + '</button>'; }).join('')
+      : '<button data-act="nwhich:0" aria-pressed="' + (ui.numWhich === 0) + '">All 9 (work it out)</button>' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (k) { return '<button data-act="nwhich:' + k + '" aria-pressed="' + (ui.numWhich === k) + '">Month ' + k + '</button>'; }).join('');
+    var secs = all.length ? wordCount(all) / st.wpm * 60 : 0;
+    return '<div class="s-pad"><div class="s-signs" style="margin-bottom:10px"><button data-act="smode:sign" aria-pressed="' + (ui.shortMode === 'sign') + '">Star sign Shorts</button><button data-act="smode:num" aria-pressed="' + (ui.shortMode === 'num') + '">Numbers Shorts</button></div>' +
+      '<div class="s-signs">' + picker + '</div>' +
+      (ui.shortMode === 'num' ? '<p class="s-hint" style="margin-top:-6px">Start with the ‘All 9’ Short each month: viewers work out their own number and comment it. Only add the single-number ones if the analytics say they’re pulling views.</p>' : '') +
+      '<div class="s-shortwrap"><div><div class="s-stage s-tall" id="stage" data-w="1080" data-h="1920"><div class="s-canvas" style="width:1080px;height:1920px">' + cs.scene(i) + '</div></div></div>' +
+      '<div class="s-shortside">' + stageControls(n, i, cs.labels[i], Math.max(4, wordCount(p.text) / st.wpm * 60)) +
+      '<div class="s-dur ' + (secs <= 60 ? 'ok' : 'warn') + '">' + fmtDur(secs) + ' · ' + wordCount(all) + ' words (under 60s is the sweet spot)</div>' +
+      cs.parts.map(function (x, k) { return '<section class="s-sec"><div class="s-sechead"><b>' + cs.labels[k] + '</b>' + (x.edited ? '<span class="s-edited">edited</span><button class="s-link" data-act="sreset:' + x.id + '">Reset</button>' : '') + '</div><textarea data-short="' + x.id + '" rows="' + Math.max(2, Math.ceil(x.text.length / 70)) + '">' + esc(x.text) + '</textarea></section>'; }).join('') +
+      '<div class="s-actions"><button class="s-cta" data-act="copy-short">Copy this Short\u2019s script</button><button class="s-btn2" data-act="dl-shorts">Download all ' + (ui.shortMode === 'num' ? 'Numbers' : '12 sign') + ' Shorts scripts</button></div>' +
+      '<p class="s-hint">These are 9:16, so the same recordings work as Instagram Reels and TikToks.</p></div></div></div>';
   }
   function viewYouTube(secs) {
     var pk = ytPackage(sky(), secs, st.wpm);
@@ -1410,15 +1509,15 @@ function ytPackage(sky, secs, wpm) {
     clearTimeout(timer); if (!ui.playing) return;
     var dur;
     if (ui.tab === 'video') dur = secDur(secsCache[ui.scene]);
-    else { var sh = short(); dur = Math.max(4, wordCount(sh.parts[ui.shortScene].text) / st.wpm * 60); }
+    else { var cs = curShort(); dur = Math.max(4, wordCount(cs.parts[ui.shortScene].text) / st.wpm * 60); }
     timer = setTimeout(function () {
       if (ui.tab === 'video') { if (ui.scene < secsCache.length - 1) { ui.scene++; render(); schedule(); } else { ui.playing = false; render(); } }
-      else { if (ui.shortScene < 3) { ui.shortScene++; render(); schedule(); } else { ui.playing = false; render(); } }
+      else { if (ui.shortScene < curShort().parts.length - 1) { ui.shortScene++; render(); schedule(); } else { ui.playing = false; render(); } }
     }, dur * 1000);
   }
   function step(dlt) {
     if (ui.tab === 'video') ui.scene = Math.max(0, Math.min(secsCache.length - 1, ui.scene + dlt));
-    else if (ui.tab === 'shorts') ui.shortScene = Math.max(0, Math.min(3, ui.shortScene + dlt));
+    else if (ui.tab === 'shorts') ui.shortScene = Math.max(0, Math.min(curShort().parts.length - 1, ui.shortScene + dlt));
     render(); schedule();
   }
   function scriptTxt(secs) {
@@ -1439,15 +1538,24 @@ function ytPackage(sky, secs, wpm) {
     else if (act === 'clean') { ui.clean = true; render(); }
     else if (act === 'fs') { var s = document.getElementById('stage'); if (s && s.requestFullscreen) { ui.clean = true; render(); document.documentElement.requestFullscreen().catch(function () {}); } }
     else if (act === 'reset') { delete st.edits[mkey() + '|' + arg]; persist(); render(); }
-    else if (act === 'sreset') { delete st.shortEdits[mkey() + '|' + ui.shortSign + '|' + arg]; persist(); render(); }
+    else if (act === 'sreset') { var cs0 = curShort(); delete cs0.store[cs0.key + '|' + arg]; persist(); render(); }
     else if (act === 'ssign') { ui.shortSign = +arg; ui.shortScene = 0; render(); }
+    else if (act === 'smode') { ui.shortMode = arg; ui.shortScene = 0; ui.playing = false; clearTimeout(timer); render(); }
+    else if (act === 'nwhich') { ui.numWhich = +arg; ui.shortScene = 0; render(); }
     else if (act === 'copy-voice') copy(secsCache.map(function (s) { return s.text; }).join('\n\n'), el);
     else if (act === 'dl-script') download('duology-' + mkey() + '-script.txt', scriptTxt(secsCache));
-    else if (act === 'copy-short') copy(short().parts.map(function (p) { return p.text; }).join(' '), el);
+    else if (act === 'copy-short') copy(curShort().parts.map(function (p) { return p.text; }).join(' '), el);
     else if (act === 'dl-shorts') {
-      var keep = ui.shortSign, out = [];
-      for (var k = 0; k < 12; k++) { ui.shortSign = k; var sh = short(), tx = sh.parts.map(function (p) { return p.text; }).join(' '); out.push('=== ' + SIGNS[k].name.toUpperCase() + ' · ' + fmtDur(wordCount(tx) / st.wpm * 60) + ' ===\n' + tx + '\n'); }
-      ui.shortSign = keep; download('duology-' + mkey() + '-shorts.txt', out.join('\n'));
+      var out = [], kk;
+      if (ui.shortMode === 'num') {
+        var keepN = ui.numWhich;
+        for (kk = 0; kk <= 9; kk++) { ui.numWhich = kk; var ns = numShort(), tn = ns.parts.map(function (p) { return p.text; }).join(' '); out.push('=== ' + (kk ? 'PERSONAL MONTH ' + kk : 'ALL NUMBERS (WORK IT OUT)') + ' · ' + fmtDur(wordCount(tn) / st.wpm * 60) + ' ===\n' + tn + '\n'); }
+        ui.numWhich = keepN; download('duology-' + mkey() + '-numbers-shorts.txt', out.join('\n'));
+      } else {
+        var keep = ui.shortSign;
+        for (kk = 0; kk < 12; kk++) { ui.shortSign = kk; var sh = short(), tx = sh.parts.map(function (p) { return p.text; }).join(' '); out.push('=== ' + SIGNS[kk].name.toUpperCase() + ' · ' + fmtDur(wordCount(tx) / st.wpm * 60) + ' ===\n' + tx + '\n'); }
+        ui.shortSign = keep; download('duology-' + mkey() + '-shorts.txt', out.join('\n'));
+      }
     }
     else if (act === 'copyt') copy(ytPackage(sky(), secsCache, st.wpm).titles[+arg], el);
     else if (act === 'copy-desc') copy(document.getElementById('ytdesc').value, el);
@@ -1463,12 +1571,13 @@ function ytPackage(sky, secs, wpm) {
       if (b) { b.textContent = fmtDur(tot) + ' · ' + secsCache.reduce(function (a, x) { return a + wordCount(x.text); }, 0) + ' words'; b.className = 's-dur ' + (tot >= 300 && tot <= 435 ? 'ok' : 'warn'); }
       clearTimeout(saveT); saveT = setTimeout(persist, 400);
     } else if (t.hasAttribute('data-short')) {
-      st.shortEdits[mkey() + '|' + ui.shortSign + '|' + t.getAttribute('data-short')] = t.value;
+      var cs1 = curShort(); cs1.store[cs1.key + '|' + t.getAttribute('data-short')] = t.value;
       clearTimeout(saveT); saveT = setTimeout(persist, 400);
     }
   });
   root.addEventListener('change', function (e) {
     if (e.target.id === 'depth') { st.depth = e.target.value; persist(); ui.scene = 0; render(); }
+    if (e.target.id === 'order') { st.order = e.target.value; persist(); ui.scene = 0; render(); }
     if (e.target.id === 'wpm') { st.wpm = Math.max(100, Math.min(220, +e.target.value || 160)); persist(); render(); }
   });
   document.addEventListener('keydown', function (e) {
