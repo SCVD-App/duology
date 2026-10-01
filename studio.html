@@ -54,9 +54,20 @@ button{cursor:pointer}
 .s-signs button[aria-pressed="true"]{background:var(--v-accent);color:#14131A;border-color:var(--v-accent)}
 .s-shortwrap{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}.s-shortside{flex:1;min-width:320px}
 body.clean{overflow:hidden;cursor:none}
-body.clean .s-top,body.clean .s-tabs,body.clean .s-controls,body.clean .s-timeline,body.clean .s-voice,body.clean .s-hint,body.clean .s-signs,body.clean .s-shortside{display:none}
+body.clean .s-voicepanel,body.clean .s-top,body.clean .s-tabs,body.clean .s-controls,body.clean .s-timeline,body.clean .s-voice,body.clean .s-hint,body.clean .s-signs,body.clean .s-shortside{display:none}
 body.clean .s-pad{padding:0;max-width:none}
 body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !important;border:none;border-radius:0;z-index:50;background:#000}
+/* ----- voice + record ----- */
+.s-voicepanel{margin-top:14px;background:var(--ui-panel);border:1px solid var(--ui-line);border-radius:12px;padding:14px 16px}
+.s-vhead{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline}
+.s-file{position:relative;display:inline-flex;align-items:center;cursor:pointer}.s-file input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.s-rec{min-height:40px;padding:0 18px;border-radius:10px;border:none;background:#E5484D;color:#fff;font-weight:700}
+.s-vrow{display:flex;gap:12px;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--ui-line);font-size:13px}
+.s-vn{color:var(--ui-ink)}.s-vok{color:var(--ok)}.s-vmiss{color:var(--ui-muted)}
+.s-vwarn{color:var(--warn);font-size:13px;margin:4px 0}
+.s-vlist summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--v-accent);margin:6px 0}
+.s-recmsg{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(127,209,160,.12);color:var(--ok);font-weight:600;font-size:14px}
+.s-fname{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--v-brass);background:var(--ui-bg);border:1px solid var(--ui-line);border-radius:6px;padding:2px 8px}
 /* ----- video scenes ----- */
 .v{position:absolute;inset:0;padding:90px 110px;color:var(--v-ink);font-family:var(--sans);background:var(--v-bg)}
 .v::after{content:"";position:absolute;inset:36px;border:2px solid var(--v-line);border-radius:28px;pointer-events:none}
@@ -1303,6 +1314,134 @@ function buildNumShort(sky, which) {
     return secs;
   }
   function secDur(s) { return Math.max(4, wordCount(s.text) / st.wpm * 60); }
+  // ---------- voice files + playback engine + recorder ----------
+  var audioSets = {}, audioCtx = null, run = null, recording = null;
+  function audioKey() { return ui.tab === 'video' ? 'v|' + mkey() : (ui.shortMode === 'num' ? 'n|' + mkey() + '|' + ui.numWhich : 's|' + mkey() + '|' + ui.shortSign); }
+  function curAudio() { return audioSets[audioKey()] || []; }
+  function sceneCount() { return ui.tab === 'video' ? secsCache.length : curShort().parts.length; }
+  function curIndex() { return ui.tab === 'video' ? ui.scene : ui.shortScene; }
+  function setIndex(i) { if (ui.tab === 'video') ui.scene = i; else ui.shortScene = i; }
+  function estDur(i) { return ui.tab === 'video' ? secDur(secsCache[i]) : Math.max(4, wordCount(curShort().parts[i].text) / st.wpm * 60); }
+  function sceneDur(i) { var a = curAudio()[i]; return a && a.dur ? a.dur + 1.1 : estDur(i); }
+  function slug(i, label) { return String(i + 1).padStart(2, '0') + '-' + String(label).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 28) + '.mp3'; }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function loadVoiceFiles(fileList) {
+    var key = audioKey(), files = Array.prototype.slice.call(fileList).filter(function (f) { return /^audio\//.test(f.type) || /\.(mp3|wav|m4a|ogg|aac)$/i.test(f.name); });
+    files.sort(function (a, b) { return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }); });
+    (audioSets[key] || []).forEach(function (a) { try { URL.revokeObjectURL(a.url); } catch (e) {} });
+    var set = files.map(function (f) { var url = URL.createObjectURL(f), el = new Audio(url); el.preload = 'auto'; return { name: f.name, url: url, el: el, dur: 0 }; });
+    audioSets[key] = set;
+    Promise.all(set.map(function (a) { return new Promise(function (res) { if (a.el.readyState >= 1) { a.dur = a.el.duration; return res(); } a.el.addEventListener('loadedmetadata', function () { a.dur = a.el.duration; res(); }, { once: true }); a.el.addEventListener('error', function () { res(); }, { once: true }); }); })).then(render);
+    render();
+  }
+  function clearVoice() { (audioSets[audioKey()] || []).forEach(function (a) { try { URL.revokeObjectURL(a.url); } catch (e) {} }); delete audioSets[audioKey()]; render(); }
+  function renderStage() {
+    var cv = document.querySelector('#stage .s-canvas'); if (!cv) return render();
+    var i = curIndex();
+    cv.innerHTML = ui.tab === 'video' ? scene16(secsCache[i], sky()) : curShort().scene(i);
+  }
+  function stopRun() { if (run) { run.cancelled = true; clearTimeout(run.t); if (run.audio) { try { run.audio.pause(); } catch (e) {} } run = null; } ui.playing = false; }
+  function playFrom(start, opts) {
+    opts = opts || {}; stopRun();
+    var r = run = { cancelled: false }; ui.playing = true;
+    function step(i) {
+      if (r.cancelled) return;
+      if (i >= sceneCount()) { ui.playing = false; run = null; if (opts.onDone) opts.onDone(); else render(); return; }
+      setIndex(i);
+      if (opts.record) renderStage(); else render();
+      var a = curAudio()[i];
+      if (a && a.dur) {
+        r.t = setTimeout(function () {
+          if (r.cancelled) return;
+          var done = false, next = function () { if (done || r.cancelled) return; done = true; a.el.onended = null; r.t = setTimeout(function () { step(i + 1); }, 500); };
+          a.el.currentTime = 0; r.audio = a.el; a.el.onended = next;
+          var p = a.el.play(); if (p && p.catch) p.catch(function () { r.t = setTimeout(next, a.dur * 1000); });
+          setTimeout(next, a.dur * 1000 + 1500);
+        }, 600);
+      } else {
+        r.t = setTimeout(function () { step(i + 1); }, estDur(i) * 1000);
+      }
+    }
+    step(start);
+  }
+  function togglePlay() { if (ui.playing) { stopRun(); render(); } else playFrom(curIndex()); }
+  function downloadBlob(name, blob) {
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+  function recName(ext) {
+    if (ui.tab === 'video') return 'duology-' + mkey() + '-forecast.' + ext;
+    return 'duology-' + mkey() + '-short-' + (ui.shortMode === 'num' ? (ui.numWhich ? 'month-' + ui.numWhich : 'numbers') : SIGNS[ui.shortSign].name.toLowerCase()) + '.' + ext;
+  }
+  function finishRecording(msg) {
+    if (!recording || !recording.rec) return;
+    var R = recording; recording = null; stopRun();
+    try { if (R.rec.state !== 'inactive') R.rec.stop(); } catch (e) {}
+    R.msg = msg;
+  }
+  async function startRecording() {
+    if (recording) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || !window.MediaRecorder) { ui.recMsg = 'Recording needs Chrome or Edge on a computer.'; render(); return; }
+    stopRun(); recording = { pending: true };
+    var set = curAudio();
+    ui.recMsg = ''; ui.clean = true; setIndex(0); render();
+    try { if (document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(function () {}); } catch (e) {}
+    var stream;
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false, preferCurrentTab: true, selfBrowserSurface: 'include', surfaceSwitching: 'exclude' });
+    } catch (e) {
+      recording = null; ui.clean = false; if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
+      ui.recMsg = 'Recording didn’t start (' + (e.name === 'NotAllowedError' ? 'permission was cancelled' : e.message) + '). Click Record and choose ‘This tab’ when Chrome asks.'; render(); return;
+    }
+    var vt = stream.getVideoTracks()[0];
+    await sleep(900); fit();
+    try { if (window.CropTarget && vt.cropTo) { var ct = await CropTarget.fromElement(document.querySelector('#stage .s-canvas')); await vt.cropTo(ct); } } catch (e) {}
+    var tracks = [vt];
+    if (set.length) {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      try { await audioCtx.resume(); } catch (e) {}
+      var dest = audioCtx.createMediaStreamDestination();
+      set.forEach(function (a) { if (!a.node) { a.node = audioCtx.createMediaElementSource(a.el); a.node.connect(audioCtx.destination); } a.node.connect(dest); });
+      tracks = tracks.concat(dest.stream.getAudioTracks());
+    }
+    var mixed = new MediaStream(tracks);
+    var types = ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+    var mime = types.filter(function (t) { try { return MediaRecorder.isTypeSupported(t); } catch (e) { return false; } })[0] || '';
+    var rec = new MediaRecorder(mixed, mime ? { mimeType: mime, videoBitsPerSecond: 10000000, audioBitsPerSecond: 192000 } : {});
+    var chunks = [];
+    rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    var R = recording = { rec: rec, msg: '' };
+    rec.onstop = function () {
+      var type = (rec.mimeType || mime || 'video/webm').split(';')[0], ext = /mp4/.test(type) ? 'mp4' : 'webm';
+      if (chunks.length) downloadBlob(recName(ext), new Blob(chunks, { type: type }));
+      stream.getTracks().forEach(function (t) { t.stop(); });
+      set.forEach(function (a) { try { a.node.disconnect(); a.node.connect(audioCtx.destination); } catch (e) {} });
+      recording = null; ui.clean = false;
+      if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
+      ui.recMsg = (R.msg || 'Done!') + ' Your video (' + ext.toUpperCase() + ') is in your Downloads folder as ' + recName(ext) + '.';
+      render();
+    };
+    vt.addEventListener('ended', function () { finishRecording('Recording stopped early (sharing was stopped).'); });
+    rec.start(1000);
+    await sleep(400);
+    playFrom(0, { record: true, onDone: function () { setTimeout(function () { finishRecording('Done!'); }, 1200); } });
+  }
+  function voicePanel() {
+    var set = curAudio(), n = sceneCount(), labels = ui.tab === 'video' ? secsCache.map(function (x) { return x.label; }) : curShort().labels;
+    var rows = labels.map(function (lb, i) {
+      var a = set[i];
+      return '<div class="s-vrow"><span class="s-vn">' + (i + 1) + '. ' + esc(lb) + '</span><span class="' + (a ? 's-vok' : 's-vmiss') + '">' + (a ? esc(a.name) + (a.dur ? ' · ' + fmtDur(a.dur) : '') : 'no file yet (would be ' + slug(i, lb) + ')') + '</span></div>';
+    }).join('');
+    var extra = set.length > n ? '<div class="s-vwarn">' + (set.length - n) + ' extra file(s) won’t be used. Check you loaded the right set.</div>' : '';
+    var miss = set.length && set.length < n ? '<div class="s-vwarn">' + (n - set.length) + ' scene(s) have no voice file. They’ll play silent for their estimated time.</div>' : '';
+    var tot = 0; for (var i = 0; i < n; i++) tot += sceneDur(i);
+    return '<div class="s-voicepanel"><div class="s-vhead"><b>Scotty’s voice files</b><span class="s-meta">' + (set.length ? set.length + ' loaded · video runs about ' + fmtDur(tot) : 'Load the MP3s for this ' + (ui.tab === 'video' ? 'video' : 'Short') + ', named in scene order') + '</span></div>' +
+      '<div class="s-actions" style="margin:8px 0"><label class="s-btn2 s-file">Load voice files<input type="file" id="voicefiles" accept="audio/*,.mp3,.wav,.m4a" multiple></label>' + (set.length ? '<button class="s-btn2" data-act="clearvoice">Clear</button>' : '') +
+      '<button class="s-rec" data-act="record">● Record finished video</button></div>' + extra + miss +
+      '<details class="s-vlist"' + (set.length ? ' open' : '') + '><summary>Which file goes with which scene</summary>' + rows + '</details>' +
+      (ui.recMsg ? '<div class="s-recmsg">' + esc(ui.recMsg) + '</div>' : '') +
+      '<p class="s-hint">How it works: click Record, pick <b>This tab</b> when Chrome asks, then hands off. The Studio goes full screen, plays every scene in time with Scotty, and downloads the finished video when it’s done. Keep this tab on screen while it records, and press F11 first for the sharpest picture. Press Esc to stop early.</p></div>';
+  }
   function short() {
     var sh = buildShort(sky(), ui.shortSign), k = mkey() + '|' + ui.shortSign;
     sh.parts.forEach(function (p) { p.generated = p.text; var e = st.shortEdits[k + '|' + p.id]; if (e != null) { p.text = e; p.edited = true; } });
@@ -1442,10 +1581,10 @@ function buildNumShort(sky, which) {
   }
   function viewScript(secs) {
     var t = 0;
-    return '<div class="s-pad"><div class="s-actions"><button class="s-cta" data-act="copy-voice">Copy voice script</button><button class="s-btn2" data-act="dl-script">Download script with scene notes (.txt)</button><span class="s-hint">Edit anything below. Your changes are saved in this browser, and marked ‘edited’.</span></div>' +
+    return '<div class="s-pad"><div class="s-actions"><button class="s-cta" data-act="copy-voice">Copy voice script</button><button class="s-btn2" data-act="dl-script">Download script with scene notes (.txt)</button><span class="s-hint">Edit anything below. Your changes are saved in this browser, and marked ‘edited’. Save each of Scotty\u2019s clips with the file name shown on its scene, and the Video tab will match them up automatically.</span></div>' +
       secs.map(function (s, i) {
         var start = t; t += secDur(s);
-        return '<section class="s-sec"><div class="s-sechead"><b>' + (i + 1) + '. ' + esc(s.label) + '</b><span class="s-meta" id="meta-' + i + '">' + fmtDur(start) + ' · ' + wordCount(s.text) + ' words · ' + fmtDur(secDur(s)) + '</span>' + (s.edited ? '<span class="s-edited">edited</span><button class="s-link" data-act="reset:' + s.id + '">Reset</button>' : '') + '<button class="s-link" data-act="goto:' + i + '">Preview scene</button></div>' +
+        return '<section class="s-sec"><div class="s-sechead"><b>' + (i + 1) + '. ' + esc(s.label) + '</b><span class="s-meta" id="meta-' + i + '">' + fmtDur(start) + ' · ' + wordCount(s.text) + ' words · ' + fmtDur(secDur(s)) + '</span>' + (s.edited ? '<span class="s-edited">edited</span><button class="s-link" data-act="reset:' + s.id + '">Reset</button>' : '') + '<span class="s-fname" title="Save Scotty\u2019s audio for this scene with this name">' + slug(i, s.label) + '</span><button class="s-link" data-act="goto:' + i + '">Preview scene</button></div>' +
           '<textarea data-sec="' + s.id + '" data-idx="' + i + '" rows="' + Math.max(3, Math.ceil(s.text.length / 110)) + '">' + esc(s.text) + '</textarea></section>';
       }).join('') + '</div>';
   }
@@ -1456,12 +1595,11 @@ function buildNumShort(sky, which) {
   }
   function viewVideo(secs) {
     var i = Math.min(ui.scene, secs.length - 1), s = secs[i];
-    var total = secs.reduce(function (a, x) { return a + secDur(x); }, 0), acc = 0;
-    return '<div class="s-pad">' + stageControls(secs.length, i, s.label, secDur(s)) +
-      '<div class="s-timeline">' + secs.map(function (x, k) { var w = secDur(x) / total * 100; acc += w; return '<button style="width:' + w + '%" class="' + (k === i ? 'on' : '') + '" data-act="goto:' + k + '" title="' + esc(x.label) + '"></button>'; }).join('') + '</div>' +
+    var total = 0; secs.forEach(function (x, k) { total += sceneDur(k); }); var acc = 0;
+    return '<div class="s-pad">' + stageControls(secs.length, i, s.label, sceneDur(i)) +
+      '<div class="s-timeline">' + secs.map(function (x, k) { var w = sceneDur(k) / total * 100; acc += w; return '<button style="width:' + w + '%" class="' + (k === i ? 'on' : '') + '" data-act="goto:' + k + '" title="' + esc(x.label) + '"></button>'; }).join('') + '</div>' +
       '<div class="s-stage" id="stage" data-w="1920" data-h="1080"><div class="s-canvas" style="width:1920px;height:1080px">' + scene16(s, sky()) + '</div></div>' +
-      '<div class="s-voice"><b>Voiceover for this scene</b><p>' + esc(s.text) + '</p></div>' +
-      '<p class="s-hint">To record: start your screen recorder (OBS, or Windows Game Bar with Win + Alt + R), hit Clean mode, then press Space to play. Each scene holds for as long as its voiceover takes at ' + st.wpm + ' words a minute. Drop the AI voice track over the top in your editor.</p></div>';
+      '<div class="s-voice"><b>Voiceover for this scene</b><p>' + esc(s.text) + '</p></div>' + voicePanel() + '</div>';
   }
   function viewShorts() {
     var cs = curShort(), n = cs.parts.length, i = Math.min(ui.shortScene, n - 1), p = cs.parts[i], all = cs.parts.map(function (x) { return x.text; }).join(' ');
@@ -1474,7 +1612,7 @@ function buildNumShort(sky, which) {
       (ui.shortMode === 'num' ? '<p class="s-hint" style="margin-top:-6px">Start with the ‘All 9’ Short each month: viewers work out their own number and comment it. Only add the single-number ones if the analytics say they’re pulling views.</p>' : '') +
       '<div class="s-shortwrap"><div><div class="s-stage s-tall" id="stage" data-w="1080" data-h="1920"><div class="s-canvas" style="width:1080px;height:1920px">' + cs.scene(i) + '</div></div></div>' +
       '<div class="s-shortside">' + stageControls(n, i, cs.labels[i], Math.max(4, wordCount(p.text) / st.wpm * 60)) +
-      '<div class="s-dur ' + (secs <= 60 ? 'ok' : 'warn') + '">' + fmtDur(secs) + ' · ' + wordCount(all) + ' words (under 60s is the sweet spot)</div>' +
+      voicePanel() + '<div class="s-dur ' + (secs <= 60 ? 'ok' : 'warn') + '">' + fmtDur(secs) + ' · ' + wordCount(all) + ' words (under 60s is the sweet spot)</div>' +
       cs.parts.map(function (x, k) { return '<section class="s-sec"><div class="s-sechead"><b>' + cs.labels[k] + '</b>' + (x.edited ? '<span class="s-edited">edited</span><button class="s-link" data-act="sreset:' + x.id + '">Reset</button>' : '') + '</div><textarea data-short="' + x.id + '" rows="' + Math.max(2, Math.ceil(x.text.length / 70)) + '">' + esc(x.text) + '</textarea></section>'; }).join('') +
       '<div class="s-actions"><button class="s-cta" data-act="copy-short">Copy this Short\u2019s script</button><button class="s-btn2" data-act="dl-shorts">Download all ' + (ui.shortMode === 'num' ? 'Numbers' : '12 sign') + ' Shorts scripts</button></div>' +
       '<p class="s-hint">These are 9:16, so the same recordings work as Instagram Reels and TikToks.</p></div></div></div>';
@@ -1505,20 +1643,11 @@ function buildNumShort(sky, which) {
     document.body.classList.toggle('clean', ui.clean);
     fit();
   }
-  function schedule() {
-    clearTimeout(timer); if (!ui.playing) return;
-    var dur;
-    if (ui.tab === 'video') dur = secDur(secsCache[ui.scene]);
-    else { var cs = curShort(); dur = Math.max(4, wordCount(cs.parts[ui.shortScene].text) / st.wpm * 60); }
-    timer = setTimeout(function () {
-      if (ui.tab === 'video') { if (ui.scene < secsCache.length - 1) { ui.scene++; render(); schedule(); } else { ui.playing = false; render(); } }
-      else { if (ui.shortScene < curShort().parts.length - 1) { ui.shortScene++; render(); schedule(); } else { ui.playing = false; render(); } }
-    }, dur * 1000);
-  }
+  function schedule() { if (ui.playing) playFrom(curIndex()); }
   function step(dlt) {
-    if (ui.tab === 'video') ui.scene = Math.max(0, Math.min(secsCache.length - 1, ui.scene + dlt));
-    else if (ui.tab === 'shorts') ui.shortScene = Math.max(0, Math.min(curShort().parts.length - 1, ui.shortScene + dlt));
-    render(); schedule();
+    var wasPlaying = ui.playing; stopRun();
+    var n = sceneCount(); setIndex(Math.max(0, Math.min(n - 1, curIndex() + dlt)));
+    render(); if (wasPlaying) playFrom(curIndex());
   }
   function scriptTxt(secs) {
     var t = 0, out = ['DUOLOGY · ' + sky().label.toUpperCase() + ' FORECAST', 'Estimated ' + fmtDur(secs.reduce(function (a, s) { return a + secDur(s); }, 0)) + ' at ' + st.wpm + ' wpm · ' + secs.reduce(function (a, s) { return a + wordCount(s.text); }, 0) + ' words', ''];
@@ -1529,19 +1658,21 @@ function buildNumShort(sky, which) {
   root.addEventListener('click', function (e) {
     var el = e.target.closest('[data-act]'); if (!el) return;
     var a = el.getAttribute('data-act').split(':'), act = a[0], arg = a[1];
-    if (act === 'tab') { ui.tab = arg; ui.playing = false; clearTimeout(timer); render(); }
+    if (act === 'tab') { stopRun(); ui.recMsg = ''; ui.tab = arg; render(); }
     else if (act === 'mprev' || act === 'mnext') { ui.m += act === 'mnext' ? 1 : -1; if (ui.m > 12) { ui.m = 1; ui.y++; } if (ui.m < 1) { ui.m = 12; ui.y--; } ui.scene = 0; ui.shortScene = 0; render(); }
-    else if (act === 'goto') { ui.scene = +arg; if (ui.tab !== 'video') ui.tab = 'video'; render(); schedule(); }
+    else if (act === 'goto') { stopRun(); if (ui.tab !== 'video') ui.tab = 'video'; ui.scene = +arg; render(); }
     else if (act === 'prev') step(-1);
     else if (act === 'next') step(1);
-    else if (act === 'play') { ui.playing = !ui.playing; render(); schedule(); }
+    else if (act === 'play') togglePlay();
+    else if (act === 'record') startRecording();
+    else if (act === 'clearvoice') clearVoice();
     else if (act === 'clean') { ui.clean = true; render(); }
     else if (act === 'fs') { var s = document.getElementById('stage'); if (s && s.requestFullscreen) { ui.clean = true; render(); document.documentElement.requestFullscreen().catch(function () {}); } }
     else if (act === 'reset') { delete st.edits[mkey() + '|' + arg]; persist(); render(); }
     else if (act === 'sreset') { var cs0 = curShort(); delete cs0.store[cs0.key + '|' + arg]; persist(); render(); }
-    else if (act === 'ssign') { ui.shortSign = +arg; ui.shortScene = 0; render(); }
-    else if (act === 'smode') { ui.shortMode = arg; ui.shortScene = 0; ui.playing = false; clearTimeout(timer); render(); }
-    else if (act === 'nwhich') { ui.numWhich = +arg; ui.shortScene = 0; render(); }
+    else if (act === 'ssign') { stopRun(); ui.shortSign = +arg; ui.shortScene = 0; render(); }
+    else if (act === 'smode') { stopRun(); ui.shortMode = arg; ui.shortScene = 0; render(); }
+    else if (act === 'nwhich') { stopRun(); ui.numWhich = +arg; ui.shortScene = 0; render(); }
     else if (act === 'copy-voice') copy(secsCache.map(function (s) { return s.text; }).join('\n\n'), el);
     else if (act === 'dl-script') download('duology-' + mkey() + '-script.txt', scriptTxt(secsCache));
     else if (act === 'copy-short') copy(curShort().parts.map(function (p) { return p.text; }).join(' '), el);
@@ -1576,21 +1707,23 @@ function buildNumShort(sky, which) {
     }
   });
   root.addEventListener('change', function (e) {
+    if (e.target.id === 'voicefiles' && e.target.files && e.target.files.length) { loadVoiceFiles(e.target.files); return; }
     if (e.target.id === 'depth') { st.depth = e.target.value; persist(); ui.scene = 0; render(); }
     if (e.target.id === 'order') { st.order = e.target.value; persist(); ui.scene = 0; render(); }
     if (e.target.id === 'wpm') { st.wpm = Math.max(100, Math.min(220, +e.target.value || 160)); persist(); render(); }
   });
   document.addEventListener('keydown', function (e) {
+    if (recording) { if (e.key === 'Escape') { e.preventDefault(); finishRecording('Stopped early.'); } return; }
     if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
     if (ui.tab !== 'video' && ui.tab !== 'shorts') return;
     if (e.key === 'ArrowRight') step(1);
     else if (e.key === 'ArrowLeft') step(-1);
-    else if (e.key === ' ') { e.preventDefault(); ui.playing = !ui.playing; render(); schedule(); }
+    else if (e.key === ' ') { e.preventDefault(); togglePlay(); }
     else if (e.key === 'h' || e.key === 'H') { ui.clean = !ui.clean; render(); }
-    else if (e.key === 'Escape' && ui.clean) { ui.clean = false; if (document.fullscreenElement) document.exitFullscreen(); render(); }
+    else if (e.key === 'Escape' && ui.clean) { stopRun(); ui.clean = false; if (document.fullscreenElement) document.exitFullscreen(); render(); }
     else if (e.key === 'f' || e.key === 'F') { if (!document.fullscreenElement) { ui.clean = true; render(); document.documentElement.requestFullscreen().catch(function () {}); } else document.exitFullscreen(); }
   });
-  document.addEventListener('fullscreenchange', function () { if (!document.fullscreenElement && ui.clean) { ui.clean = false; render(); } else fit(); });
+  document.addEventListener('fullscreenchange', function () { if (recording) { fit(); return; } if (!document.fullscreenElement && ui.clean) { stopRun(); ui.clean = false; render(); } else fit(); });
   window.addEventListener('resize', fit);
   render();
 })();
