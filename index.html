@@ -173,6 +173,30 @@ nav.tabs svg{width:24px;height:24px}
 .empty{text-align:center;padding:40px 10px;color:var(--muted)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 footer.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
+/* Pro */
+.lock{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--rust);vertical-align:middle}
+.lock svg{width:12px;height:12px}
+.tile.locked,.asp.locked{opacity:.78}
+.pro-card{padding:16px;display:flex;flex-direction:column;gap:10px;border:1.5px solid var(--accent);background:var(--accent-soft)}
+.pro-card b.t{font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.15}
+.locked-row{display:flex;align-items:center;gap:14px;padding:12px 14px;min-height:64px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-align:left;width:100%}
+.locked-row .big{width:44px;height:44px;font-size:21px}
+.plans{display:flex;flex-direction:column;gap:8px}
+.plan{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:68px;padding:12px 16px;border-radius:12px;border:1px solid var(--line2);background:var(--surface);text-align:left;width:100%}
+.plan b{display:block;font-size:15.5px}
+.plan .small{display:block}
+.plan .price{font-family:var(--serif);font-size:21px;font-weight:600;white-space:nowrap}
+.plan.best{border:2px solid var(--accent);background:var(--accent-soft)}
+.plan .badge{position:absolute;top:-9px;left:14px;background:var(--accent);color:var(--on-accent);font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:2px 8px;border-radius:8px}
+.plan[disabled]{opacity:.55}
+.perks{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.perks li{display:flex;gap:8px;align-items:flex-start}
+.perks li:before{content:"\2713";color:var(--accent);font-weight:700}
+.codebox{font-family:Consolas,'SF Mono',Menlo,monospace;font-size:13px;background:var(--ink);color:var(--bg);padding:12px 14px;border-radius:10px;overflow-wrap:anywhere}
+.inrow{display:flex;gap:8px}
+.inrow .input{flex:1;min-width:0}
+.inrow .btn-ghost{flex-shrink:0;min-height:48px}
+.ok{color:var(--flow);font-size:13px;font-weight:600}
 </style>
 </head>
 <body>
@@ -1202,8 +1226,41 @@ function signReading(sky, si) {
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
 
+  // ---------- Pro (Stripe one-off passes) ----------
+  // Paste your Cloudflare Worker address here (no slash on the end).
+  var DUOLOGY_API = 'https://duology.emblen-scott.workers.dev';
+  var SUPPORT_EMAIL = 'duologyexplained@gmail.com';
+  var PRO_KEY = 'duology.pro', PENDING_KEY = 'duology.pendingClaim';
+  var PRO_PLANS = [
+    { id: 'newmoon', name: 'New Moon', len: '30 days', price: 'US$3.99', sub: '30 days of Pro. Try it for a month.' },
+    { id: 'fullcircle', name: 'Full Circle', len: '12 months', price: 'US$24.99', sub: '12 months of Pro. A full trip around the Sun.', best: true },
+    { id: 'lifetime', name: 'Written in the Stars', len: 'Lifetime', price: 'US$39.99', sub: 'Pro for life. Pay once, done.' }
+  ];
+  var PLAN_NAME = { newmoon: 'New Moon', fullcircle: 'Full Circle', lifetime: 'Written in the Stars' };
+  var FREE_POINTS = { sun: 1, moon: 1, asc: 1 }, MAX_PROFILES = 10;
+  function apiReady() { return DUOLOGY_API.indexOf('REPLACE-ME') < 0; }
+  function api(path, body) {
+    var opt = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {};
+    return fetch(DUOLOGY_API + path, opt).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { status: r.status, d: d || {} }; }); });
+  }
+  function parseToken(t) {
+    var p = String(t || '').trim().split('_');
+    if (p.length !== 5 || p[0] !== 'duology' || !PLAN_NAME[p[1]] || !/^[0-9a-f]{32}$/.test(p[4])) return null;
+    var issued = parseInt(p[3], 36); if (!(issued > 0)) return null;
+    if (p[2] === 'forever') return p[1] === 'lifetime' ? { plan: p[1], expires: null } : null;
+    var d = +p[2]; if (!(d >= 1 && d <= 400)) return null;
+    return { plan: p[1], expires: issued + d * 86400000 };
+  }
+  function loadPro() { try { var x = JSON.parse(localStorage.getItem(PRO_KEY)); if (x && parseToken(x.token)) return x; } catch (e) {} return null; }
+  var pro = loadPro();
+  function savePro() { try { if (pro) localStorage.setItem(PRO_KEY, JSON.stringify(pro)); else localStorage.removeItem(PRO_KEY); } catch (e) {} }
+  function setPro(token) { var t = parseToken(token); pro = { token: token.trim(), plan: t.plan, expires: t.expires, checkedAt: Date.now() }; savePro(); }
+  function isPro() { return !!(pro && (pro.expires === null || pro.expires > Date.now())); }
+  function houseSys() { return isPro() ? store.settings.houses : 'placidus'; }
+
   var store = load();
-  var ui = { screen: store.profiles.length ? 'chart' : 'onboard', card: null, range: 30, tag: 'all', lesson: null, editId: null, showAllAsp: false, confirmDel: null, confirmWipe: false, place: null, results: [], searchMsg: '', formErr: '', sign: null, smonth: 0 };
+  var ui = { paywall: null, claim: null, payBusy: null, payMsg: '', codeMsg: '', codeOk: false, restoreMsg: '', copied: false, payNote: '', proLost: '', confirmRemovePro: false,
+    screen: store.profiles.length ? 'chart' : 'onboard', card: null, range: 30, tag: 'all', lesson: null, editId: null, showAllAsp: false, confirmDel: null, confirmWipe: false, place: null, results: [], searchMsg: '', formErr: '', sign: null, smonth: 0 };
   (function () { var mm = /sign=([a-z]+)/i.exec(location.hash || ''); if (mm) { var ix = SIGNS.map(function (x) { return x.name.toLowerCase(); }).indexOf(mm[1].toLowerCase()); if (ix >= 0) { ui.sign = ix; ui.screen = 'signs'; } } })();
   var root = document.getElementById('app');
 
@@ -1216,13 +1273,13 @@ function signReading(sky, si) {
 
   var chartCache = {}, fcCache = {};
   function getChart(p) {
-    var k = p.id + '|' + p.updated + '|' + store.settings.houses;
-    if (!chartCache[k]) chartCache[k] = buildChart(p, store.settings.houses);
+    var k = p.id + '|' + p.updated + '|' + houseSys();
+    if (!chartCache[k]) chartCache[k] = buildChart(p, houseSys());
     return chartCache[k];
   }
   function todayStart() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }
   function getForecast(c) {
-    var start = todayStart(), k = c.profile.id + '|' + c.profile.updated + '|' + store.settings.houses + '|' + start;
+    var start = todayStart(), k = c.profile.id + '|' + c.profile.updated + '|' + houseSys() + '|' + start;
     if (!fcCache[k]) fcCache[k] = forecast(c, start, 366);
     return fcCache[k];
   }
@@ -1234,6 +1291,7 @@ function signReading(sky, si) {
     numbers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><line x1="9" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="15" y2="20"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/></svg>',
     learn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 5.5c3-1.5 6-1.5 9 0v14c-3-1.5-6-1.5-9 0z"/><path d="M21 5.5c-3-1.5-6-1.5-9 0v14c3-1.5 6-1.5 9 0z"/></svg>',
     settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.3" fill="var(--surface)"/><circle cx="15" cy="17" r="2.3" fill="var(--surface)"/></svg>',
+    lock: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>',
     x: '<svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>'
   };
   var TABS = [['chart', 'Chart'], ['forecast', 'Forecast'], ['numbers', 'Numbers'], ['learn', 'Learn'], ['settings', 'Settings']];
@@ -1295,6 +1353,15 @@ function signReading(sky, si) {
     return o.join('');
   }
 
+  // ---------- Pro helpers ----------
+  var LOCK = '<span class="lock">' + ICON.lock + 'Pro</span>';
+  function proCard(title, text, reason, btn) {
+    return '<div class="card pro-card"><span class="lock">' + ICON.lock + 'Duology Pro</span><b class="t">' + title + '</b><div class="small" style="color:var(--ink2)">' + text + '</div><button type="button" class="btn" data-act="paywall:' + reason + '">' + (btn || 'See the Pro options') + '</button></div>';
+  }
+  function lockedRow(n, label, title, reason) {
+    return '<button type="button" class="locked-row" data-act="paywall:' + reason + '"><div class="big">' + n + '</div><div style="flex:1"><div class="small" style="font-weight:700;text-transform:uppercase;letter-spacing:.8px">' + label + '</div><b style="font-size:15px">' + title + '</b></div>' + LOCK + '</button>';
+  }
+
   // ---------- screens ----------
   function birthLine(c) {
     var p = c.profile, y = +p.date.split('-')[0];
@@ -1353,10 +1420,12 @@ function signReading(sky, si) {
       return '<button type="button" class="row-btn" data-act="card-place:' + id + '"><div class="orb' + (P.isPoint ? ' pt' : '') + '">' + glyph(id) + '</div><div style="flex:1"><b style="font-size:15px">' + title + '</b><div class="small" style="color:var(--ink2)">' + P.short + ': ' + S.style + '</div></div><span aria-hidden="true" style="color:var(--muted);font-size:18px">›</span></button>';
     }).join('') + '</section>');
     // placements
+    var free = isPro();
+    if (!free) out.push(proCard('That\u2019s your Big Three. There\u2019s a lot more to you.', 'Your chart has ' + c.points.length + ' placements and ' + c.aspects.length + ' aspects. Pro explains every one of them, the same way: what it means, why astrologers say so, and how it fits the rest of your chart.', 'chart', 'Unlock my full chart'));
     out.push('<section class="stack-s"><h2>Every placement</h2><p class="small" style="margin:0">Tap any of them for what it means, and why astrologers say so.</p><div class="grid2">' + c.points.map(function (id) {
-      var P = PLANETS[id], S = SIGNS[signOf(c.pos[id])];
+      var P = PLANETS[id], S = SIGNS[signOf(c.pos[id])], lk = !free && !FREE_POINTS[id];
       var sub = degIn(c.pos[id]) + (c.hasTime && id !== 'asc' ? ' · ' + ord(c.houses[id]) + ' house' : '') + (c.retro[id] ? ' · R' : '');
-      return '<button type="button" class="tile" data-act="card-place:' + id + '"><b><span class="g">' + glyph(id) + '</span> ' + (id === 'asc' ? 'Rising' : (id === 'mc' ? 'MC' : P.name)) + ' in ' + S.name + '</b><span class="small">' + sub + '</span></button>';
+      return '<button type="button" class="tile' + (lk ? ' locked' : '') + '" data-act="card-place:' + id + '"><b><span class="g">' + glyph(id) + '</span> ' + (id === 'asc' ? 'Rising' : (id === 'mc' ? 'MC' : P.name)) + ' in ' + S.name + '</b><span class="small">' + sub + (lk ? ' \u00B7 ' + LOCK : '') + '</span></button>';
     }).join('') + '</div>' + (!c.hasTime ? '<p class="small" style="margin:0">Moon position is for noon, so it could be a few degrees either side.</p>' : '') + '</section>');
     // balance
     var cnt = { fire: 0, earth: 0, air: 0, water: 0 };
@@ -1364,13 +1433,13 @@ function signReading(sky, si) {
     var top = Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; })[0];
     out.push('<section class="stack-s"><h2>Your element mix</h2><div class="bal">' + ['fire', 'earth', 'air', 'water'].map(function (e) { return '<div><b>' + cnt[e] + '</b><small>' + e[0].toUpperCase() + e.slice(1) + '</small></div>'; }).join('') + '</div><p class="small" style="margin:0;color:var(--ink2)">Counting which element each planet' + (c.hasTime ? ' (plus your Rising sign)' : '') + ' sits in. Yours leans <b>' + top + '</b> (' + ELEMENT[top] + '). Astrologers use this as a quick read on your overall flavour.</p></section>');
     // aspects
-    var aps = ui.showAllAsp ? c.aspects : c.aspects.slice(0, 10);
+    var aps = !free ? c.aspects.slice(0, 4) : (ui.showAllAsp ? c.aspects : c.aspects.slice(0, 10));
     out.push('<section class="stack-s"><h2>The lines in the middle</h2><p class="small" style="margin:0">Those are aspects: the angles between planets. Some angles are read as easy, some as friction. Tightest first.</p><div>' + aps.map(function (ap) {
       var idx = c.aspects.indexOf(ap);
       var col = ap.asp.easy === null ? 'var(--muted)' : (ap.asp.easy ? 'var(--flow)' : 'var(--tension)');
       var kind = ap.asp.easy === null ? 'Blending' : (ap.asp.easy ? 'Flowing' : 'Tension');
-      return '<button type="button" class="asp" data-act="card-asp:' + idx + '"><b>' + PLANETS[ap.a].name + ' ' + ap.asp.name.toLowerCase() + ' ' + PLANETS[ap.b].name + '</b><span style="color:' + col + '">' + kind + ' · ' + ap.asp.angle + '°</span></button>';
-    }).join('') + '</div>' + (c.aspects.length > 10 && !ui.showAllAsp ? '<button type="button" class="link" data-act="show-all-asp">Show all ' + c.aspects.length + '</button>' : '') + '</section>');
+      return '<button type="button" class="asp' + (free ? '' : ' locked') + '" data-act="card-asp:' + idx + '"><b>' + PLANETS[ap.a].name + ' ' + ap.asp.name.toLowerCase() + ' ' + PLANETS[ap.b].name + '</b><span style="color:' + col + '">' + kind + ' · ' + ap.asp.angle + '°' + (free ? '' : ' ' + LOCK) + '</span></button>';
+    }).join('') + '</div>' + (!free ? '<button type="button" class="link" data-act="paywall:aspects">See all ' + c.aspects.length + ' explained with Pro</button>' : '') + (free && c.aspects.length > 10 && !ui.showAllAsp ? '<button type="button" class="link" data-act="show-all-asp">Show all ' + c.aspects.length + '</button>' : '') + '</section>');
     out.push('</div>');
     return out.join('');
   }
@@ -1415,6 +1484,7 @@ function signReading(sky, si) {
   function screenForecast() {
     var p = active(); if (!p) return '';
     var c = getChart(p), all = getForecast(c), now = Date.now(), start = todayStart(), end = start + ui.range * 86400000;
+    var free = isPro(); if (!free) ui.range = 30;
     var ev = all.filter(function (e) {
       if (e.ms > end) return false;
       if (ui.tag !== 'all' && e.tag !== ui.tag) return false;
@@ -1424,18 +1494,23 @@ function signReading(sky, si) {
     });
     var py = personalYear(p.date, new Date().getFullYear()), pm = personalMonth(py.n, new Date().getMonth() + 1), mt = moonToday(c, now);
     var out = ['<div class="stack">' + fviewSeg('forecast') + '<div><h1>What’s coming up</h1><p class="lede">Where the planets are heading, compared with where they were when you were born. Astrologers call these transits.</p></div>'];
-    out.push('<div class="seg" role="group" aria-label="Forecast range" style="grid-template-columns:repeat(3,minmax(0,1fr))">' + [[30, '30 days'], [90, '90 days'], [365, '12 months']].map(function (r) { return '<button type="button" aria-pressed="' + (ui.range === r[0]) + '" data-act="range:' + r[0] + '">' + r[1] + '</button>'; }).join('') + '</div>');
+    out.push('<div class="seg" role="group" aria-label="Forecast range" style="grid-template-columns:repeat(3,minmax(0,1fr))">' + [[30, '30 days'], [90, '90 days'], [365, '12 months']].map(function (r) { var lk = !free && r[0] > 30; return '<button type="button" style="white-space:nowrap;padding:0 4px" aria-pressed="' + (ui.range === r[0]) + '" data-act="' + (lk ? 'paywall:forecast' : 'range:' + r[0]) + '">' + r[1] + (lk ? ' ' + ICON.lock.replace('<svg ', '<svg style="width:11px;height:11px;vertical-align:-1px" ') : '') + '</button>'; }).join('') + '</div>');
     out.push('<div class="dark-strip"><div class="k">Today</div><div class="v">' + mt.phase + ' in ' + mt.sign + '</div><div class="s">' + mt.text.replace(mt.phase + ' in ' + mt.sign, 'The Moon is here') + '</div></div>');
     out.push('<div class="dark-strip"><div class="k">Numbers layer</div><div class="v">Personal Year ' + py.n + ' · Personal Month ' + pm.n + '</div><div class="s">Numerology’s timing cycle, running alongside the planets. ' + pm.working + '.</div></div>');
     out.push('<div class="chips" role="group" aria-label="Filter">' + [['all', 'Everything'], ['Planets', 'Planets'], ['Moon', 'Moon'], ['Numbers', 'Numbers']].map(function (t) { return '<button type="button" class="chip" aria-pressed="' + (ui.tag === t[0]) + '" data-act="tag:' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>');
     out.push('<p class="small" style="margin:0">' + (ui.range === 30 ? 'Everything, including the quick stuff.' : (ui.range === 90 ? 'Leaving out the quick day-or-two stuff so the bigger themes stand out.' : 'Just the big-ticket items: slow planets, retrogrades, eclipses and your solar return.')) + ' Tap any event for the why.</p>');
     if (!ev.length) out.push('<div class="empty">Nothing matching in this window.</div>');
-    var lastMonth = '';
+    var lastMonth = '', hidden = 0;
+    if (!free && ev.length > 3) { hidden = ev.length - 3; ev = ev.slice(0, 3); }
     ev.forEach(function (e) {
       var mLabel = fmtDate(e.ms, { month: 'long', year: 'numeric' });
       if (mLabel !== lastMonth) { out.push('<div class="month">' + mLabel + '</div>'); lastMonth = mLabel; }
       out.push(evHTML(e));
     });
+    if (!free) {
+      var yearN = all.filter(function (e) { return e.tier === 'major'; }).length;
+      out.push(proCard((hidden ? hidden + ' more in the next 30 days' : 'There\u2019s more coming'), 'Pro unlocks your whole personal forecast: every event over the next 30 days, the bigger themes over 90 days, and ' + yearN + ' big-ticket events across the next 12 months. Each one tells you where it lands in your chart, how long it lasts and why astrologers read it that way.', 'forecast', 'Unlock my forecast'));
+    }
     out.push('<p class="small" style="margin:0">Dates are calculated from real planet positions and shown in your current local time. <button type="button" class="link" style="min-height:0" data-act="learn:weigh">How astrologers decide what counts</button></p></div>');
     return out.join('');
   }
@@ -1457,6 +1532,18 @@ function signReading(sky, si) {
     var ex = nameNumber(p.name, s.numSys, s.masters, 'all'), so = nameNumber(p.name, s.numSys, s.masters, 'vowels'), pe = nameNumber(p.name, s.numSys, s.masters, 'cons');
     var yr = new Date().getFullYear(), py = personalYear(p.date, yr), pm = personalMonth(py.n, new Date().getMonth() + 1);
     var nextPy = personalYear(p.date, yr + 1), fitNow = yearVsLifePath(lp.n, py.n), fitNext = yearVsLifePath(lp.n, nextPy.n);
+    if (!isPro()) {
+      out.push(numCard('Life Path', lp, 'Your birth date can never change, so numerology treats it as the main road you\u2019re on.', [['What it\u2019s for', 'Your Life Path is the big one: the overall direction of your life, and the number everything else gets compared against, including your Personal Year.']], true));
+      out.push('<h2>Your other numbers</h2><p class="small" style="margin:0">Here they are. Pro explains each one, shows the working, and how they play off your Life Path.</p>');
+      out.push(lockedRow(py.n, 'Personal Year ' + yr, PY_THEME[py.n].title, 'numbers'));
+      out.push(lockedRow(pm.n, 'Personal Month', PY_THEME[pm.n].title, 'numbers'));
+      if (ex) out.push(lockedRow(ex.n, 'Expression', NUM_MEAN[ex.n], 'numbers'));
+      if (so) out.push(lockedRow(so.n, 'Soul Urge', NUM_MEAN[so.n], 'numbers'));
+      if (pe) out.push(lockedRow(pe.n, 'Personality', NUM_MEAN[pe.n], 'numbers'));
+      out.push(proCard('How your numbers fit together', 'What this year means for someone on a Life Path ' + lp.n + ', what\u2019s coming in ' + (yr + 1) + ', and where your name numbers agree or pull against each other.', 'numbers', 'Unlock my numbers'));
+      out.push('</div>');
+      return out.join('');
+    }
     out.push('<h2>Right now</h2>');
     out.push(numCard('Personal Year ' + yr, py, 'Your birthday plus the current year. It runs in a nine-year cycle, so it changes every 1 January.', [
       ['What ' + an(py.n) + ' ' + py.n + ' year is about', PY_THEME[py.n].text],
@@ -1490,34 +1577,92 @@ function signReading(sky, si) {
 
   function screenSettings() {
     var s = store.settings, p = active(), out = ['<div class="stack">'];
+    out.push(proSection());
     out.push('<section class="stack-s"><h2>Saved charts</h2>' + store.profiles.map(function (x) {
       var isA = p && x.id === p.id;
       return '<div class="card prof"><div class="avatar">' + esc(initials(x.name)) + '</div><div style="flex:1;min-width:0"><b>' + esc(x.name) + '</b>' + (isA ? ' <span class="small">(showing)</span>' : '') + '<div class="small">' + fmtDate(new Date(x.date + 'T00:00:00').getTime()) + ' · ' + (x.time ? fmtTime(x.time) : 'time unknown') + ' · ' + esc(x.placeName) + '</div>' +
         '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' + (isA ? '' : '<button type="button" class="btn-ghost" data-act="use-profile:' + x.id + '">Show</button>') + '<button type="button" class="btn-ghost" data-act="edit-profile:' + x.id + '">Edit</button>' +
         '<button type="button" class="btn-ghost" style="color:var(--danger);border-color:var(--danger)" data-act="del-profile:' + x.id + '">' + (ui.confirmDel === x.id ? 'Tap again to delete' : 'Delete') + '</button></div></div></div>';
-    }).join('') + '<button type="button" class="btn-dashed" data-act="add-profile">+ Add a chart (partner, kids, mates)</button></section>');
+    }).join('') + '<button type="button" class="btn-dashed" data-act="add-profile">+ Add a chart (partner, kids, mates)' + (isPro() ? '' : ' ' + LOCK) + '</button>' + (isPro() ? '<div class="small">Up to ' + MAX_PROFILES + ' charts.</div>' : '<div class="small">The free version keeps one chart. Pro keeps up to ' + MAX_PROFILES + ', so you can read the whole family.</div>') + '</section>');
     // astrology
     out.push('<section class="stack-s"><h2>Astrology system</h2><div class="lbl">Zodiac</div><div class="grid2"><button type="button" class="opt" aria-pressed="true"><b>Tropical</b><span>Western standard</span></button><button type="button" class="opt" disabled><b>Sidereal (Vedic)</b><span>Coming later</span></button></div>');
     out.push('<button type="button" class="link" data-act="learn:vedic">Why are there two zodiacs?</button><div class="lbl">House system</div>');
     [['placidus', 'Placidus', 'The most common. Divides the sky by time, not equal slices.'], ['whole', 'Whole Sign', 'The oldest system: one sign = one house. Popular with newer astrologers.'], ['equal', 'Equal', 'Twelve equal 30° slices, starting from your Rising sign.']].forEach(function (o) {
-      out.push('<button type="button" class="opt" aria-pressed="' + (s.houses === o[0]) + '" data-act="houses:' + o[0] + '"><b>' + o[1] + '</b><span>' + o[2] + '</span></button>');
+      var lk = !isPro() && o[0] !== 'placidus';
+      out.push('<button type="button" class="opt" aria-pressed="' + (houseSys() === o[0]) + '" data-act="' + (lk ? 'paywall:houses' : 'houses:' + o[0]) + '"><b>' + o[1] + (lk ? ' ' + LOCK : '') + '</b><span>' + o[2] + '</span></button>');
     });
     if (p && p.time) {
       var cur = getChart(p), base = buildChart(p, 'placidus'), moves = [];
       CHART_POINTS.forEach(function (id) { if (base.houses[id] !== cur.houses[id]) moves.push(PLANETS[id].name + ' ' + ord(base.houses[id]) + ' → ' + ord(cur.houses[id])); });
-      out.push('<div class="note"><b>What this changes for ' + esc(p.name.split(/\s+/)[0]) + ': </b>' + (s.houses === 'placidus' ? 'You’re on the default. Switch systems and we’ll show you exactly which planets change house.' : (moves.length ? 'Compared with Placidus: ' + moves.join(', ') + '. Same sky, different slicing.' : 'Nothing moves house in this chart compared with Placidus.')) + '</div>');
+      out.push('<div class="note"><b>What this changes for ' + esc(p.name.split(/\s+/)[0]) + ': </b>' + (houseSys() === 'placidus' ? 'You’re on the default. Switch systems and we’ll show you exactly which planets change house.' : (moves.length ? 'Compared with Placidus: ' + moves.join(', ') + '. Same sky, different slicing.' : 'Nothing moves house in this chart compared with Placidus.')) + '</div>');
     }
     out.push('</section>');
     // numerology
     out.push('<section class="stack-s"><h2>Numerology system</h2><div class="grid2"><button type="button" class="opt" aria-pressed="' + (s.numSys === 'pyth') + '" data-act="numsys:pyth"><b>Pythagorean</b><span>Most widely used</span></button><button type="button" class="opt" aria-pressed="' + (s.numSys === 'chaldean') + '" data-act="numsys:chaldean"><b>Chaldean</b><span>Older, sound-based</span></button></div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px"><div><b id="mlabel" style="font-size:14px">Keep master numbers</b><div class="small">11, 22 and 33 don’t get reduced</div></div><button type="button" class="switch" role="switch" aria-checked="' + s.masters + '" aria-labelledby="mlabel" data-act="masters"><i></i></button></div></section>');
     // privacy
-    out.push('<section class="stack-s"><h2>Privacy</h2><p class="small" style="margin:0;color:var(--ink2)">Your charts are stored in this browser only. Nothing is sent to us. The only thing that leaves your device is the place name you type into the search, which goes to Open-Meteo’s free place lookup.</p><button type="button" class="btn-danger" data-act="wipe">' + (ui.confirmWipe ? 'Tap again to delete everything' : 'Delete all my data') + '</button></section>');
-    out.push('<footer class="foot">Duology · astrology and numerology, explained<br>An SCVD app<br>All calculations run on your device.</footer></div>');
+    out.push('<section class="stack-s"><h2>Privacy</h2><p class="small" style="margin:0;color:var(--ink2)">Your charts are stored in this browser only. Your name, birth date, time and place are never sent to us. Two things do leave your device: the place name you type into the search, which goes to Open-Meteo\u2019s free place lookup, and, if you buy Pro, your payment, which is handled by Stripe. We never see your card. Stripe passes us the email you used so we can send your Pro code. We keep that email with your code so we can send it again if you lose it, and use it for nothing else. No ads, no tracking, no selling data.</p>' +
+      '<h2 style="margin-top:6px">Refunds</h2><p class="small" style="margin:0;color:var(--ink2)">Every Pro pass is a one-off payment. Nothing renews and nothing is charged again. If Pro isn\u2019t what you expected, email <b>' + SUPPORT_EMAIL + '</b> within 14 days of buying and we\u2019ll refund you in full, no questions asked. This doesn\u2019t limit any rights you have under consumer law where you live.</p><button type="button" class="btn-danger" data-act="wipe">' + (ui.confirmWipe ? 'Tap again to delete everything' : 'Delete all my data') + '</button></section>');
+    out.push('<footer class="foot">Duology · astrology and numerology, explained<br>An SCVD app<br>All calculations run on your device.<br>Questions? ' + SUPPORT_EMAIL + '</footer></div>');
     return out.join('');
   }
 
+  function fmtExp(ms) { return fmtDate(ms, { day: 'numeric', month: 'long', year: 'numeric' }); }
+  function codeForm(where) {
+    return '<div class="field"><label for="f-code-' + where + '">Have a code?</label><div class="inrow"><input class="input" id="f-code-' + where + '" placeholder="duology_..." autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(ui.codeVal || '') + '"><button type="button" class="btn-ghost" data-act="apply-code:' + where + '">Apply</button></div>' +
+      (ui.codeMsg ? '<div class="' + (ui.codeOk ? 'ok' : 'err') + '" role="status">' + esc(ui.codeMsg) + '</div>' : '') + '</div>';
+  }
+  function proSection() {
+    var o = ['<section class="stack-s"><h2>Duology Pro</h2>'];
+    if (ui.proLost) o.push('<div class="note">' + esc(ui.proLost) + ' If you think that\u2019s a mistake, email ' + SUPPORT_EMAIL + '.</div>');
+    if (isPro()) {
+      var masked = pro.token.slice(0, 8) + '\u2026' + pro.token.slice(-6);
+      o.push('<div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px"><div><b style="font-size:16px">' + PLAN_NAME[pro.plan] + '</b> <span class="lock" style="color:var(--flow)">Active</span><div class="small">' + (pro.expires === null ? 'Pro for life. Nothing to renew.' : 'Runs until ' + fmtExp(pro.expires) + ' (' + Math.max(1, Math.ceil((pro.expires - Date.now()) / 86400000)) + ' days left). It just stops then. Nothing renews.') + '</div></div>' +
+        '<div class="field"><div class="lbl">Your code</div><div class="codebox">' + esc(masked) + '</div><div class="small">Keep a copy. It unlocks Pro on another phone or browser, or if you clear this one.</div></div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn-ghost" data-act="copy-code">' + (ui.copied ? 'Copied' : 'Copy full code') + '</button><button type="button" class="btn-ghost" data-act="remove-pro">' + (ui.confirmRemovePro ? 'Tap again to remove' : 'Remove from this device') + '</button></div></div>');
+      if (pro.expires !== null) o.push('<button type="button" class="link" data-act="paywall:extend">Want more time? See the passes</button>');
+    } else {
+      if (pro && pro.expires !== null) o.push('<div class="note">Your ' + PLAN_NAME[pro.plan] + ' pass finished on ' + fmtExp(pro.expires) + '. Thanks for giving it a go. Pick up another pass any time.</div>');
+      o.push('<p class="small" style="margin:0;color:var(--ink2)">Every placement, your personal forecast, all your numbers and charts for the whole family. One-off passes from US$3.99. No subscription.</p>');
+      o.push('<button type="button" class="btn" data-act="paywall:settings">See the Pro options</button>');
+      o.push(codeForm('st'));
+      o.push('<div class="field"><label for="f-restore">Lost your code? We\u2019ll email it again</label><div class="inrow"><input class="input" id="f-restore" type="email" placeholder="The email you paid with" autocomplete="email" value="' + esc(ui.restoreVal || '') + '"><button type="button" class="btn-ghost" data-act="restore">Send</button></div>' + (ui.restoreMsg ? '<div class="small" role="status" style="color:var(--ink2)">' + esc(ui.restoreMsg) + '</div>' : '') + '</div>');
+    }
+    o.push('</section>');
+    return o.join('');
+  }
+  var PAY_WHY = {
+    chart: 'Unlock the rest of your chart.', aspects: 'See every aspect, explained.', place: 'Every placement, explained.', forecast: 'Your whole personal forecast.', numbers: 'All your numbers, and how they fit.',
+    profiles: 'Charts for the whole family.', houses: 'Choose your house system.', settings: 'Everything in Duology, unlocked.', extend: 'Add more time.'
+  };
+  function paywallSheet() {
+    var busy = !!ui.payBusy;
+    return '<div class="scrim" data-act="close-paywall"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pw-title">' +
+      '<div class="sheet-head"><div><span class="lock">' + ICON.lock + 'Duology Pro</span><div class="sheet-title" id="pw-title">' + (PAY_WHY[ui.paywall] || PAY_WHY.settings) + '</div></div><button type="button" class="x" aria-label="Close" data-act="close-paywall" id="pw-close">' + ICON.x + '</button></div>' +
+      '<ul class="perks"><li>Every placement and aspect in your chart, explained</li><li>Your personal forecast: 30 days, 90 days and 12 months</li><li>All your numbers, the working, and how they fit together</li><li>Up to ' + MAX_PROFILES + ' charts for family and friends</li><li>Your choice of house system</li></ul>' +
+      '<div class="plans">' + PRO_PLANS.map(function (pl) {
+        return '<button type="button" class="plan' + (pl.best ? ' best' : '') + '" data-act="buy:' + pl.id + '"' + (busy ? ' disabled' : '') + '>' + (pl.best ? '<span class="badge">Best value</span>' : '') + '<span><b>' + pl.name + '</b><span class="small">' + (ui.payBusy === pl.id ? 'Opening secure checkout\u2026' : pl.sub) + '</span></span><span class="price">' + pl.price + '</span></button>';
+      }).join('') + '</div>' +
+      (ui.payMsg ? '<div class="err" role="alert">' + esc(ui.payMsg) + '</div>' : '') +
+      '<p class="small" style="margin:0;text-align:center">One-off payment. No subscription, no auto-renew.<br>Secure checkout by Stripe, in US dollars. Your bank converts it.<br>Not happy? Full refund within 14 days.</p>' +
+      codeForm('pw') + '</div></div>';
+  }
+  function claimSheet() {
+    var c = ui.claim, inner;
+    if (c.state === 'working') inner = '<div class="sheet-title" id="cl-title">Unlocking Duology Pro\u2026</div><p style="margin:0">Payment received. Just grabbing your code. This takes a few seconds.</p>';
+    else if (c.state === 'done') inner = '<div class="sheet-head"><div class="sheet-title" id="cl-title">You\u2019re Pro. Welcome aboard.</div><button type="button" class="x" aria-label="Close" data-act="close-claim" id="cl-close">' + ICON.x + '</button></div>' +
+      '<p style="margin:0">' + PLAN_NAME[pro.plan] + (pro.expires === null ? ' is yours for life.' : ' runs until ' + fmtExp(pro.expires) + '. It simply stops then. Nothing renews.') + '</p>' +
+      '<div class="field"><div class="lbl">Your Pro code</div><div class="codebox">' + esc(pro.token) + '</div><div class="small">We\u2019ve emailed this to you too. Keep it: it unlocks Pro on another device, or if you clear your browser (Settings \u2192 Have a code?).</div></div>' +
+      '<button type="button" class="btn-ghost" data-act="copy-code">' + (ui.copied ? 'Copied' : 'Copy code') + '</button><button type="button" class="btn" data-act="close-claim">Let\u2019s go</button>';
+    else inner = '<div class="sheet-head"><div class="sheet-title" id="cl-title">Payment received</div><button type="button" class="x" aria-label="Close" data-act="close-claim" id="cl-close">' + ICON.x + '</button></div>' +
+      '<p style="margin:0">Your payment went through, but we couldn\u2019t fetch your code just yet (usually a patchy connection). Your code is also on its way to your email. You can paste it into Settings \u2192 Have a code?, or try again now.</p>' +
+      '<button type="button" class="btn" data-act="retry-claim">Try again</button><div class="small">Still stuck? Email ' + SUPPORT_EMAIL + ' and we\u2019ll sort it out.</div>';
+    return '<div class="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cl-title">' + inner + '</div></div>';
+  }
+
   function sheet() {
+    if (ui.claim) return claimSheet();
+    if (ui.paywall) return paywallSheet();
     var p = active(); if (!ui.card || !p) return '';
     var c = getChart(p), cd;
     if (ui.card.type === 'place') cd = placementCard(c, ui.card.id); else { var ap = c.aspects[ui.card.idx]; if (!ap) return ''; cd = aspectCard(c, ap); }
@@ -1537,18 +1682,82 @@ function signReading(sky, si) {
   }
 
   // ---------- render ----------
+  var keepFocus = false;
+  function toast(msg) {
+    var t = document.createElement('div'); t.setAttribute('role', 'status'); t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:30;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;max-width:90vw;text-align:center';
+    document.body.appendChild(t); setTimeout(function () { t.remove(); }, 4200);
+  }
   function render() {
     var scr = ui.screen;
     if (scr !== 'onboard' && scr !== 'signs' && scr !== 'learn' && !active()) scr = ui.screen = 'onboard';
     var body = scr === 'onboard' ? screenOnboard() : scr === 'chart' ? screenChart() : scr === 'forecast' ? screenForecast() : scr === 'numbers' ? screenNumbers() : scr === 'learn' ? screenLearn() : scr === 'signs' ? screenSigns() : screenSettings();
     var tabs = (scr === 'onboard' || !active()) ? '' : '<nav class="tabs" aria-label="Main">' + TABS.map(function (t) { return '<button type="button" data-act="tab:' + t[0] + '"' + (scr === t[0] || (scr === 'signs' && t[0] === 'forecast') ? ' aria-current="page"' : '') + '>' + ICON[t[0]] + t[1] + '</button>'; }).join('') + '</nav>';
     root.innerHTML = '<header class="top"><div class="brand">Du<em>ology</em></div><div class="screen-name">' + NAMES[scr] + '</div></header><main id="main">' + body + '</main>' + tabs + sheet();
-    document.body.style.overflow = ui.card ? 'hidden' : '';
-    if (ui.card) { var cb = document.getElementById('sheet-close'); if (cb) cb.focus(); }
+    var anySheet = ui.card || ui.paywall || ui.claim;
+    document.body.style.overflow = anySheet ? 'hidden' : '';
+    if (anySheet && !keepFocus) { var cb = document.getElementById('cl-close') || document.getElementById('pw-close') || document.getElementById('sheet-close'); if (cb) cb.focus(); }
+    keepFocus = false;
+    if (ui.payNote) { var pn = ui.payNote; ui.payNote = ''; toast(pn); }
     if (scr === 'onboard') wireOnboard();
     if (scr === 'learn' && ui.lesson) { var el = document.getElementById('lesson-' + ui.lesson); if (el) el.scrollIntoView({ block: 'center' }); }
   }
-  function go(screen) { ui.screen = screen; ui.card = null; ui.confirmDel = null; ui.confirmWipe = false; render(); window.scrollTo(0, 0); }
+  function go(screen) { ui.screen = screen; ui.card = null; ui.paywall = null; ui.confirmDel = null; ui.confirmWipe = false; ui.confirmRemovePro = false; ui.codeMsg = ''; ui.restoreMsg = ''; ui.copied = false; render(); window.scrollTo(0, 0); }
+
+  // ---------- Pro actions ----------
+  function openPaywall(reason) { ui.paywall = reason || 'settings'; ui.payMsg = ''; ui.codeMsg = ''; ui.card = null; render(); }
+  function buy(planId) {
+    if (!apiReady()) { ui.payMsg = 'Payments aren\u2019t switched on yet. Check back soon.'; render(); return; }
+    ui.payBusy = planId; ui.payMsg = ''; render();
+    var back = location.href.split('#')[0].split('?')[0];
+    api('/create-checkout', { planId: planId, returnUrl: back }).then(function (r) {
+      if (r.d.url) { location.href = r.d.url; return; }
+      throw new Error(r.d.error || 'no url');
+    }).catch(function () { ui.payBusy = null; ui.payMsg = 'Couldn\u2019t open the checkout. Check your connection and try again.'; render(); });
+  }
+  function applyCode(where) {
+    var el = document.getElementById('f-code-' + where), code = el ? el.value.trim() : '';
+    ui.codeVal = code;
+    if (!parseToken(code)) { ui.codeOk = false; ui.codeMsg = 'That doesn\u2019t look like a Duology code. It starts with duology_ and is in your email.'; keepFocus = true; render(); return; }
+    if (!apiReady()) { ui.codeOk = false; ui.codeMsg = 'Codes can\u2019t be checked yet. Check back soon.'; render(); return; }
+    ui.codeOk = true; ui.codeMsg = 'Checking\u2026'; keepFocus = true; render();
+    api('/verify-token', { token: code }).then(function (r) {
+      if (r.d.valid) {
+        setPro(code); ui.codeVal = ''; ui.codeMsg = ''; ui.paywall = null; ui.proLost = '';
+        ui.claim = { state: 'done' }; render();
+      } else { ui.codeOk = false; ui.codeMsg = r.d.reason || 'That code isn\u2019t valid.'; keepFocus = true; render(); }
+    }).catch(function () { ui.codeOk = false; ui.codeMsg = 'Couldn\u2019t reach Duology to check it. Check your connection and try again.'; keepFocus = true; render(); });
+  }
+  function restore() {
+    var el = document.getElementById('f-restore'), em = el ? el.value.trim() : '';
+    ui.restoreVal = em;
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { ui.restoreMsg = 'Pop in the email you paid with.'; keepFocus = true; render(); return; }
+    if (!apiReady()) { ui.restoreMsg = 'Not switched on yet. Check back soon.'; render(); return; }
+    ui.restoreMsg = 'Sending\u2026'; keepFocus = true; render();
+    api('/restore', { email: em }).then(function (r) { ui.restoreMsg = r.d.note || r.d.error || 'Done. Check your inbox (and junk folder).'; keepFocus = true; render(); })
+      .catch(function () { ui.restoreMsg = 'Couldn\u2019t reach Duology. Check your connection and try again.'; keepFocus = true; render(); });
+  }
+  function copyCode() {
+    if (!pro) return;
+    var done = function () { ui.copied = true; keepFocus = true; render(); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(pro.token).then(done, function () { prompt('Copy your code:', pro.token); });
+    else { prompt('Copy your code:', pro.token); }
+  }
+  function claim(id, tries) {
+    if (!apiReady()) { ui.claim = { state: 'failed', id: id }; render(); return; }
+    ui.claim = { state: 'working', id: id }; render();
+    api('/claim?session_id=' + encodeURIComponent(id)).then(function (r) {
+      if (r.d.token && parseToken(r.d.token)) {
+        setPro(r.d.token); ui.proLost = '';
+        try { localStorage.removeItem(PENDING_KEY); } catch (e) {}
+        ui.claim = { state: 'done' }; render(); return;
+      }
+      throw new Error('pending');
+    }).catch(function () {
+      if (tries < 6) setTimeout(function () { claim(id, tries + 1); }, 2500);
+      else { ui.claim = { state: 'failed', id: id }; render(); }
+    });
+  }
 
   // ---------- onboarding wiring ----------
   var searchTimer = null, searchSeq = 0;
@@ -1630,9 +1839,20 @@ function signReading(sky, si) {
     var parts = el.getAttribute('data-act').split(':'), act = parts[0], arg = parts.slice(1).join(':');
     var s = store.settings;
     switch (act) {
+      case 'paywall': openPaywall(arg); break;
+      case 'close-paywall': if (!ui.payBusy) { ui.paywall = null; ui.payMsg = ''; ui.codeMsg = ''; render(); } break;
+      case 'buy': buy(arg); break;
+      case 'apply-code': applyCode(arg); break;
+      case 'restore': restore(); break;
+      case 'copy-code': copyCode(); break;
+      case 'close-claim': ui.claim = null; ui.copied = false; render(); break;
+      case 'retry-claim': if (ui.claim && ui.claim.id) claim(ui.claim.id, 0); break;
+      case 'remove-pro':
+        if (!ui.confirmRemovePro) { ui.confirmRemovePro = true; render(); break; }
+        pro = null; savePro(); ui.confirmRemovePro = false; chartCache = {}; fcCache = {}; render(); break;
       case 'tab': ui.editId = null; ui.place = null; ui.formErr = ''; go(arg); break;
-      case 'card-place': ui.card = { type: 'place', id: arg }; render(); break;
-      case 'card-asp': ui.card = { type: 'asp', idx: +arg }; render(); break;
+      case 'card-place': if (!isPro() && !FREE_POINTS[arg]) { openPaywall('place'); break; } ui.card = { type: 'place', id: arg }; render(); break;
+      case 'card-asp': if (!isPro()) { openPaywall('aspects'); break; } ui.card = { type: 'asp', idx: +arg }; render(); break;
       case 'close-card': ui.card = null; render(); break;
       case 'range': ui.range = +arg; render(); break;
       case 'tag': ui.tag = arg; render(); break;
@@ -1641,7 +1861,10 @@ function signReading(sky, si) {
       case 'masters': s.masters = !s.masters; save(); render(); break;
       case 'show-all-asp': ui.showAllAsp = true; render(); break;
       case 'learn': ui.lesson = arg; go('learn'); break;
-      case 'add-profile': ui.editId = null; ui.place = null; go('onboard'); break;
+      case 'add-profile':
+        if (!isPro() && store.profiles.length >= 1) { openPaywall('profiles'); break; }
+        if (store.profiles.length >= MAX_PROFILES) { toast('That\u2019s the limit of ' + MAX_PROFILES + ' charts. Delete one to add another.'); break; }
+        ui.editId = null; ui.place = null; go('onboard'); break;
       case 'edit-profile':
         var ep = store.profiles.filter(function (x) { return x.id === arg; })[0];
         ui.editId = arg; ui.place = ep && !ep.manual ? { label: ep.placeName, lat: ep.lat, lon: ep.lon, tz: ep.tz } : null; go('onboard'); break;
@@ -1690,7 +1913,38 @@ function signReading(sky, si) {
     }
     if (e.target.id === 'f-switch') { store.activeId = e.target.value; save(); ui.showAllAsp = false; render(); }
   });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ui.card) { ui.card = null; render(); } });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (ui.claim && ui.claim.state !== 'working') { ui.claim = null; render(); }
+    else if (ui.paywall && !ui.payBusy) { ui.paywall = null; render(); }
+    else if (ui.card) { ui.card = null; render(); }
+  });
+  root.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || !e.target.id) return;
+    if (e.target.id.indexOf('f-code-') === 0) { e.preventDefault(); applyCode(e.target.id.slice(7)); }
+    if (e.target.id === 'f-restore') { e.preventDefault(); restore(); }
+  });
+  window.addEventListener('pageshow', function (e) { if (e.persisted && ui.payBusy) { ui.payBusy = null; render(); } });
+
+  // ---------- returning from Stripe, and keeping Pro honest ----------
+  (function () {
+    var q = new URLSearchParams(location.search), paid = q.get('paid'), pending = null;
+    try { pending = localStorage.getItem(PENDING_KEY); } catch (e) {}
+    if (paid || q.get('payment')) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {} }
+    if (q.get('payment') === 'cancelled') ui.payNote = 'Checkout cancelled. Nothing was charged.';
+    if (paid && /^cs_(test|live)_[A-Za-z0-9]+$/.test(paid)) {
+      try { localStorage.setItem(PENDING_KEY, paid); } catch (e) {}
+      claim(paid, 0); return;
+    }
+    if (pending && !isPro()) { claim(pending, 4); return; }
+    if (pro && apiReady() && Date.now() - (pro.checkedAt || 0) > 3 * 86400000) {
+      api('/verify-token', { token: pro.token }).then(function (r) {
+        if (r.status !== 200) return;
+        if (r.d.valid) { pro.checkedAt = Date.now(); savePro(); }
+        else if (r.d.reason && !/run out/.test(r.d.reason)) { ui.proLost = 'Pro was removed from this device: ' + r.d.reason; pro = null; savePro(); chartCache = {}; fcCache = {}; render(); }
+      }).catch(function () {});
+    }
+  })();
 
   render();
 })();
