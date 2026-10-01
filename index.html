@@ -7,7 +7,14 @@
 <meta name="description" content="Your birth chart in plain English, with the why behind every placement. Plus forecasts and numerology.">
 <meta name="theme-color" content="#F4F1EA" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14131A" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23F4F1EA' stroke='%232E3A8C' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='11' fill='none' stroke='%232E3A8C' stroke-width='4'/%3E%3Cline x1='4' y1='32' x2='60' y2='32' stroke='%232E3A8C' stroke-width='4'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Duology">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -174,6 +181,7 @@ nav.tabs svg{width:24px;height:24px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 footer.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
 /* Pro */
+.pro-badge{margin-left:8px;vertical-align:4px;font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--on-accent);background:var(--accent);border:none;border-radius:8px;padding:3px 8px;min-height:0}
 .lock{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--rust);vertical-align:middle}
 .lock svg{width:12px;height:12px}
 .tile.locked,.asp.locked{opacity:.78}
@@ -1693,7 +1701,7 @@ function signReading(sky, si) {
     if (scr !== 'onboard' && scr !== 'signs' && scr !== 'learn' && !active()) scr = ui.screen = 'onboard';
     var body = scr === 'onboard' ? screenOnboard() : scr === 'chart' ? screenChart() : scr === 'forecast' ? screenForecast() : scr === 'numbers' ? screenNumbers() : scr === 'learn' ? screenLearn() : scr === 'signs' ? screenSigns() : screenSettings();
     var tabs = (scr === 'onboard' || !active()) ? '' : '<nav class="tabs" aria-label="Main">' + TABS.map(function (t) { return '<button type="button" data-act="tab:' + t[0] + '"' + (scr === t[0] || (scr === 'signs' && t[0] === 'forecast') ? ' aria-current="page"' : '') + '>' + ICON[t[0]] + t[1] + '</button>'; }).join('') + '</nav>';
-    root.innerHTML = '<header class="top"><div class="brand">Du<em>ology</em></div><div class="screen-name">' + NAMES[scr] + '</div></header><main id="main">' + body + '</main>' + tabs + sheet();
+    root.innerHTML = '<header class="top"><div class="brand">Du<em>ology</em>' + (isPro() ? '<button type="button" class="pro-badge" data-act="tab:settings" aria-label="Duology Pro is active. Open Settings">Pro</button>' : '') + '</div><div class="screen-name">' + NAMES[scr] + '</div></header><main id="main">' + body + '</main>' + tabs + sheet();
     var anySheet = ui.card || ui.paywall || ui.claim;
     document.body.style.overflow = anySheet ? 'hidden' : '';
     if (anySheet && !keepFocus) { var cb = document.getElementById('cl-close') || document.getElementById('pw-close') || document.getElementById('sheet-close'); if (cb) cb.focus(); }
