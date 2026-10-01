@@ -180,6 +180,38 @@ nav.tabs svg{width:24px;height:24px}
 .empty{text-align:center;padding:40px 10px;color:var(--muted)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 footer.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
+/* Report */
+.report{display:flex;flex-direction:column;gap:14px}
+.report .r-head{padding:20px;border-radius:14px;background:var(--ink);color:var(--bg)}
+.report .r-head .k{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.75}
+.report .r-head h1{color:var(--bg);margin:6px 0 4px;font-size:27px;line-height:1.15}
+.report .r-head .m{font-size:13px;opacity:.85}
+.report h2{margin:12px 0 0}
+.report p{margin:0;font-size:15.5px;line-height:1.65;color:var(--ink)}
+.report .r-foot{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
+.r-entry{padding:16px;display:flex;flex-direction:column;gap:8px}
+.print-only{display:none}
+.r-cta{border:1.5px solid #2E3A8C;border-radius:10px;padding:12px 14px;font-size:11pt;line-height:1.5;margin-top:10px;break-inside:avoid}
+.r-entry b.t{font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.2}
+@media print{
+  @page{margin:16mm 16mm 20mm;
+    @bottom-left{content:"Duology \00B7  Get your own reading at scvd-app.github.io/duology";font-family:'Instrument Sans',Arial,sans-serif;font-size:8.5pt;color:#5E5869}
+    @bottom-right{content:counter(page) " / " counter(pages);font-family:'Instrument Sans',Arial,sans-serif;font-size:8.5pt;color:#5E5869}}
+  .r-pfoot{display:none!important}
+  .print-only{display:block!important}
+  .r-foot{display:none!important}
+  .r-letter{margin-bottom:4mm}
+  :root{--bg:#fff;--surface:#fff;--ink:#1D1B26;--ink2:#3E3947;--muted:#5E5869}
+  body{background:#fff!important}
+  header.top,nav.tabs,.no-print,.scrim,.pro-card{display:none!important}
+  .app{max-width:none;border:none!important}
+  main{padding:0!important}
+  .report .r-head{background:#fff!important;color:#1D1B26!important;border:none;border-bottom:1px solid #BDB4A3;border-radius:0;padding:0 0 4mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .report .r-head h1{color:#1D1B26!important}
+  .report .r-head .k{display:none}
+  .report h2{break-after:avoid;color:#2E3A8C}
+  .report p{font-size:11.5pt;line-height:1.55;orphans:3;widows:3}
+}
 /* Pro */
 .pro-badge{margin-left:8px;vertical-align:4px;font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--on-accent);background:var(--accent);border:none;border-radius:8px;padding:3px 8px;min-height:0}
 .lock{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--rust);vertical-align:middle}
@@ -1221,6 +1253,233 @@ function signReading(sky, si) {
 }
 // ===== SIGNS END =====
 
+// ===== REPORT START =====
+// "What your stars and numbers say about you": an essay-style reading stitched
+// from the chart and the numbers. Everything is rules-based and runs on the device.
+
+// Per-sign detail used only by the report (index 0 = Aries ... 11 = Pisces)
+var SIGN_GIFT = [
+  'courage, honesty and the nerve to go first',
+  'patience, loyalty and a knack for making things last',
+  'a quick mind, a way with words and endless curiosity',
+  'deep care, a good memory and a fierce protective streak',
+  'warmth, generosity and the ability to light up a room',
+  'a sharp eye, real usefulness and quiet dedication',
+  'fairness, tact and a gift for bringing people together',
+  'depth, loyalty and the ability to see what others miss',
+  'optimism, honesty and a big-picture view',
+  'discipline, staying power and a sense of responsibility',
+  'original thinking, a fair mind and loyalty to your people',
+  'empathy, imagination and a soft touch with others'
+];
+var SIGN_SNAG = [
+  'charging in before thinking it through, or losing interest once the excitement wears off',
+  'digging in your heels long after it stops making sense',
+  'spreading yourself thin, or talking around a feeling instead of having it',
+  'taking things personally, or hiding in your shell when you’re hurt',
+  'needing the applause a little too much, or taking a knock to the pride hard',
+  'turning that sharp eye on yourself, and worrying over small stuff',
+  'sitting on the fence to keep everyone happy',
+  'holding grudges, or keeping people at arm’s length to stay in control',
+  'over-promising, or bolting when things get heavy',
+  'all work and no play, or being harder on yourself than anyone else is',
+  'going cool and detached when things get emotional',
+  'blurry boundaries, or drifting off when reality gets hard'
+];
+var MOON_NEED = [
+  'room to act on how you feel, straight away',
+  'comfort, routine and a bit of good food',
+  'someone to talk it through with',
+  'home, family and people who’ve known you forever',
+  'to feel appreciated, and to be told so',
+  'order: a tidy space and a plan',
+  'harmony, and people who play fair',
+  'trust that goes all the way down, and honesty, even the hard kind',
+  'space, freedom and something to look forward to',
+  'to feel in control and useful',
+  'space to be yourself without anyone hovering',
+  'quiet time to recharge, and somewhere to escape to'
+];
+var RISE_LOOK = [
+  'direct, energetic and ready to go',
+  'calm, steady and easy to be around',
+  'chatty, bright and quick on your feet',
+  'warm, a little guarded at first, then caring',
+  'confident and hard to miss',
+  'neat, capable and a touch reserved',
+  'charming, polite and easy-going',
+  'intense and a bit hard to read',
+  'friendly, open and up for anything',
+  'serious, capable and older than your years',
+  'friendly but a little different from the crowd',
+  'gentle, dreamy and kind'
+];
+var MARS_GO = [
+  'head-on and fast',
+  'slow, steady and impossible to budge once you’ve decided',
+  'with words and quick thinking, often several things at once',
+  'sideways and protectively, mostly on behalf of people you love',
+  'boldly, and with a bit of flair',
+  'carefully, with a plan and a checklist',
+  'through charm and negotiation rather than a fight',
+  'with quiet, total commitment, and you don’t forget',
+  'in big leaps, chasing whatever excites you',
+  'patiently, playing the long game',
+  'your own way, on your own terms',
+  'by going with the flow, and sometimes by stealth'
+];
+// Chaldean (Cheiro) number-planet pairs, and the element of each planet's home sign
+var SOUL_WANT = { 1: 'set on independence and doing things your own way', 2: 'happiest in close partnership and peace', 3: 'that wants to express itself and be enjoyed', 4: 'after security and things built properly', 5: 'hungry for freedom and new experiences', 6: 'that wants to look after people and have a home to be proud of', 7: 'after understanding: the why behind everything', 8: 'set on achievement and standing on your own two feet', 9: 'that wants to make a difference beyond itself', 11: 'drawn to meaning and inspiration', 22: 'set on building something that outlasts you', 33: 'that wants to help and teach on a big scale' };
+var NUM_PLANET = { 1: 'sun', 2: 'moon', 3: 'jupiter', 4: 'uranus', 5: 'mercury', 6: 'venus', 7: 'neptune', 8: 'saturn', 9: 'mars' };
+var PLANET_HOME = { sun: 'Leo', moon: 'Cancer', jupiter: 'Sagittarius', uranus: 'Aquarius', mercury: 'Gemini', venus: 'Taurus', neptune: 'Pisces', saturn: 'Capricorn', mars: 'Aries' };
+var EL_WORD = { fire: 'fire (drive and enthusiasm)', earth: 'earth (practical and grounded)', air: 'air (ideas and people)', water: 'water (feelings and intuition)' };
+
+function rpLow(s) { return s.charAt(0).toLowerCase() + s.slice(1); }
+function rpCap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function rpEl(si) { return SIGNS[si].el; }
+function elPair(a, b) {
+  if (a === b) return 'same';
+  var pair = [a, b].sort().join('-');
+  return (pair === 'air-fire' || pair === 'earth-water') ? 'easy' : 'mixed';
+}
+function digNote(id, si) { var t = dignityNote(id, si); return (id === 'sun' || id === 'moon') ? t.replace(/^(Sun|Moon) /, 'The $1 ') : t; }
+function aspName(ap) { return 'the ' + ap.asp.name.toLowerCase() + ' between your ' + PLANETS[ap.a].name + ' and ' + PLANETS[ap.b].name; }
+function homeEl(planet) { var nm = PLANET_HOME[planet]; return SIGNS.filter(function (s) { return s.name === nm; })[0].el; }
+
+function buildReport(p, c, settings) {
+  var first = p.name.split(/\s+/)[0];
+  var S = function (id) { return signOf(c.pos[id]); };
+  var sun = S('sun'), moon = S('moon'), asc = c.hasTime ? S('asc') : null;
+  var lp = lifePath(p.date, settings.masters);
+  var ex = nameNumber(p.name, settings.numSys, settings.masters, 'all');
+  var so = nameNumber(p.name, settings.numSys, settings.masters, 'vowels');
+  var pe = nameNumber(p.name, settings.numSys, settings.masters, 'cons');
+  var secs = [];
+
+  // element count across the ten planets (plus Rising)
+  var cnt = { fire: 0, earth: 0, air: 0, water: 0 };
+  CHART_POINTS.concat(c.hasTime ? ['asc'] : []).forEach(function (id) { cnt[SIGNS[S(id)].el]++; });
+  var els = Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; });
+  var topEl = els[0], lowEl = els[3];
+
+  // ---- 1. The short version (free) ----
+  var o = [];
+  var smRel = elPair(rpEl(sun), rpEl(moon));
+  o.push('Here’s the reading in one go, ' + first + '. Your Sun is in ' + SIGNS[sun].name + ', your Moon is in ' + SIGNS[moon].name +
+    (c.hasTime ? ' and your Rising sign is ' + SIGNS[asc].name : '') + ', and your Life Path number is ' + lp.n + '. Put together, astrologers and numerologists would describe someone who is ' +
+    SIGNS[sun].style + ' at the core, ' + SIGNS[moon].style + ' underneath' + (c.hasTime ? ', and comes across as ' + RISE_LOOK[asc] : '') +
+    ', walking the road of the ' + NUM_SHORT[lp.n] + '.');
+  o.push(smRel === 'same'
+    ? 'Your Sun and Moon share the same element, ' + EL_WORD[rpEl(sun)] + '. Astrologers read that as your head and your heart speaking the same language: what you want and what you need tend to line up, so you’re usually fairly easy to read, for others and for yourself.'
+    : smRel === 'easy'
+    ? 'Your Sun is ' + EL_WORD[rpEl(sun)] + ' and your Moon is ' + EL_WORD[rpEl(moon)] + '. Those two elements are traditionally a good match, so astrologers read your will and your feelings as working together. What you go after and what makes you feel settled usually point the same way.'
+    : 'Your Sun is ' + EL_WORD[rpEl(sun)] + ' while your Moon is ' + EL_WORD[rpEl(moon)] + '. Astrologers read that mix as a head and heart that want different things, so part of your life’s work is getting both on the same team. It also makes you harder to pin down, and more interesting for it.');
+  if (!c.hasTime) o.push('There’s no birth time on this chart, so this reading leaves out the Rising sign and houses rather than guessing them.');
+  secs.push({ h: 'The short version', paras: o, free: true });
+
+  // ---- 2. Your core ----
+  o = [];
+  var sunDig = digNote('sun', sun);
+  o.push('The Sun is the centre of the chart: what you run on, and what makes you feel most like yourself. In ' + SIGNS[sun].name + ', astrologers point to ' + SIGN_GIFT[sun] + '. ' +
+    SIGNS[sun].name + ' is ' + (rpEl(sun) === 'earth' || rpEl(sun) === 'air' ? 'an ' : 'a ') + rpEl(sun) + ' sign and a ' + SIGNS[sun].mode + ' one, which is shorthand for ' + ELEMENT[rpEl(sun)] + ', and a style that ' + MODE[SIGNS[sun].mode] + '.' + (sunDig ? ' ' + sunDig : ''));
+  if (c.hasTime) { var sh = c.houses.sun; o.push('Your Sun sits in your ' + ord(sh) + ' house, the part of the chart about ' + HOUSES[sh].area + '. That’s read as the area of life where you most need to shine and feel like yourself.'); }
+  o.push('The flip side, astrologers say, is ' + SIGN_SNAG[sun] + '. Nobody gets the strengths without the snags. Knowing which ones are yours is half the point.');
+  secs.push({ h: 'Your core: Sun in ' + SIGNS[sun].name, paras: o });
+
+  // ---- 3. Inner world: Moon + Soul Urge ----
+  o = [];
+  o.push('The Moon is the part of you that feels before it thinks. To feel safe and settled, a ' + SIGNS[moon].name + ' Moon is read as needing ' + MOON_NEED[moon] + '. When those needs go unmet, astrologers say the ' + SIGNS[moon].name + ' Moon’s snag shows up: ' + SIGN_SNAG[moon] + '.' +
+    (!c.hasTime ? ' (Without a birth time the Moon could be a few degrees either side, so if this doesn’t ring true, the next sign over might.)' : ''));
+  if (so) {
+    var mEl = rpEl(moon), sEl = homeEl(NUM_PLANET[rootNum(so.n)]);
+    o.push('Numerology has its own version of this: the Soul Urge, worked out from the vowels in your name. Yours is ' + so.n + ', the ' + NUM_SHORT[so.n] + ', which numerologists read as a heart ' + SOUL_WANT[so.n] + '. ' +
+      (elPair(mEl, sEl) !== 'mixed'
+        ? 'That sits comfortably with your ' + SIGNS[moon].name + ' Moon. Both systems describe a similar inner life, which tends to mean you know what you want, even if you don’t always say it.'
+        : 'That’s a different flavour from your ' + SIGNS[moon].name + ' Moon, so the two systems catch different sides of your inner life. Plenty of people recognise themselves in both: one is how you feel, the other is what you’re reaching for.'));
+  }
+  secs.push({ h: 'Your inner world', paras: o });
+
+  // ---- 4. How you come across ----
+  o = [];
+  if (c.hasTime) {
+    o.push('Your Rising sign is ' + SIGNS[asc].name + ', the sign coming up over the horizon when you were born. It’s read as your front door: the first impression. People tend to meet you as ' + RISE_LOOK[asc] + '.' +
+      (rpEl(asc) !== rpEl(sun) ? ' It’s a different element from your Sun, so the people who only know you a little may be surprised by the ' + SIGNS[sun].name + ' underneath.' : ' It shares an element with your Sun, so what people see first is pretty close to what they get.'));
+  }
+  if (pe) {
+    o.push((c.hasTime ? 'Numerology looks at this from a different angle. ' : 'Without a birth time there’s no Rising sign, but numerology has its own take on first impressions. ') +
+      'Your Personality number, from the consonants in your name, is ' + pe.n + ', the ' + NUM_SHORT[pe.n] + '. ' +
+      (so ? (FAMILY[rootNum(so.n)] === FAMILY[rootNum(pe.n)]
+        ? 'It’s in the same family as your Soul Urge, so people generally read you right: the outside matches the inside.'
+        : 'It’s from a different family to your Soul Urge (' + so.n + '), so numerologists would say people sometimes see the ' + NUM_SHORT[pe.n] + ' and miss the ' + NUM_SHORT[so.n] + ' underneath.') : ''));
+  }
+  var mars = S('mars');
+  o.push('When you want something, your Mars in ' + SIGNS[mars].name + ' says you go after it ' + MARS_GO[mars] + '. That’s also how you’re read as handling a blue.');
+  secs.push({ h: 'How you come across', paras: o });
+
+  // ---- 5. Mind and heart ----
+  o = [];
+  var mer = S('mercury'), ven = S('venus');
+  o.push('Mercury is how you think and talk. In ' + SIGNS[mer].name + ', your mind is read as ' + SIGNS[mer].style + '.' + (c.retro.mercury ? ' Mercury was retrograde when you were born, which astrologers read as a mind that turns things over privately before it speaks.' : '') +
+    ' Venus is what you love and how you love it. In ' + SIGNS[ven].name + ', that comes out ' + SIGNS[ven].style + '. ' + (ven === sun ? 'Venus shares your Sun sign, so that ' + SIGNS[sun].name + ' streak doubles up when it comes to love.' : 'In love, the gift astrologers point to is ' + SIGN_GIFT[ven] + '.'));
+  var vm = elPair(rpEl(ven), rpEl(mars));
+  o.push(vm === 'mixed'
+    ? 'Your Venus (' + SIGNS[ven].name + ') and Mars (' + SIGNS[mars].name + ') are in elements that don’t naturally mix. Astrologers read that as a gap between what attracts you and how you chase it. It’s often described as the recipe for chemistry, and the odd mixed signal.'
+    : 'Your Venus (' + SIGNS[ven].name + ') and Mars (' + SIGNS[mars].name + ') sit in elements that get along, so what attracts you and how you go after it tend to work together.');
+  secs.push({ h: 'Mind and heart', paras: o });
+
+  // ---- 6. Your road: Life Path + Expression ----
+  o = [];
+  var d = NUM_DETAIL[lp.n] || NUM_DETAIL[rootNum(lp.n)];
+  o.push('Your Life Path, from your full birth date, is ' + lp.n + ': ' + rpLow(NUM_MEAN[lp.n]) + '. Numerology treats it as the main road you’re on, the number everything else gets compared against. At its best that looks like this: ' + rpLow(d.good) + ' The watch-out: ' + rpLow(d.watch) + (lp.n > 9 ? ' As a master number, it’s said to carry the ' + rootNum(lp.n) + '’s traits turned up, with more pressure to match.' : ''));
+  if (ex) {
+    var pr = numberPairs(lp, ex, so, pe)[0];
+    o.push('Your Expression number, from every letter of your birth name, is ' + ex.n + ', the ' + NUM_SHORT[ex.n] + '. It’s read as the toolkit you came with. ' + (pr ? pr.text.replace(/^They’re/, 'Your Life Path and Expression are') : ''));
+  }
+  secs.push({ h: 'Your road: Life Path ' + lp.n, paras: o });
+
+  // ---- 7. Where the stars and numbers meet ----
+  o = [];
+  var lpPlanet = NUM_PLANET[rootNum(lp.n)], lpEl = homeEl(lpPlanet), lpSign = S(lpPlanet);
+  var nPts = 10 + (c.hasTime ? 1 : 0);
+  o.push('This is where Duology lines the two systems up. Your chart leans towards ' + EL_WORD[topEl] + ': ' + cnt[topEl] + ' of its ' + nPts + ' main placements are in ' + topEl + ' signs, and ' + (cnt[lowEl] === 0 ? 'none at all are' : 'the fewest are') + ' in ' + lowEl + '. ' +
+    (cnt[lowEl] === 0 ? 'Astrologers say a missing element is often something you go looking for in other people.' : ''));
+  o.push('The old Chaldean numerologists paired each number with a planet. Your Life Path ' + lp.n + ' belongs to ' + PLANETS[lpPlanet].name + ', whose home sign ' + PLANET_HOME[lpPlanet] + ' is ' + EL_WORD[lpEl] + '. ' +
+    (lpEl === topEl
+      ? 'That’s the same element your chart leans towards, so the stars and the numbers are telling the same story about you. Readings that agree like this are the ones people tend to recognise straight away.'
+      : elPair(lpEl, topEl) === 'easy'
+      ? 'That’s a natural partner to the ' + topEl + ' your chart leans towards, so the two systems describe complementary sides of you rather than competing ones.'
+      : 'That’s a different element from the ' + topEl + ' your chart leans towards. Read together, the numbers point at a road that asks for qualities the planets don’t hand you for free. That’s growth territory, not a contradiction.'));
+  o.push('In your own chart, ' + PLANETS[lpPlanet].name + ' sits in ' + SIGNS[lpSign].name + (c.hasTime && c.houses[lpPlanet] ? ', in your ' + ord(c.houses[lpPlanet]) + ' house (' + HOUSE_SHORT[c.houses[lpPlanet]] + ')' : '') + '. So the planet behind your Life Path number shows up ' + SIGNS[lpSign].style + '. ' +
+    (digNote(lpPlanet, lpSign) ? digNote(lpPlanet, lpSign) : 'That’s the flavour your Life Path takes on in practice.') + ' This cross-check is our own way of reading the two together, not a rule from either tradition, but the planet-number pairs themselves are centuries old.');
+  secs.push({ h: 'Where the stars and numbers meet', paras: o });
+
+  // ---- 8. Growth edges ----
+  o = [];
+  var tens = c.aspects.filter(function (ap) { return ap.asp.easy === false && CHART_POINTS.indexOf(ap.a) >= 0 && CHART_POINTS.indexOf(ap.b) >= 0 && ['uranus', 'neptune', 'pluto'].indexOf(ap.a) < 0; }).slice(0, 2);
+  var flow = c.aspects.filter(function (ap) { return ap.asp.easy === true && CHART_POINTS.indexOf(ap.a) >= 0 && CHART_POINTS.indexOf(ap.b) >= 0; })[0];
+  if (tens.length) {
+    o.push('The tightest friction in your chart is ' + tens.map(function (ap) { return aspName(ap) + ' (your ' + PLANETS[ap.a].theme + ' against your ' + PLANETS[ap.b].theme + ')'; }).join(', and ') +
+      '. Astrologers don’t read tension as bad luck. It’s where the pressure is, and pressure is what gets things built. The people who work with their hard aspects often end up strongest in exactly those areas.');
+  }
+  if (flow) o.push('Your easiest gift is ' + aspName(flow) + ': your ' + PLANETS[flow.a].theme + ' and your ' + PLANETS[flow.b].theme + ' working together without much effort. Astrologers’ one warning about easy aspects is that they’re easy to take for granted.');
+  var sat = S('saturn');
+  o.push('Saturn in ' + SIGNS[sat].name + (c.hasTime ? ' (your ' + ord(c.houses.saturn) + ' house, ' + HOUSE_SHORT[c.houses.saturn] + ')' : '') + ' is read as your long-haul lesson: the area where things come slowly but last. Put that next to your Life Path watch-out (' + rpLow(d.watch.replace(/\.$/, '')) + ') and you have your growth edge: Saturn asks you to build ' + SIGN_GIFT[sat] + ', slowly and on purpose.');
+  secs.push({ h: 'Your growth edges', paras: o });
+
+  // ---- 9. Right now ----
+  o = [];
+  var yr = new Date().getFullYear(), py = personalYear(p.date, yr), fit = yearVsLifePath(lp.n, py.n);
+  o.push(yr + ' is ' + an(py.n) + ' ' + py.n + ' year for you: ' + rpLow(PY_THEME[py.n].title) + '. ' + PY_THEME[py.n].text + ' ' + fit.text);
+  o.push('For what the planets are doing to your chart over the next 30 days, 90 days and 12 months, see My forecast.');
+  secs.push({ h: 'Where you are right now', paras: o });
+
+  secs.push({ h: 'Keep in mind', paras: ['Astrology and numerology are old systems for describing people, not lab results. Read this the way you’d read a thoughtful letter from someone who knows the traditions well: keep what rings true, and leave the rest. Every claim here is traced back to a placement or a number you can tap on in the app to see the working.'] });
+
+  return { title: 'What your stars and numbers say about you', name: p.name, first: first, sections: secs,
+    meta: SIGNS[sun].name + ' Sun · ' + SIGNS[moon].name + ' Moon' + (c.hasTime ? ' · ' + SIGNS[asc].name + ' Rising' : '') + ' · Life Path ' + lp.n };
+}
+// ===== REPORT END =====
+
 // ===== APP START =====
 (function () {
   var KEY = 'chartExplained.v1';
@@ -1303,7 +1562,7 @@ function signReading(sky, si) {
     x: '<svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>'
   };
   var TABS = [['chart', 'Chart'], ['forecast', 'Forecast'], ['numbers', 'Numbers'], ['learn', 'Learn'], ['settings', 'Settings']];
-  var NAMES = { onboard: 'New chart', chart: 'My chart', forecast: 'Forecast', numbers: 'Numbers', learn: 'Learn', settings: 'Settings', signs: 'Star signs' };
+  var NAMES = { onboard: 'New chart', chart: 'My chart', forecast: 'Forecast', numbers: 'Numbers', learn: 'Learn', settings: 'Settings', signs: 'Star signs', report: 'Your reading' };
   var ABBR = { sun: 'SUN', moon: 'MOON', mercury: 'MERC', venus: 'VEN', mars: 'MARS', jupiter: 'JUP', saturn: 'SAT', uranus: 'URA', neptune: 'NEP', pluto: 'PLU' };
 
   // ---------- wheel ----------
@@ -1427,6 +1686,7 @@ function signReading(sky, si) {
       var title = id === 'asc' ? S.name + ' Rising' : P.name + ' in ' + S.name;
       return '<button type="button" class="row-btn" data-act="card-place:' + id + '"><div class="orb' + (P.isPoint ? ' pt' : '') + '">' + glyph(id) + '</div><div style="flex:1"><b style="font-size:15px">' + title + '</b><div class="small" style="color:var(--ink2)">' + P.short + ': ' + S.style + '</div></div><span aria-hidden="true" style="color:var(--muted);font-size:18px">›</span></button>';
     }).join('') + '</section>');
+    out.push(reportEntry(p));
     // placements
     var free = isPro();
     if (!free) out.push(proCard('That\u2019s your Big Three. There\u2019s a lot more to you.', 'Your chart has ' + c.points.length + ' placements and ' + c.aspects.length + ' aspects. Pro explains every one of them, the same way: what it means, why astrologers say so, and how it fits the rest of your chart.', 'chart', 'Unlock my full chart'));
@@ -1523,6 +1783,44 @@ function signReading(sky, si) {
     return out.join('');
   }
 
+  function reportEntry(p) {
+    return '<div class="card pro-card r-entry no-print" style="border-color:var(--rust);background:var(--surface)"><span class="lock" style="color:var(--rust)">' + (isPro() ? 'Your reading' : ICON.lock + 'New \u00B7 Pro') + '</span><b class="t">What your stars and numbers say about ' + (p.id === store.profiles[0].id ? 'you' : esc(p.name.split(/\s+/)[0])) + '</b><div class="small" style="color:var(--ink2)">Your chart and your numbers, read together as one plain-English report. About a 6-minute read' + (isPro() ? ', and you can save it as a PDF.' : '. The opening section is free.') + '</div><button type="button" class="btn" data-act="tab:report">Read ' + (isPro() ? 'the report' : 'the opening') + '</button></div>';
+  }
+  function screenReport() {
+    var p = active(); if (!p) return '';
+    var r = buildReport(p, getChart(p), store.settings), pro = isPro(), out = ['<div class="report">'];
+    out.push('<button type="button" class="link no-print" data-act="tab:chart">\u2190 Back to the chart</button>');
+    out.push(letterhead());
+    out.push('<div class="r-head"><div class="k">Duology reading</div><h1>' + r.title + '</h1><div class="m"><b>' + esc(p.name) + '</b><br>' + r.meta + '<br>' + birthLine(getChart(p)) + '</div></div>');
+    if (pro) out.push('<button type="button" class="btn-ghost no-print" data-act="print-report">Save as PDF</button>');
+    r.sections.forEach(function (sct, i) {
+      if (!pro && !sct.free) return;
+      out.push('<h2>' + sct.h + '</h2>' + sct.paras.map(function (t) { return '<p>' + t + '</p>'; }).join(''));
+    });
+    if (!pro) {
+      out.push(proCard('The rest of your reading', 'Eight more sections: your core, your inner world, how you come across, mind and heart, your Life Path road, where your stars and numbers meet, your growth edges, and where you are right now. Plus a PDF copy to keep or share.', 'report', 'Unlock the full reading'));
+    } else {
+      out.push('<div class="r-foot">Duology \u00B7 astrology and numerology, explained \u00B7 scvd-app.github.io/duology</div>');
+      out.push('<div class="r-cta print-only"><b>Want your own reading?</b><br>Build your chart for free at <b>scvd-app.github.io/duology</b>. No glyphs, no gatekeeping: every placement explained in plain English, plus your personal forecast and numbers.</div>');
+    }
+    out.push('</div>');
+    return out.join('');
+  }
+  function letterhead() {
+    // One SVG, so it prints in full even when the browser drops background colours.
+    var ring = '<circle cx="46" cy="46" r="29" fill="none" stroke="#A9B6FF" stroke-width="3"/><line x1="46" y1="11" x2="46" y2="20" stroke="#E4A673" stroke-width="3.5" stroke-linecap="round"/><text x="46" y="48" text-anchor="middle" dominant-baseline="central" font-family="Fraunces, Georgia, serif" font-weight="600" font-size="25" fill="#EEEAF2">Du</text>';
+    return '<div class="r-letter print-only"><svg viewBox="0 0 600 92" width="100%" role="img" aria-label="Duology: astrology and numerology, explained"><rect width="600" height="92" rx="10" fill="#1D1B26"/>' + ring +
+      '<text x="90" y="44" font-family="Fraunces, Georgia, serif" font-weight="600" font-size="30" fill="#EEEAF2">Du<tspan font-style="italic" font-weight="500" fill="#A9B6FF">ology</tspan></text>' +
+      '<text x="91" y="66" font-family="Instrument Sans, Arial, sans-serif" font-size="11.5" fill="#D2CCDA">Astrology and numerology, explained.</text>' +
+      '<text x="578" y="40" text-anchor="end" font-family="Instrument Sans, Arial, sans-serif" font-weight="700" font-size="10" letter-spacing="1.5" fill="#E4A673">PERSONAL READING</text>' +
+      '<text x="578" y="58" text-anchor="end" font-family="Instrument Sans, Arial, sans-serif" font-size="11" fill="#A9B6FF">scvd-app.github.io/duology</text></svg></div>';
+  }
+  function printReport() {
+    var p = active(), old = document.title;
+    document.title = 'Duology reading - ' + (p ? p.name : '');
+    window.print();
+    setTimeout(function () { document.title = old; }, 1000);
+  }
   function sec(k, html) { return '<div style="font-size:13.5px;color:var(--ink2)"><b style="display:block;color:var(--rust);font-size:12px;text-transform:uppercase;letter-spacing:.8px">' + k + '</b>' + html + '</div>'; }
   function numCard(label, r, typeWhy, extras, core) {
     var d = NUM_DETAIL[r.n];
@@ -1640,14 +1938,14 @@ function signReading(sky, si) {
     return o.join('');
   }
   var PAY_WHY = {
-    chart: 'Unlock the rest of your chart.', aspects: 'See every aspect, explained.', place: 'Every placement, explained.', forecast: 'Your whole personal forecast.', numbers: 'All your numbers, and how they fit.',
+    report: 'Your full reading.', chart: 'Unlock the rest of your chart.', aspects: 'See every aspect, explained.', place: 'Every placement, explained.', forecast: 'Your whole personal forecast.', numbers: 'All your numbers, and how they fit.',
     profiles: 'Charts for the whole family.', houses: 'Choose your house system.', settings: 'Everything in Duology, unlocked.', extend: 'Add more time.'
   };
   function paywallSheet() {
     var busy = !!ui.payBusy;
     return '<div class="scrim" data-act="close-paywall"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pw-title">' +
       '<div class="sheet-head"><div><span class="lock">' + ICON.lock + 'Duology Pro</span><div class="sheet-title" id="pw-title">' + (PAY_WHY[ui.paywall] || PAY_WHY.settings) + '</div></div><button type="button" class="x" aria-label="Close" data-act="close-paywall" id="pw-close">' + ICON.x + '</button></div>' +
-      '<ul class="perks"><li>Every placement and aspect in your chart, explained</li><li>Your personal forecast: 30 days, 90 days and 12 months</li><li>All your numbers, the working, and how they fit together</li><li>Up to ' + MAX_PROFILES + ' charts for family and friends</li><li>Your choice of house system</li></ul>' +
+      '<ul class="perks"><li>Your full reading: what your stars and numbers say about you, with a PDF copy</li><li>Every placement and aspect in your chart, explained</li><li>Your personal forecast: 30 days, 90 days and 12 months</li><li>All your numbers, the working, and how they fit together</li><li>Up to ' + MAX_PROFILES + ' charts for family and friends</li><li>Your choice of house system</li></ul>' +
       '<div class="plans">' + PRO_PLANS.map(function (pl) {
         return '<button type="button" class="plan' + (pl.best ? ' best' : '') + '" data-act="buy:' + pl.id + '"' + (busy ? ' disabled' : '') + '>' + (pl.best ? '<span class="badge">Best value</span>' : '') + '<span><b>' + pl.name + '</b><span class="small">' + (ui.payBusy === pl.id ? 'Opening secure checkout\u2026' : pl.sub) + '</span></span><span class="price">' + pl.price + '</span></button>';
       }).join('') + '</div>' +
@@ -1699,8 +1997,8 @@ function signReading(sky, si) {
   function render() {
     var scr = ui.screen;
     if (scr !== 'onboard' && scr !== 'signs' && scr !== 'learn' && !active()) scr = ui.screen = 'onboard';
-    var body = scr === 'onboard' ? screenOnboard() : scr === 'chart' ? screenChart() : scr === 'forecast' ? screenForecast() : scr === 'numbers' ? screenNumbers() : scr === 'learn' ? screenLearn() : scr === 'signs' ? screenSigns() : screenSettings();
-    var tabs = (scr === 'onboard' || !active()) ? '' : '<nav class="tabs" aria-label="Main">' + TABS.map(function (t) { return '<button type="button" data-act="tab:' + t[0] + '"' + (scr === t[0] || (scr === 'signs' && t[0] === 'forecast') ? ' aria-current="page"' : '') + '>' + ICON[t[0]] + t[1] + '</button>'; }).join('') + '</nav>';
+    var body = scr === 'onboard' ? screenOnboard() : scr === 'chart' ? screenChart() : scr === 'forecast' ? screenForecast() : scr === 'numbers' ? screenNumbers() : scr === 'learn' ? screenLearn() : scr === 'signs' ? screenSigns() : scr === 'report' ? screenReport() : screenSettings();
+    var tabs = (scr === 'onboard' || !active()) ? '' : '<nav class="tabs" aria-label="Main">' + TABS.map(function (t) { return '<button type="button" data-act="tab:' + t[0] + '"' + (scr === t[0] || (scr === 'signs' && t[0] === 'forecast') || (scr === 'report' && t[0] === 'chart') ? ' aria-current="page"' : '') + '>' + ICON[t[0]] + t[1] + '</button>'; }).join('') + '</nav>';
     root.innerHTML = '<header class="top"><div class="brand">Du<em>ology</em>' + (isPro() ? '<button type="button" class="pro-badge" data-act="tab:settings" aria-label="Duology Pro is active. Open Settings">Pro</button>' : '') + '</div><div class="screen-name">' + NAMES[scr] + '</div></header><main id="main">' + body + '</main>' + tabs + sheet();
     var anySheet = ui.card || ui.paywall || ui.claim;
     document.body.style.overflow = anySheet ? 'hidden' : '';
@@ -1850,6 +2148,7 @@ function signReading(sky, si) {
       case 'paywall': openPaywall(arg); break;
       case 'close-paywall': if (!ui.payBusy) { ui.paywall = null; ui.payMsg = ''; ui.codeMsg = ''; render(); } break;
       case 'buy': buy(arg); break;
+      case 'print-report': printReport(); break;
       case 'apply-code': applyCode(arg); break;
       case 'restore': restore(); break;
       case 'copy-code': copyCode(); break;
