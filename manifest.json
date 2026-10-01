@@ -1,0 +1,16 @@
+{
+  "name": "Duology",
+  "short_name": "Duology",
+  "description": "Astrology and numerology, explained. Your birth chart in plain English, with the why behind every placement.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1D1B26",
+  "theme_color": "#1D1B26",
+  "categories": ["lifestyle", "education", "entertainment"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
