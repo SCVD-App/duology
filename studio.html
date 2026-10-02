@@ -325,7 +325,7 @@ var PLANETS = {
     why: "Venus was the goddess of love and beauty, and it's the brightest planet in the night sky, so it got attraction, pleasure and what you value.",
     keep: "Venus never gets more than about 47 degrees from the Sun, so it's always in your Sun sign or within two signs of it." },
   mars: { name: 'Mars', glyph: '♂', theme: 'drive',
-    domain: "your drive: how you chase what you want and how you handle a blue",
+    domain: "your drive: how you chase what you want and how you handle conflict",
     why: "Mars was the Roman god of war, and it glows red in the night sky, so it got energy, courage, anger and push.",
     keep: "Mars takes about two years to get around the zodiac." },
   jupiter: { name: 'Jupiter', glyph: '♃', theme: 'growth and luck',
@@ -1372,6 +1372,7 @@ function buildNumShort(sky, which) {
     var i = curIndex();
     cv.innerHTML = ui.tab === 'video' ? scene16(secsCache[i], sky()) : curShort().scene(i);
   }
+  var MUSIC_FADE = 2;
   function stopRun() { if (run) { run.cancelled = true; clearTimeout(run.t); if (run.audio) { try { run.audio.pause(); } catch (e) {} } run = null; } ui.playing = false; musicStop(0.3); }
   function playFrom(start, opts) {
     opts = opts || {}; stopRun();
@@ -1379,7 +1380,13 @@ function buildNumShort(sky, which) {
     if (music) musicStart();
     function step(i) {
       if (r.cancelled) return;
-      if (i >= sceneCount()) { ui.playing = false; run = null; musicStop(1.8); if (opts.onDone) opts.onDone(); else render(); return; }
+      if (i >= sceneCount()) {
+        // 2-second music fade-out at the end of every video and Short. The recording keeps
+        // rolling until the fade has finished (onDone fires after it), so the fade is in the file.
+        ui.playing = false; run = null; musicStop(MUSIC_FADE);
+        if (opts.onDone) setTimeout(opts.onDone, music ? MUSIC_FADE * 1000 : 0); else render();
+        return;
+      }
       if (i === 1 && ui.tab === 'video' && st.sting !== false && !r.stung && start === 0) {
         r.stung = true; showSting(opts.record); musicRamp(Math.min(1, musicLevel() * 3), 0.5);
         r.t = setTimeout(function () { musicRamp(musicLevel(), 0.8); step(1); }, 3000);
@@ -1417,6 +1424,12 @@ function buildNumShort(sky, which) {
     try { if (R.rec.state !== 'inactive') R.rec.stop(); } catch (e) {}
     R.msg = msg;
   }
+  // MP4 (H.264 + AAC) plays everywhere, including Instagram. WebM is the fallback.
+  var MP4_TYPES = ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1.4D401F,mp4a.40.2', 'video/mp4;codecs=avc1.42E01F,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2'];
+  var WEBM_TYPES = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+  function supported(t) { try { return window.MediaRecorder && MediaRecorder.isTypeSupported(t); } catch (e) { return false; } }
+  function pickMime(mp4) { return (mp4 ? MP4_TYPES.concat(WEBM_TYPES) : WEBM_TYPES).filter(supported)[0] || ''; }
+  function mp4Ok() { return MP4_TYPES.some(supported); }
   async function startRecording() {
     if (recording) return;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || !window.MediaRecorder) { ui.recMsg = 'Recording needs Chrome or Edge on a computer.'; render(); return; }
@@ -1444,8 +1457,7 @@ function buildNumShort(sky, which) {
       tracks = tracks.concat(dest.stream.getAudioTracks());
     }
     var mixed = new MediaStream(tracks);
-    var types = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
-    var mime = types.filter(function (t) { try { return MediaRecorder.isTypeSupported(t); } catch (e) { return false; } })[0] || '';
+    var mime = pickMime(st.recFormat !== 'webm'), wantMp4 = st.recFormat !== 'webm';
     var rec = new MediaRecorder(mixed, mime ? { mimeType: mime, videoBitsPerSecond: 10000000, audioBitsPerSecond: 192000 } : {});
     var chunks = [];
     rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
@@ -1458,13 +1470,14 @@ function buildNumShort(sky, which) {
       if (music && dest) { try { musicGain.disconnect(dest); } catch (e) {} }
       recording = null; ui.clean = false;
       if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
-      ui.recMsg = (R.msg || 'Done!') + ' Your video (' + ext.toUpperCase() + ') is in your Downloads folder as ' + recName(ext) + '.';
+      ui.recMsg = (R.msg || 'Done!') + ' Your video (' + ext.toUpperCase() + ') is in your Downloads folder as ' + recName(ext) + '.' +
+        (wantMp4 && ext !== 'mp4' ? ' This browser couldn\u2019t record MP4, so it\u2019s WebM. That uploads fine to YouTube, but Instagram needs MP4: run it through HandBrake (Social 1080p preset) first.' : (ext === 'mp4' ? ' Ready for YouTube and Instagram.' : ' WebM suits YouTube. Instagram needs MP4.'));
       render();
     };
     vt.addEventListener('ended', function () { finishRecording('Recording stopped early (sharing was stopped).'); });
     rec.start(1000);
     await sleep(400);
-    playFrom(0, { record: true, onDone: function () { setTimeout(function () { finishRecording('Done!'); }, 1200); } });
+    playFrom(0, { record: true, onDone: function () { setTimeout(function () { finishRecording('Done!'); }, 400); } });
   }
   function voicePanel() {
     var set = curAudio(), n = sceneCount(), labels = ui.tab === 'video' ? secsCache.map(function (x) { return x.label; }) : curShort().labels;
@@ -1477,7 +1490,9 @@ function buildNumShort(sky, which) {
     var tot = (ui.tab === 'video' && st.sting !== false) ? 3 : 0; for (var i = 0; i < n; i++) tot += sceneDur(i);
     return '<div class="s-voicepanel"><div class="s-vhead"><b>Scotty’s voice files</b><span class="s-meta">' + (set.length ? set.length + ' loaded · video runs about ' + fmtDur(tot) : 'Load the MP3s for this ' + (ui.tab === 'video' ? 'video' : 'Short') + ', named in scene order') + '</span></div>' +
       '<div class="s-actions" style="margin:8px 0"><label class="s-btn2 s-file">Load voice files<input type="file" id="voicefiles" accept="audio/*,.mp3,.wav,.m4a" multiple></label>' + (set.length ? '<button class="s-btn2" data-act="clearvoice">Clear</button>' : '') +
-      '<button class="s-rec" data-act="record">● Record finished video</button></div>' + extra + miss +
+      '<button class="s-rec" data-act="record">● Record finished video</button>' +
+      '<label class="s-field" title="MP4 works on YouTube and Instagram. WebM is YouTube only.">File <select id="recformat"><option value="mp4"' + (st.recFormat !== 'webm' ? ' selected' : '') + '>MP4 (YouTube + Instagram)</option><option value="webm"' + (st.recFormat === 'webm' ? ' selected' : '') + '>WebM (YouTube only)</option></select></label></div>' +
+      (st.recFormat !== 'webm' && window.MediaRecorder && !mp4Ok() ? '<div class="s-vwarn">This browser can\u2019t record MP4, so it\u2019ll save WebM instead. Update Chrome to record MP4.</div>' : '') + extra + miss +
       '<details class="s-vlist"' + (set.length ? ' open' : '') + '><summary>Which file goes with which scene</summary>' + rows + '</details>' +
       '<div class="s-music"><b>Background music</b> <span class="s-meta">' + (music ? esc(music.name) : 'optional, loops quietly under Scotty') + '</span>' +
       '<label class="s-btn2 s-file">' + (music ? 'Change track' : 'Load music') + '<input type="file" id="musicfile" accept="audio/*,.mp3,.wav,.m4a"></label>' + (music ? '<button class="s-btn2" data-act="clearmusic">Remove</button>' : '') +
@@ -1757,6 +1772,7 @@ function buildNumShort(sky, which) {
     if (e.target.id === 'voicefiles' && e.target.files && e.target.files.length) { loadVoiceFiles(e.target.files); return; }
     if (e.target.id === 'musicfile' && e.target.files && e.target.files[0]) { loadMusic(e.target.files[0]); return; }
     if (e.target.id === 'sting') { st.sting = e.target.checked; persist(); render(); return; }
+    if (e.target.id === 'recformat') { st.recFormat = e.target.value; persist(); render(); return; }
     if (e.target.id === 'musicvol') { st.musicVol = +e.target.value; persist(); if (ui.playing) musicRamp(musicLevel(), 0.2); render(); return; }
     if (e.target.id === 'depth') { st.depth = e.target.value; persist(); ui.scene = 0; render(); }
     if (e.target.id === 'order') { st.order = e.target.value; persist(); ui.scene = 0; render(); }
