@@ -464,7 +464,7 @@ var PLANETS = {
     why: "Venus was the goddess of love and beauty, and it's the brightest planet in the night sky, so it got attraction, pleasure and what you value.",
     keep: "Venus never gets more than about 47 degrees from the Sun, so it's always in your Sun sign or within two signs of it." },
   mars: { name: 'Mars', glyph: '♂', theme: 'drive',
-    domain: "your drive: how you chase what you want and how you handle a blue",
+    domain: "your drive: how you chase what you want and how you handle conflict",
     why: "Mars was the Roman god of war, and it glows red in the night sky, so it got energy, courage, anger and push.",
     keep: "Mars takes about two years to get around the zodiac." },
   jupiter: { name: 'Jupiter', glyph: '♃', theme: 'growth and luck',
@@ -1336,17 +1336,31 @@ var RISE_LOOK = [
 ];
 var MARS_GO = [
   'head-on and fast',
-  'slow, steady and impossible to budge once you’ve decided',
-  'with words and quick thinking, often several things at once',
-  'sideways and protectively, mostly on behalf of people you love',
-  'boldly, and with a bit of flair',
+  'slowly and steadily, and once you’ve decided, nothing shifts you',
+  'with words and quick thinking, often juggling several things at once',
+  'sideways rather than head-on, and hardest on behalf of people you love',
+  'boldly, with a bit of flair',
   'carefully, with a plan and a checklist',
-  'through charm and negotiation rather than a fight',
-  'with quiet, total commitment, and you don’t forget',
-  'in big leaps, chasing whatever excites you',
+  'through charm and negotiation rather than force',
+  'quietly, with total commitment',
+  'in big leaps, following whatever excites you',
   'patiently, playing the long game',
   'your own way, on your own terms',
-  'by going with the flow, and sometimes by stealth'
+  'quietly and indirectly, going with the flow until the moment is right'
+];
+var MARS_FIGHT = [
+  'you flare up fast, say it straight, and get over it just as fast',
+  'you’re slow to anger, but once you dig in, you don’t budge',
+  'you argue with words, and you’re usually good at it',
+  'you go quiet first, and get fierce if someone you love is threatened',
+  'you take it personally, but you fight fair',
+  'you pick the problem apart point by point',
+  'you’d rather smooth things over than have it out',
+  'you stay cool on the surface and remember everything',
+  'you say exactly what you think, then move on',
+  'you stay controlled and outlast the other side',
+  'you go cool and logical, and won’t be pushed',
+  'you avoid a head-on fight and tend to slip away from it instead'
 ];
 // Chaldean (Cheiro) number-planet pairs, and the element of each planet's home sign
 var SOUL_WANT = { 1: 'set on independence and doing things your own way', 2: 'happiest in close partnership and peace', 3: 'that wants to express itself and be enjoyed', 4: 'after security and things built properly', 5: 'hungry for freedom and new experiences', 6: 'that wants to look after people and have a home to be proud of', 7: 'after understanding: the why behind everything', 8: 'set on achievement and standing on your own two feet', 9: 'that wants to make a difference beyond itself', 11: 'drawn to meaning and inspiration', 22: 'set on building something that outlasts you', 33: 'that wants to help and teach on a big scale' };
@@ -1433,7 +1447,7 @@ function buildReport(p, c, settings) {
         : 'It’s from a different family to your Soul Urge (' + so.n + '), so numerologists would say people sometimes see the ' + NUM_SHORT[pe.n] + ' and miss the ' + NUM_SHORT[so.n] + ' underneath.') : ''));
   }
   var mars = S('mars');
-  o.push('When you want something, your Mars in ' + SIGNS[mars].name + ' says you go after it ' + MARS_GO[mars] + '. That’s also how you’re read as handling a blue.');
+  o.push('Mars is your drive. In ' + SIGNS[mars].name + ', astrologers say you chase what you want ' + MARS_GO[mars] + '. It also shows how you handle conflict: ' + MARS_FIGHT[mars] + '.');
   secs.push({ h: 'How you come across', paras: o });
 
   // ---- 5. Mind and heart ----
@@ -1456,6 +1470,22 @@ function buildReport(p, c, settings) {
     o.push('Your Expression number, from every letter of your birth name, is ' + ex.n + ', the ' + NUM_SHORT[ex.n] + '. It’s read as the toolkit you came with. ' + (pr ? pr.text.replace(/^They’re/, 'Your Life Path and Expression are') : ''));
   }
   secs.push({ h: 'Your road: Life Path ' + lp.n, paras: o });
+
+  // ---- 6b. Birth name vs the name you go by now ----
+  if (p.nowName && ex) {
+    var nx = nameNumber(p.nowName, settings.numSys, settings.masters, 'all');
+    if (nx) {
+      o = [];
+      o.push('You were born ' + p.name + ' and go by ' + p.nowName + ' now. Numerology reads the birth name as the blueprint you came in with, and it never changes. The name you live under is read as a second layer on top of it: how you show up, how people treat you, and the energy you\u2019ve taken on in this chapter of your life.');
+      var same = rootNum(nx.n) === rootNum(ex.n), fam = FAMILY[rootNum(nx.n)] === FAMILY[rootNum(ex.n)];
+      o.push('Your birth name works out to ' + ex.n + ', the ' + NUM_SHORT[ex.n] + '. ' + p.nowName.split(/\s+/)[0] + ' ' + p.nowName.split(/\s+/).slice(1).join(' ') + ' works out to ' + nx.n + ', the ' + NUM_SHORT[nx.n] + '. ' +
+        (same ? 'They come out the same, so numerologists would say the change kept your natural energy intact. What people meet now is what you came in with.'
+          : fam ? 'They\u2019re in the same family of numbers, so the name you go by now sits comfortably on top of your birth name. Numerologists would say it suits you.'
+          : 'They come from different families. Numerologists would read the name you go by as adding something new: the qualities of the ' + NUM_SHORT[nx.n] + ' layered over your natural ' + NUM_SHORT[ex.n] + '. People who know you only by this name may see more of the ' + NUM_SHORT[nx.n] + '. Old friends may still see the ' + NUM_SHORT[ex.n] + '.'));
+      o.push('Your Life Path (' + lp.n + ') comes from your birth date, so a name change never touches it.' + (settings.numSys === 'chaldean' ? ' You\u2019re using the Chaldean system, which gives the name you use day to day more weight than the Pythagorean system does.' : ' The older Chaldean system gives the name you use day to day even more weight. You can switch systems in Settings to compare.'));
+      secs.push({ h: 'Your names: then and now', paras: o });
+    }
+  }
 
   // ---- 7. Where the stars and numbers meet ----
   o = [];
@@ -1499,6 +1529,159 @@ function buildReport(p, c, settings) {
     meta: SIGNS[sun].name + ' Sun · ' + SIGNS[moon].name + ' Moon' + (c.hasTime ? ' · ' + SIGNS[asc].name + ' Rising' : '') + ' · Life Path ' + lp.n };
 }
 // ===== REPORT END =====
+// ===== PET REPORT START =====
+var PET_SUN = [
+  'a go-getter: first to the door, first to the food bowl, and first to make a fuss about anything new',
+  'a creature of comfort who knows exactly where the softest spot in the house is, and claims it',
+  'curious and easily distracted, with a nose in everything that’s going on',
+  'a homebody and a loyal shadow who sticks close to {p2} people',
+  'a show-off who loves an audience and expects to be the centre of attention',
+  'a creature of habit who notices when anything in the house has moved',
+  'a charmer who gets along with almost everyone and hates a raised voice',
+  'intense and devoted: slow to trust strangers, but fiercely loyal once {p} decides you’re family',
+  'an adventurer who lives for outings, new smells and anything beyond the front gate',
+  'serious and sensible, an old soul with a strong sense of routine',
+  'a bit of an odd one, in the best way, with habits nobody in the house can explain',
+  'a gentle, sensitive soul who picks up on everyone’s mood'
+];
+var PET_SNAG = [
+  'impatience, and a habit of charging at things before checking them out',
+  'stubbornness. Once {p}’s decided not to move, {p} isn’t moving',
+  'a short attention span, and a talent for getting into things {p} shouldn’t',
+  'sulking when {p}’s feelings are hurt, and getting clingy when routines change',
+  'a bit of jealousy when someone else gets the attention',
+  'fussiness about food, beds and anything out of place',
+  'getting rattled by conflict in the house',
+  'grudges. {P} remembers who stepped on {p2} tail',
+  'wandering off the moment the gate’s left open',
+  'grumpiness when the routine gets broken',
+  'selective hearing when {p}’d rather do {p2} own thing',
+  'getting overwhelmed by noise and busy days'
+];
+var PET_MOON = [
+  'a good run to burn off steam, then a quiet place to crash',
+  'meals on time, a comfy bed, and the same routine every day',
+  'company and a bit of chatter. Too much quiet makes {o} restless',
+  'family close by, and a den of {p2} own to retreat to',
+  'praise, attention and the occasional fuss made just for {o}',
+  'a tidy routine and a calm household',
+  'peace in the house. Raised voices upset {o} more than you might think',
+  'one trusted person and a good hiding spot. {P} doesn’t love being handled by strangers',
+  'room to roam, and something new to explore',
+  'structure: meals, walks and bedtime at the same time each day',
+  'a bit of independence, and space to do {p2} own thing',
+  'quiet, cuddles and somewhere soft to disappear to'
+];
+var PET_MARS = [
+  'goes flat out, then flops. A game of chase is heaven',
+  'is steady rather than speedy, and wins any tug-of-war through sheer stubbornness',
+  'needs variety. The same toy two days running is old news',
+  'plays hardest with family, and guards {p2} favourite toys',
+  'plays to the crowd, and loves a game where {p} gets to win',
+  'likes games with a job to do, like fetch or a puzzle feeder',
+  'plays nicely with others, and would rather have company than play alone',
+  'plays with total focus, and never forgets where a toy was hidden',
+  'needs big outdoor play and long outings, or {p}’ll invent {p2} own fun',
+  'takes play seriously, and has more stamina than {p} lets on',
+  'invents games nobody ever taught {o}',
+  'drifts between bursts of play and long naps'
+];
+var PET_VENUS = [
+  'greeting you like you’ve been gone a year, every time',
+  'leaning against you and settling in for a long cuddle',
+  'following you from room to room and “talking” to you',
+  'sticking close, especially when you’re feeling low',
+  'showing off for you, and making sure you notice',
+  'quiet loyalty: always nearby, rarely in the way',
+  'gentle affection, shared around the whole family',
+  'picking one or two favourite people and being completely devoted to them',
+  'getting excited about everything you do together',
+  'being reliable: there at the door, every single time',
+  'affection on {p2} own terms. Close by, but not always in your lap',
+  'snuggling in, and seeming to know exactly when you need it'
+];
+var PET_MERC = [
+  'fast but gets bored fast, so keep training short and lively',
+  'slowly, but once something sticks, it sticks for good',
+  'quickly and loves new tricks, as long as there’s plenty of variety',
+  'best from people {p} trusts, with lots of reassurance',
+  'eagerly, especially when there’s praise and an audience',
+  'well with clear, consistent routines',
+  'best with gentle encouragement. A harsh tone backfires',
+  'on {p2} own terms, and is smarter than {p} lets on',
+  'through play and exploring rather than repetition',
+  'steadily, and responds well to firm, fair rules',
+  'in unusual ways, and may decide some rules don’t apply to {o}',
+  'through gentle, patient repetition and plenty of affection'
+];
+var PET_NUM = { 1: 'the leader of the pack: independent and a little bossy', 2: 'the peacemaker: happiest with a buddy, and sensitive to tension', 3: 'the entertainer: playful, social and a bit of a clown',
+  4: 'the steady one: loyal, routine-loving and dependable', 5: 'the adventurer: curious, restless and always up for an outing', 6: 'the carer: protective of the family and gentle with little ones',
+  7: 'the thinker: watchful, and happy with quiet time alone', 8: 'the boss: confident, and keen to run the household', 9: 'the old soul: gentle, wise and kind to everyone',
+  11: 'the sensitive one: unusually tuned in to people’s moods', 22: 'the guardian: steady and protective, a rock for the family', 33: 'the nurturer: gentle and comforting to anyone who needs it' };
+var PET_NOUN = { dog: 'dog', cat: 'cat', horse: 'horse', bird: 'bird', rabbit: 'rabbit', other: 'pet' };
+var PET_EL_TIP = {
+  'fire-water': 'one runs hot and loud, the other feels everything. Gentle energy around {o} goes a long way',
+  'earth-fire': 'one wants routine, the other wants action. A walk or a game first, then the settled time both enjoy',
+  'air-earth': 'one likes chatter and change, the other likes things just so. Keep the basics predictable',
+  'air-water': 'one lives in the head, the other in the heart. Talk less, cuddle more',
+  'earth-water': '', 'air-fire': ''
+};
+
+function petPron(p) { return p.sex === 'boy' ? { p: 'he', P: 'He', o: 'him', p2: 'his' } : { p: 'she', P: 'She', o: 'her', p2: 'her' }; }
+function petFill(t, pr) { return t.replace(/\{p\}/g, pr.p).replace(/\{P\}/g, pr.P).replace(/\{o\}/g, pr.o).replace(/\{p2\}/g, pr.p2); }
+
+function buildPetReport(p, c, settings, family) {
+  var first = p.name.split(/\s+/)[0], pr = petPron(p), F = function (t) { return petFill(t, pr); };
+  var S = function (id) { return signOf(c.pos[id]); };
+  var sun = S('sun'), moon = S('moon'), mars = S('mars'), ven = S('venus'), mer = S('mercury');
+  var lp = lifePath(p.date, settings.masters), ex = nameNumber(p.name, settings.numSys, settings.masters, 'all');
+  var noun = PET_NOUN[p.species] || 'pet', secs = [], o;
+
+  o = [];
+  o.push(F(first + ' is a ' + SIGNS[sun].name + ' with the Moon in ' + SIGNS[moon].name + ', and a Life Path ' + lp.n + '. Put the old rules to work on a ' + noun + ' and you get ' + PET_SUN[sun] + '. To feel settled, {p} needs ' + PET_MOON[moon].split('. ')[0] + '. In numerology terms, ' + first + ' is ' + PET_NUM[lp.n].split(':')[0] + '.'));
+  o.push('Astrology and numerology were built to describe people, not pets, so take this as a bit of fun with a serious set of rules behind it. You know ' + first + ' better than any chart does. See how much of it rings true.');
+  secs.push({ h: 'The short version', paras: o, free: true });
+
+  secs.push({ h: 'Character: Sun in ' + SIGNS[sun].name, paras: [
+    F('The Sun is the core of any chart. In ' + SIGNS[sun].name + ', astrologers would describe ' + first + ' as ' + PET_SUN[sun] + '. ' + SIGNS[sun].name + ' is ' + (rpEl(sun) === 'earth' || rpEl(sun) === 'air' ? 'an ' : 'a ') + rpEl(sun) + ' sign, shorthand for ' + EL_WORD[rpEl(sun)].replace(/^.*\((.*)\)$/, '$1') + ', and a ' + SIGNS[sun].mode + ' one, so {p} ' + MODE[SIGNS[sun].mode].replace('starts things', 'likes to start things').replace('holds steady', 'tends to hold steady').replace('adapts', 'adapts easily') + '.'),
+    F('The flip side: ' + PET_SNAG[sun] + '. Sound familiar?')
+  ] });
+  secs.push({ h: 'What settles ' + (p.sex === 'boy' ? 'him' : 'her'), paras: [
+    F('The Moon is about comfort and feeling safe. ' + (/^[AEIOU]/.test(SIGNS[moon].name) ? 'An ' : 'A ') + SIGNS[moon].name + ' Moon needs ' + PET_MOON[moon] + '.' + (!c.hasTime ? ' (Without a birth time the Moon could be a few degrees either side, so if this doesn’t sound like ' + first + ', the next sign over might.)' : '')),
+    F('If ' + first + ' seems unsettled, astrologers would say start there: what’s missing from that list?')
+  ] });
+  secs.push({ h: 'Play and energy', paras: [F('Mars is energy and drive. With Mars in ' + SIGNS[mars].name + ', ' + first + ' ' + PET_MARS[mars] + '.')] });
+  secs.push({ h: 'Love and affection', paras: [F('Venus is how love gets shown. With Venus in ' + SIGNS[ven].name + ', ' + first + ' shows it by ' + PET_VENUS[ven] + '.')] });
+  secs.push({ h: 'Learning and training', paras: [F('Mercury is the mind. With Mercury in ' + SIGNS[mer].name + ', ' + first + ' learns ' + PET_MERC[mer] + '.')] });
+
+  o = [];
+  if (family.length) {
+    o.push(F('Here’s how ' + first + '’s chart sits with the people in this app, using the oldest test in astrology: whether your Sun signs share an element, or come from elements that get along.'));
+    family.slice(0, 6).forEach(function (f) {
+      var fs = signOf(f.chart.pos.sun), a = rpEl(sun), b = rpEl(fs), rel = elPair(a, b), key = [a, b].sort().join('-');
+      var who = f.profile.name.split(/\s+/)[0];
+      o.push(F('<b>' + first + ' and ' + who + '</b> (' + SIGNS[sun].name + ' and ' + SIGNS[fs].name + '): ' +
+        (rel === 'same' ? 'the same element, ' + a + '. Kindred spirits: you run on the same fuel.' :
+         rel === 'easy' ? a + ' and ' + b + ' are a natural match, so astrologers would expect an easy bond.' :
+         'different elements, ' + a + ' and ' + b + '. ' + rpCap(PET_EL_TIP[key] || 'different styles, which just means a bit more give and take') + '.')));
+    });
+  } else {
+    o.push(F('Add the family’s charts in Settings, and this section will show how ' + first + ' fits with each of you.'));
+  }
+  secs.push({ h: 'Fitting into the family', paras: o });
+
+  o = [F('From the birth date, ' + first + '’s Life Path is ' + lp.n + ', ' + PET_NUM[lp.n] + '.')];
+  if (ex) o.push(F('From the name, the Expression number is ' + ex.n + ', ' + PET_NUM[ex.n].split(':')[0] + '. ' + (FAMILY[rootNum(ex.n)] === FAMILY[rootNum(lp.n)] ? 'It’s in the same family of numbers as the Life Path, so the name suits {o}.' : 'It’s from a different family to the Life Path, so the name adds a side to {o} the birth date doesn’t.')));
+  var lpPlanet = NUM_PLANET[rootNum(lp.n)];
+  o.push(F('The old Chaldean numerologists paired each number with a planet. ' + first + '’s Life Path belongs to ' + PLANETS[lpPlanet].name + ', and in {p2} chart ' + PLANETS[lpPlanet].name + ' sits in ' + SIGNS[S(lpPlanet)].name + ', where it shows up ' + SIGNS[S(lpPlanet)].style + '.'));
+  secs.push({ h: 'By the numbers', paras: o });
+
+  secs.push({ h: 'Keep in mind', paras: [F('This is a reading built on centuries-old rules for people, translated for a ' + noun + ', and meant to be enjoyed. For anything to do with ' + first + '’s health or behaviour, your vet or a trainer is the one to ask.')] });
+
+  return { title: 'What the stars and numbers say about ' + first, name: p.name, first: first, sections: secs, pet: true,
+    meta: SIGNS[sun].name + ' Sun · ' + SIGNS[moon].name + ' Moon · Life Path ' + lp.n + ' · ' + rpCap(noun) };
+}
+// ===== PET REPORT END =====
 
 // ===== APP START =====
 (function () {
@@ -1546,7 +1729,8 @@ function buildReport(p, c, settings) {
   function houseSys() { return isPro() ? store.settings.houses : 'placidus'; }
 
   var store = load();
-  var ui = { paywall: null, claim: null, payBusy: null, payMsg: '', codeMsg: '', codeOk: false, restoreMsg: '', copied: false, payNote: '', proLost: '', confirmRemovePro: false,
+  var PET_KINDS = [['dog', 'Dog'], ['cat', 'Cat'], ['horse', 'Horse'], ['bird', 'Bird'], ['rabbit', 'Rabbit'], ['other', 'Other']];
+  var ui = { kind: 'person', paywall: null, claim: null, payBusy: null, payMsg: '', codeMsg: '', codeOk: false, restoreMsg: '', copied: false, payNote: '', proLost: '', confirmRemovePro: false,
     screen: store.profiles.length ? 'chart' : 'onboard', card: null, range: 30, tag: 'all', lesson: null, editId: null, showAllAsp: false, confirmDel: null, confirmWipe: false, place: null, results: [], searchMsg: '', formErr: '', sign: null, smonth: 0 };
   (function () { var mm = /sign=([a-z]+)/i.exec(location.hash || ''); if (mm) { var ix = SIGNS.map(function (x) { return x.name.toLowerCase(); }).indexOf(mm[1].toLowerCase()); if (ix >= 0) { ui.sign = ix; ui.screen = 'signs'; } } })();
   var root = document.getElementById('app');
@@ -1663,15 +1847,23 @@ function buildReport(p, c, settings) {
     var guessTz = ''; try { guessTz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) {}
     var tzs = []; try { tzs = Intl.supportedValuesOf('timeZone'); } catch (e) { tzs = [guessTz || 'UTC']; }
     var tzSel = (p && p.manual) ? p.tz : guessTz;
-    var place = ui.place;
+    var place = ui.place, pet = ui.kind === 'pet';
+    var noTimeOn = p ? !p.time : pet;
+    var sp = (p && p.species) || 'dog', sx = (p && p.sex) || 'girl';
     return '<div class="stack">' +
-      '<div><h1>' + (p ? 'Edit chart' : (store.profiles.length ? 'Add a chart' : "Let's build your chart")) + '</h1><p class="lede">Astrology and numerology, explained. Plain English, no glyph-guessing. Takes about a minute.</p></div>' +
-      '<div class="field"><label for="f-name">Full birth name</label><input class="input" id="f-name" autocomplete="name" value="' + esc(p ? p.name : '') + '"><div class="small">As it’s written on the birth certificate. Numerology works from this, not a nickname.</div></div>' +
+      '<div><h1>' + (p ? 'Edit chart' : (pet ? 'Add a pet' : (store.profiles.length ? 'Add a chart' : "Let's build your chart"))) + '</h1><p class="lede">' + (pet ? 'A reading for the four-legged (or feathered) member of the family. Their character, what settles them, how they play, and how they fit with everyone at home. Just for fun.' : 'Astrology and numerology, explained. Plain English, no glyph-guessing. Takes about a minute.') + '</p></div>' +
+      (store.profiles.length || p ? '<div class="seg" role="group" aria-label="Who is this chart for" style="grid-template-columns:repeat(2,minmax(0,1fr))"><button type="button" aria-pressed="' + !pet + '" data-act="kind:person">A person</button><button type="button" aria-pressed="' + pet + '" data-act="kind:pet">A pet</button></div>' : '') +
+      (pet
+        ? '<div class="field"><label for="f-name">Pet\u2019s name</label><input class="input" id="f-name" autocomplete="off" value="' + esc(p ? p.name : '') + '"><div class="small">Add the family surname if you like (Stella Smith). The numbers are worked out from the name you enter.</div></div>' +
+          '<div class="grid2"><div class="field"><label for="f-species">Animal</label><select class="input" id="f-species">' + PET_KINDS.map(function (k) { return '<option value="' + k[0] + '"' + (k[0] === sp ? ' selected' : '') + '>' + k[1] + '</option>'; }).join('') + '</select></div>' +
+          '<div class="field"><label for="f-sex">Girl or boy</label><select class="input" id="f-sex"><option value="girl"' + (sx === 'girl' ? ' selected' : '') + '>Girl</option><option value="boy"' + (sx === 'boy' ? ' selected' : '') + '>Boy</option></select></div></div>'
+        : '<div class="field"><label for="f-name">Full birth name</label><input class="input" id="f-name" autocomplete="name" value="' + esc(p ? p.name : '') + '"><div class="small">As it’s written on the birth certificate. Numerology works from this, not a nickname.</div></div>' +
+          '<div class="field"><label for="f-now">Name you go by now <span class="small">(optional)</span></label><div class="small" style="color:var(--ink2);line-height:1.5">Changed your name since you were born? Maybe through marriage, or a name you chose yourself. Numerology reads your birth name as the blueprint you came in with. The name you live under now is read as a second layer on top: how you show up and how people treat you today. Add it and we\u2019ll show you how the two fit together.</div><input class="input" id="f-now" autocomplete="off" value="' + esc(p && p.nowName ? p.nowName : '') + '"><div class="small">Leave it blank if it\u2019s the same as your birth name.</div></div>') +
       '<div class="field"><label for="f-date">Birth date</label><input class="input" id="f-date" type="date" min="1800-01-01" max="2050-12-31" value="' + esc(p ? p.date : '') + '"></div>' +
-      '<div class="field"><label for="f-time">Birth time</label><input class="input" id="f-time" type="time" value="' + esc(p && p.time ? p.time : '') + '"' + (p && !p.time ? ' disabled' : '') + '>' +
-      '<div class="check"><input type="checkbox" id="f-notime"' + (p && !p.time ? ' checked' : '') + '><label for="f-notime">I don’t know the birth time</label></div>' +
-      '<div class="small" id="notime-note"' + (p && !p.time ? '' : ' hidden') + '>No drama. We’ll build a noon chart and leave out the houses and Rising sign, because those need the time. We won’t fake them.</div></div>' +
-      '<div class="field"><label for="f-place">Birth place</label>' +
+      '<div class="field"><label for="f-time">Birth time</label><input class="input" id="f-time" type="time" value="' + esc(p && p.time ? p.time : '') + '"' + (noTimeOn ? ' disabled' : '') + '>' +
+      '<div class="check"><input type="checkbox" id="f-notime"' + (noTimeOn ? ' checked' : '') + '><label for="f-notime">I don’t know the birth time</label></div>' +
+      '<div class="small" id="notime-note"' + (noTimeOn ? '' : ' hidden') + '>No drama. We’ll build a noon chart and leave out the houses and Rising sign, because those need the time. We won’t fake them.</div></div>' +
+      '<div class="field"><label for="f-place">' + (pet ? 'Where ' + (sx === 'boy' ? 'he' : 'she') + ' was born (or the nearest town you know)' : 'Birth place') + '</label>' +
       (place ? '<div class="chosen"><div style="flex:1"><b>' + esc(place.label) + '</b><br>' + Math.abs(place.lat).toFixed(2) + '°' + (place.lat < 0 ? 'S' : 'N') + ' ' + Math.abs(place.lon).toFixed(2) + '°' + (place.lon < 0 ? 'W' : 'E') + ' · ' + esc(place.tz) + '</div><button type="button" class="btn-ghost" data-act="clear-place">Change</button></div>'
         : '<input class="input" id="f-place" placeholder="Start typing a town or city" autocomplete="off"><div id="place-results" class="results" aria-live="polite"></div>') +
       '<div class="small">We look up the coordinates, plus the timezone and daylight saving rules that applied on that day.</div>' +
@@ -1706,6 +1898,7 @@ function buildReport(p, c, settings) {
       var title = id === 'asc' ? S.name + ' Rising' : P.name + ' in ' + S.name;
       return '<button type="button" class="row-btn" data-act="card-place:' + id + '"><div class="orb' + (P.isPoint ? ' pt' : '') + '">' + glyph(id) + '</div><div style="flex:1"><b style="font-size:15px">' + title + '</b><div class="small" style="color:var(--ink2)">' + P.short + ': ' + S.style + '</div></div><span aria-hidden="true" style="color:var(--muted);font-size:18px">›</span></button>';
     }).join('') + '</section>');
+    if (p.kind === 'pet') out.push('<div class="note">This is ' + esc(p.name.split(/\s+/)[0]) + '\u2019s real birth chart. The placement cards below use the standard meanings, which were written for people. The pet reading translates them for a ' + ({ dog: 'dog', cat: 'cat', horse: 'horse', bird: 'bird', rabbit: 'rabbit' }[p.species] || 'pet') + '.</div>');
     out.push(reportEntry(p));
     // placements
     var free = isPro();
@@ -1804,11 +1997,14 @@ function buildReport(p, c, settings) {
   }
 
   function reportEntry(p) {
-    return '<div class="card pro-card r-entry no-print" style="border-color:var(--rust);background:var(--surface)"><span class="lock" style="color:var(--rust)">' + (isPro() ? 'Your reading' : ICON.lock + 'New \u00B7 Pro') + '</span><b class="t">What your stars and numbers say about ' + (p.id === store.profiles[0].id ? 'you' : esc(p.name.split(/\s+/)[0])) + '</b><div class="small" style="color:var(--ink2)">Your chart and your numbers, read together as one plain-English report. About a 6-minute read' + (isPro() ? ', and you can save it as a PDF.' : '. The opening section is free.') + '</div><button type="button" class="btn" data-act="tab:report">Read ' + (isPro() ? 'the report' : 'the opening') + '</button></div>';
+    return '<div class="card pro-card r-entry no-print" style="border-color:var(--rust);background:var(--surface)"><span class="lock" style="color:var(--rust)">' + (isPro() ? 'Your reading' : ICON.lock + 'New \u00B7 Pro') + '</span><b class="t">' + (p.kind === 'pet' ? 'What the stars and numbers say about ' + esc(p.name.split(/\s+/)[0]) : 'What your stars and numbers say about ' + (p.id === store.profiles[0].id ? 'you' : esc(p.name.split(/\s+/)[0]))) + '</b><div class="small" style="color:var(--ink2)">Your chart and your numbers, read together as one plain-English report. About a 6-minute read' + (isPro() ? ', and you can save it as a PDF.' : '. The opening section is free.') + '</div><button type="button" class="btn" data-act="tab:report">Read ' + (isPro() ? 'the report' : 'the opening') + '</button></div>';
   }
   function screenReport() {
     var p = active(); if (!p) return '';
-    var r = buildReport(p, getChart(p), store.settings), pro = isPro(), out = ['<div class="report">'];
+    var r = p.kind === 'pet'
+      ? buildPetReport(p, getChart(p), store.settings, store.profiles.filter(function (x) { return x.kind !== 'pet' && x.id !== p.id; }).map(function (x) { return { profile: x, chart: getChart(x) }; }))
+      : buildReport(p, getChart(p), store.settings);
+    var pro = isPro(), out = ['<div class="report">'];
     out.push('<button type="button" class="link no-print" data-act="tab:chart">\u2190 Back to the chart</button>');
     out.push(letterhead());
     out.push('<div class="r-head"><div class="k">Duology reading</div><h1>' + r.title + '</h1><div class="m"><b>' + esc(p.name) + '</b><br>' + r.meta + '<br>' + birthLine(getChart(p)) + '</div></div>');
@@ -1819,7 +2015,9 @@ function buildReport(p, c, settings) {
       out.push('<h2>' + sct.h + '</h2>' + sct.paras.map(function (t) { return '<p>' + t + '</p>'; }).join(''));
     });
     if (!pro) {
-      out.push(proCard('The rest of your reading', 'Eight more sections: your core, your inner world, how you come across, mind and heart, your Life Path road, where your stars and numbers meet, your growth edges, and where you are right now. Plus a PDF copy to keep or share.', 'report', 'Unlock the full reading'));
+      out.push(r.pet
+        ? proCard('The rest of ' + esc(r.first) + '\u2019s reading', 'Character, what settles ' + (p.sex === 'boy' ? 'him' : 'her') + ', play and energy, love and affection, learning and training, how ' + (p.sex === 'boy' ? 'he' : 'she') + ' fits with each person in the family, and ' + (p.sex === 'boy' ? 'his' : 'her') + ' numbers. Plus a PDF copy to keep or share.', 'report', 'Unlock the full reading')
+        : proCard('The rest of your reading', 'More sections: your core, your inner world, how you come across, mind and heart, your Life Path road, where your stars and numbers meet, your growth edges, and where you are right now. Plus a PDF copy to keep or share.', 'report', 'Unlock the full reading'));
     } else {
       out.push('<div class="r-foot">Duology \u00B7 astrology and numerology, explained \u00B7 scvd-app.github.io/duology</div>');
       out.push('<div class="r-cta print-only"><b>Want your own reading?</b><br>Build your chart for free at <b>scvd-app.github.io/duology</b>. No glyphs, no gatekeeping: every placement explained in plain English, plus your personal forecast and numbers.</div>');
@@ -1849,11 +2047,14 @@ function buildReport(p, c, settings) {
     var lp = lifePath(p.date, s.masters), yr = new Date().getFullYear(), py = personalYear(p.date, yr);
     var rows = [['Life Path', lp, 'Full birth date'], ['Expression', nameNumber(p.name, s.numSys, s.masters, 'all'), 'Every letter of the name'],
       ['Soul Urge', nameNumber(p.name, s.numSys, s.masters, 'vowels'), 'The vowels'], ['Personality', nameNumber(p.name, s.numSys, s.masters, 'cons'), 'The consonants'],
-      ['Personal Year ' + yr, py, 'Birthday + this year']].filter(function (r) { return r[1]; });
+      ['Personal Year ' + yr, py, 'Birthday + this year']];
+    if (p.nowName) rows.splice(2, 0, ['Name now', nameNumber(p.nowName, s.numSys, s.masters, 'all'), esc(p.nowName)]);
+    if (p.kind === 'pet') rows = rows.slice(0, 2);
+    rows = rows.filter(function (r) { return r[1]; });
     o.push('<h2>Your numbers at a glance</h2><table class="r-tbl r-num"><thead><tr><th>Number</th><th></th><th>How we got there</th></tr></thead><tbody>' + rows.map(function (r) {
       return '<tr><td><b>' + r[0] + '</b><br><small>' + r[2] + '</small></td><td class="n">' + r[1].n + '</td><td class="w">' + esc(r[1].working) + '</td></tr>';
     }).join('') + '</tbody></table>');
-    o.push('<p class="r-note">' + (s.numSys === 'pyth' ? 'Pythagorean' : 'Chaldean') + ' system' + (s.masters ? ', master numbers kept' : ', master numbers reduced') + '. Name: ' + esc(p.name) + '.</p></section>');
+    o.push('<p class="r-note">' + (s.numSys === 'pyth' ? 'Pythagorean' : 'Chaldean') + ' system' + (s.masters ? ', master numbers kept' : ', master numbers reduced') + '. ' + (p.kind === 'pet' ? 'Name' : 'Birth name') + ': ' + esc(p.name) + '.</p></section>');
     return o.join('');
   }
   function printReport() {
@@ -1905,6 +2106,8 @@ function buildReport(p, c, settings) {
     out.push('<h2>Your core numbers</h2>');
     out.push(numCard('Life Path', lp, 'Your birth date can never change, so numerology treats it as the main road you\u2019re on.', [['What it\u2019s for', 'Your Life Path is the big one: the overall direction of your life, and the number everything else gets compared against, including your Personal Year.']], true));
     if (ex) out.push(numCard('Expression', ex, 'Every letter of your full birth name, read as your natural talents: the toolkit you came with.', [], true));
+    var nowX = p.nowName ? nameNumber(p.nowName, s.numSys, s.masters, 'all') : null;
+    if (nowX) out.push(numCard('Name you go by now: ' + esc(p.nowName), nowX, 'Numerology reads your birth name as the blueprint and the name you live under as a second layer on top: how you show up today. Your birth name works out to ' + (ex ? ex.n : '?') + '.', [], true));
     if (so) out.push(numCard('Soul Urge', so, 'Just the vowels, the soft sounds inside the name, so they\u2019re read as what you want deep down.', [], true));
     if (pe) out.push(numCard('Personality', pe, 'Just the consonants, the hard outer shell of the name, so they\u2019re read as how other people see you.', [], true));
     var pairs = numberPairs(lp, ex, so, pe);
@@ -1927,10 +2130,10 @@ function buildReport(p, c, settings) {
     out.push(proSection());
     out.push('<section class="stack-s"><h2>Saved charts</h2>' + store.profiles.map(function (x) {
       var isA = p && x.id === p.id;
-      return '<div class="card prof"><div class="avatar">' + esc(initials(x.name)) + '</div><div style="flex:1;min-width:0"><b>' + esc(x.name) + '</b>' + (isA ? ' <span class="small">(showing)</span>' : '') + '<div class="small">' + fmtDate(new Date(x.date + 'T00:00:00').getTime()) + ' · ' + (x.time ? fmtTime(x.time) : 'time unknown') + ' · ' + esc(x.placeName) + '</div>' +
+      return '<div class="card prof"><div class="avatar">' + esc(initials(x.name)) + '</div><div style="flex:1;min-width:0"><b>' + esc(x.name) + '</b>' + (x.kind === 'pet' ? ' <span class="small">(' + ({ dog: 'dog', cat: 'cat', horse: 'horse', bird: 'bird', rabbit: 'rabbit' }[x.species] || 'pet') + ')</span>' : (x.nowName ? ' <span class="small">now ' + esc(x.nowName) + '</span>' : '')) + (isA ? ' <span class="small">(showing)</span>' : '') + '<div class="small">' + fmtDate(new Date(x.date + 'T00:00:00').getTime()) + ' · ' + (x.time ? fmtTime(x.time) : 'time unknown') + ' · ' + esc(x.placeName) + '</div>' +
         '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' + (isA ? '' : '<button type="button" class="btn-ghost" data-act="use-profile:' + x.id + '">Show</button>') + '<button type="button" class="btn-ghost" data-act="edit-profile:' + x.id + '">Edit</button>' +
         '<button type="button" class="btn-ghost" style="color:var(--danger);border-color:var(--danger)" data-act="del-profile:' + x.id + '">' + (ui.confirmDel === x.id ? 'Tap again to delete' : 'Delete') + '</button></div></div></div>';
-    }).join('') + '<button type="button" class="btn-dashed" data-act="add-profile">+ Add a chart (partner, kids, mates)' + (isPro() ? '' : ' ' + LOCK) + '</button>' + (isPro() ? '<div class="small">Up to ' + MAX_PROFILES + ' charts.</div>' : '<div class="small">The free version keeps one chart. Pro keeps up to ' + MAX_PROFILES + ', so you can read the whole family.</div>') + '</section>');
+    }).join('') + '<button type="button" class="btn-dashed" data-act="add-profile">+ Add a chart (partner, kids, mates, pets)' + (isPro() ? '' : ' ' + LOCK) + '</button>' + (isPro() ? '<div class="small">Up to ' + MAX_PROFILES + ' charts.</div>' : '<div class="small">The free version keeps one chart. Pro keeps up to ' + MAX_PROFILES + ', so you can read the whole family.</div>') + '</section>');
     // astrology
     out.push('<section class="stack-s"><h2>Astrology system</h2><div class="lbl">Zodiac</div><div class="grid2"><button type="button" class="opt" aria-pressed="true"><b>Tropical</b><span>Western standard</span></button><button type="button" class="opt" disabled><b>Sidereal (Vedic)</b><span>Coming later</span></button></div>');
     out.push('<button type="button" class="link" data-act="learn:vedic">Why are there two zodiacs?</button><div class="lbl">House system</div>');
@@ -2143,12 +2346,21 @@ function buildReport(p, c, settings) {
       name: document.getElementById('f-name').value.trim(),
       date: document.getElementById('f-date').value,
       noTime: document.getElementById('f-notime').checked,
-      time: document.getElementById('f-time').value
+      time: document.getElementById('f-time').value,
+      nowName: (document.getElementById('f-now') || {}).value || '',
+      species: (document.getElementById('f-species') || {}).value || '',
+      sex: (document.getElementById('f-sex') || {}).value || ''
     };
+  }
+  function fillForm(k) {
+    var set = function (id, v) { var el = document.getElementById(id); if (el && v !== undefined && v !== '') el.value = v; };
+    set('f-name', k.name); set('f-date', k.date); set('f-time', k.time); set('f-now', k.nowName); set('f-species', k.species); set('f-sex', k.sex);
+    document.getElementById('f-notime').checked = k.noTime;
+    document.getElementById('f-time').disabled = k.noTime; document.getElementById('notime-note').hidden = !k.noTime;
   }
   function saveProfile() {
     var f = readForm(), err = '';
-    if (!f.name) err = 'Add a name. Numerology needs the full birth name.';
+    if (!f.name) err = ui.kind === 'pet' ? 'Add your pet\u2019s name.' : 'Add a name. Numerology needs the full birth name.';
     else if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) err = 'Add the birth date.';
     else if (+f.date.slice(0, 4) < 1800 || +f.date.slice(0, 4) > 2050) err = 'The calculations are built for births between 1800 and 2050.';
     else if (!f.noTime && !f.time) err = 'Add the birth time, or tick “I don’t know the birth time”.';
@@ -2162,12 +2374,12 @@ function buildReport(p, c, settings) {
     if (err) {
       ui.formErr = err;
       var keep = readForm(); render();
-      document.getElementById('f-name').value = keep.name; document.getElementById('f-date').value = keep.date;
-      document.getElementById('f-notime').checked = keep.noTime; document.getElementById('f-time').value = keep.time;
-      document.getElementById('f-time').disabled = keep.noTime; document.getElementById('notime-note').hidden = !keep.noTime;
+      fillForm(keep);
       return;
     }
     var rec = { name: f.name, date: f.date, time: f.noTime ? null : f.time, placeName: place.label, lat: place.lat, lon: place.lon, tz: place.tz, manual: !!place.manual, updated: Date.now() };
+    if (ui.kind === 'pet') { rec.kind = 'pet'; rec.species = f.species || 'dog'; rec.sex = f.sex || 'girl'; }
+    else if (f.nowName && f.nowName.trim().toLowerCase() !== f.name.toLowerCase()) rec.nowName = f.nowName.trim();
     if (ui.editId) {
       store.profiles = store.profiles.map(function (x) { return x.id === ui.editId ? Object.assign({ id: x.id }, rec) : x; });
       store.activeId = ui.editId;
@@ -2212,9 +2424,13 @@ function buildReport(p, c, settings) {
       case 'add-profile':
         if (!isPro() && store.profiles.length >= 1) { openPaywall('profiles'); break; }
         if (store.profiles.length >= MAX_PROFILES) { toast('That\u2019s the limit of ' + MAX_PROFILES + ' charts. Delete one to add another.'); break; }
-        ui.editId = null; ui.place = null; go('onboard'); break;
+        ui.editId = null; ui.place = null; ui.kind = 'person'; go('onboard'); break;
+      case 'kind':
+        var kk = readForm(); ui.kind = arg; ui.formErr = ''; render(); fillForm({ name: kk.name, date: kk.date, time: kk.time, noTime: arg === 'pet' && !kk.time ? true : kk.noTime });
+        break;
       case 'edit-profile':
         var ep = store.profiles.filter(function (x) { return x.id === arg; })[0];
+        ui.kind = ep && ep.kind === 'pet' ? 'pet' : 'person';
         ui.editId = arg; ui.place = ep && !ep.manual ? { label: ep.placeName, lat: ep.lat, lon: ep.lon, tz: ep.tz } : null; go('onboard'); break;
       case 'use-profile': store.activeId = arg; save(); ui.showAllAsp = false; go('chart'); break;
       case 'del-profile':
@@ -2231,15 +2447,11 @@ function buildReport(p, c, settings) {
         var keep = readForm();
         ui.place = { label: [r.name, r.admin1, r.country].filter(Boolean).join(', '), lat: r.latitude, lon: r.longitude, tz: r.timezone };
         ui.results = []; render();
-        document.getElementById('f-name').value = keep.name; document.getElementById('f-date').value = keep.date;
-        document.getElementById('f-notime').checked = keep.noTime; document.getElementById('f-time').value = keep.time;
-        document.getElementById('f-time').disabled = keep.noTime; document.getElementById('notime-note').hidden = !keep.noTime;
+        fillForm(keep);
         break;
       case 'clear-place':
         var kp = readForm(); ui.place = null; render();
-        document.getElementById('f-name').value = kp.name; document.getElementById('f-date').value = kp.date;
-        document.getElementById('f-notime').checked = kp.noTime; document.getElementById('f-time').value = kp.time;
-        document.getElementById('f-time').disabled = kp.noTime; document.getElementById('notime-note').hidden = !kp.noTime;
+        fillForm(kp);
         document.getElementById('f-place').focus();
         break;
       case 'save-profile': saveProfile(); break;
