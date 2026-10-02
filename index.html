@@ -1875,7 +1875,8 @@ function buildPetReport(p, c, settings, family) {
       (ui.formErr ? '<div class="err" role="alert">' + esc(ui.formErr) + '</div>' : '') +
       '<button type="button" class="btn" data-act="save-profile">' + (p ? 'Save changes' : 'Save to my profile') + '</button>' +
       (store.profiles.length ? '<button type="button" class="btn-ghost" data-act="tab:' + (p ? 'settings' : 'chart') + '">Cancel</button>' : '') +
-      '<p class="small" style="text-align:center;margin:0">Your details are saved on this device only. Delete them any time in Settings.</p>' +
+      '<details class="manual"><summary style="justify-content:center">Your details stay on this device. How that works</summary><div style="padding-top:10px">' + privacyHTML() + '</div></details>' +
+      (store.profiles.length || p ? '' : '<div class="card" style="padding:14px;text-align:center"><div class="small" style="color:var(--ink2)">New phone, or cleared your browser? Load your backup file and everything comes back.</div><label class="link" for="f-import" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center">Load a backup file</label><input type="file" id="f-import" accept=".json,application/json" class="sr">' + (ui.importMsg ? '<div class="' + (ui.importOk ? 'ok' : 'err') + '" role="status">' + esc(ui.importMsg) + '</div>' : '') + '</div>') +
       (store.profiles.length ? '' : '<div class="card" style="padding:14px;text-align:center"><div class="small" style="color:var(--ink2)">Just want the general reading for your star sign? No details needed.</div><button type="button" class="link" data-act="tab:signs">See your star sign\u2019s month \u2192</button></div>') + '</div>';
   }
 
@@ -2057,6 +2058,86 @@ function buildPetReport(p, c, settings, family) {
     o.push('<p class="r-note">' + (s.numSys === 'pyth' ? 'Pythagorean' : 'Chaldean') + ' system' + (s.masters ? ', master numbers kept' : ', master numbers reduced') + '. ' + (p.kind === 'pet' ? 'Name' : 'Birth name') + ': ' + esc(p.name) + '.</p></section>');
     return o.join('');
   }
+  // ---------- securing your information ----------
+  function privacyHTML() {
+    var P = function (h, t) { return '<div class="small" style="color:var(--ink2);line-height:1.55"><b style="color:var(--ink)">' + h + '</b><br>' + t + '</div>'; };
+    return '<div class="stack-s">' +
+      P('Your information stays on your device', 'Names, birth dates, times and places, your charts, readings and settings are all stored in this browser on this device, and nowhere else. Every calculation runs right here on your phone. We don\u2019t have accounts, a database of users or a copy of your charts, so there\u2019s nothing of yours on our side to lose, leak or sell.') +
+      P('The few things that do leave your device, and why', '<b>Place search:</b> when you type a birth place, just that text goes to Open-Meteo\u2019s free place lookup to find the coordinates and timezone. Nothing else goes with it.<br><b>Buying Pro:</b> payment is handled entirely by Stripe. We never see your card. Stripe passes us the email you paid with, and we keep it with your Pro code on our server so we can send the code again if you lose it. It\u2019s used for nothing else.<br><b>Loading the app:</b> like any website, the host (GitHub) and Google Fonts see your device\u2019s internet address when the page loads. Neither sees anything you\u2019ve typed in.') +
+      P('What we don\u2019t do', 'No ads, no tracking, no analytics, no selling data, and no subscriptions.') +
+      P('The catch, and how to cover it', 'Because your charts only live on this device, we can\u2019t recover them for you. If you clear your browser, lose your phone or switch devices, they\u2019re gone, unless you\u2019ve made a backup. A backup is a small file you keep yourself. Email it to yourself, or save it to Google Drive or iCloud, and load it back in any time. Your backup contains birth details and your Pro code, so treat it like any personal document.') +
+      P('Deleting your information', '<b>Delete all my data</b> (below) wipes everything Duology has stored on this device. To have your email and Pro code removed from our server too, email ' + SUPPORT_EMAIL + '.') + '</div>';
+  }
+  // ---------- backup: export / import ----------
+  var canShareFiles = (function () { try { return !!(navigator.canShare && navigator.canShare({ files: [new File(['x'], 'x.json', { type: 'application/json' })] })); } catch (e) { return false; } })();
+  function backupSection() {
+    var last = store.settings.lastBackup;
+    return '<section class="stack-s"><h2>Back up your charts</h2>' +
+      '<p class="small" style="margin:0;color:var(--ink2)">Your charts only live on this device. If you clear your browser, change phones or the app gets reinstalled, they\u2019re gone. A backup is one small file you keep somewhere safe (email it to yourself, or save it to Google Drive or iCloud) and load back in here any time.' + (pro ? ' It includes your Pro code too, so keep it private.' : '') + '</p>' +
+      '<div class="small">' + (last ? 'Last backup: ' + fmtDate(last) + '.' : (store.profiles.length ? '<b style="color:var(--rust)">No backup yet.</b>' : '')) + '</div>' +
+      '<div class="grid2">' + (canShareFiles ? '<button type="button" class="btn-ghost" data-act="backup:share">Share or email it</button>' : '') + '<button type="button" class="btn-ghost" data-act="backup:download"' + (canShareFiles ? '' : ' style="grid-column:1/-1"') + '>Download backup file</button></div>' +
+      '<label class="btn-dashed" for="f-import" style="display:flex;align-items:center;justify-content:center;cursor:pointer">Load a backup file</label><input type="file" id="f-import" accept=".json,application/json" class="sr">' +
+      (ui.importMsg ? '<div class="' + (ui.importOk ? 'ok' : 'err') + '" role="status">' + esc(ui.importMsg) + '</div>' : '') + '</section>';
+  }
+  function backupData() {
+    return { app: 'duology', version: 1, exported: new Date().toISOString(), settings: { houses: store.settings.houses, numSys: store.settings.numSys, masters: store.settings.masters },
+      profiles: store.profiles, activeId: store.activeId, pro: pro ? { token: pro.token } : null };
+  }
+  function doBackup(how) {
+    var name = 'duology-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    var blob = new Blob([JSON.stringify(backupData(), null, 1)], { type: 'application/json' });
+    var done = function () { store.settings.lastBackup = Date.now(); save(); ui.importMsg = ''; render(); toast('Backup saved. Vandelay Industries would be proud.'); };
+    if (how === 'share' && canShareFiles) {
+      navigator.share({ files: [new File([blob], name, { type: 'application/json' })], title: 'Duology backup', text: 'My Duology charts backup. Load it in Duology: Settings \u2192 Back up your charts \u2192 Load a backup file.' })
+        .then(done).catch(function (e) { if (e && e.name !== 'AbortError') toast('Couldn\u2019t share it. Try Download instead.'); });
+      return;
+    }
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000); done();
+  }
+  function validProfile(x) {
+    return x && typeof x.name === 'string' && x.name.trim() && /^\d{4}-\d{2}-\d{2}$/.test(x.date || '') && (x.time === null || x.time === undefined || /^\d{2}:\d{2}$/.test(x.time)) &&
+      typeof x.lat === 'number' && typeof x.lon === 'number' && Math.abs(x.lat) <= 90 && Math.abs(x.lon) <= 180 && typeof x.tz === 'string';
+  }
+  function doImport(file) {
+    var fail = function (m) { ui.importOk = false; ui.importMsg = m; render(); };
+    if (!file) return;
+    if (file.size > 500000) return fail('That file\u2019s too big to be a Duology backup.');
+    var rd = new FileReader();
+    rd.onload = function () {
+      var d; try { d = JSON.parse(rd.result); } catch (e) { return fail('That doesn\u2019t look like a Duology backup file.'); }
+      if (!d || d.app !== 'duology' || !Array.isArray(d.profiles)) return fail('That doesn\u2019t look like a Duology backup file.');
+      var gotPro = false, before = store.profiles.length;
+      if (d.pro && d.pro.token && !isPro()) { var t = parseToken(d.pro.token); if (t && (t.expires === null || t.expires > Date.now())) { setPro(d.pro.token); pro.checkedAt = 0; savePro(); gotPro = true; } }
+      var key = function (x) { return (x.name || '').trim().toLowerCase() + '|' + x.date + '|' + (x.time || ''); };
+      var have = {}; store.profiles.forEach(function (x) { have[key(x)] = 1; });
+      var cap = isPro() ? MAX_PROFILES : 1, added = 0, dup = 0, bad = 0, over = 0;
+      d.profiles.forEach(function (x) {
+        if (!validProfile(x)) { bad++; return; }
+        if (have[key(x)]) { dup++; return; }
+        if (store.profiles.length >= cap) { over++; return; }
+        var rec = { id: 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: x.name.trim(), date: x.date, time: x.time || null, placeName: String(x.placeName || ''), lat: x.lat, lon: x.lon, tz: x.tz, manual: !!x.manual, updated: Date.now() };
+        if (x.kind === 'pet') { rec.kind = 'pet'; rec.species = PET_KINDS.some(function (k) { return k[0] === x.species; }) ? x.species : 'other'; rec.sex = x.sex === 'boy' ? 'boy' : 'girl'; }
+        else if (typeof x.nowName === 'string' && x.nowName.trim()) rec.nowName = x.nowName.trim();
+        store.profiles.push(rec); have[key(x)] = 1; added++;
+      });
+      if (!store.activeId && store.profiles.length) store.activeId = store.profiles[0].id;
+      if (d.settings && before === 0) { ['houses', 'numSys'].forEach(function (k) { if (typeof d.settings[k] === 'string') store.settings[k] = d.settings[k]; }); if (typeof d.settings.masters === 'boolean') store.settings.masters = d.settings.masters; }
+      save(); chartCache = {}; fcCache = {};
+      var bits = [];
+      bits.push(added ? 'Loaded ' + added + ' chart' + (added === 1 ? '' : 's') + '.' : 'No new charts to load.');
+      if (dup) bits.push(dup + ' already here, so skipped.');
+      if (over) bits.push(over + ' left out: ' + (isPro() ? 'that\u2019s the ' + MAX_PROFILES + '-chart limit.' : 'the free version keeps one chart. Go Pro to load the rest.'));
+      if (bad) bits.push(bad + ' couldn\u2019t be read.');
+      if (gotPro) bits.push('Pro is back on too.');
+      ui.importOk = added > 0 || gotPro || dup > 0; ui.importMsg = bits.join(' ');
+      if (!added && !dup && !gotPro && !over) ui.importOk = false;
+      if (ui.screen === 'onboard' && added) { var m = ui.importMsg; go('chart'); toast(m); return; }
+      render();
+    };
+    rd.onerror = function () { fail('Couldn\u2019t read that file.'); };
+    rd.readAsText(file);
+  }
   function printReport() {
     var p = active(), old = document.title;
     document.title = 'Duology reading - ' + (p ? p.name : '');
@@ -2134,6 +2215,7 @@ function buildPetReport(p, c, settings, family) {
         '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' + (isA ? '' : '<button type="button" class="btn-ghost" data-act="use-profile:' + x.id + '">Show</button>') + '<button type="button" class="btn-ghost" data-act="edit-profile:' + x.id + '">Edit</button>' +
         '<button type="button" class="btn-ghost" style="color:var(--danger);border-color:var(--danger)" data-act="del-profile:' + x.id + '">' + (ui.confirmDel === x.id ? 'Tap again to delete' : 'Delete') + '</button></div></div></div>';
     }).join('') + '<button type="button" class="btn-dashed" data-act="add-profile">+ Add a chart (partner, kids, mates, pets)' + (isPro() ? '' : ' ' + LOCK) + '</button>' + (isPro() ? '<div class="small">Up to ' + MAX_PROFILES + ' charts.</div>' : '<div class="small">The free version keeps one chart. Pro keeps up to ' + MAX_PROFILES + ', so you can read the whole family.</div>') + '</section>');
+    out.push(backupSection());
     // astrology
     out.push('<section class="stack-s"><h2>Astrology system</h2><div class="lbl">Zodiac</div><div class="grid2"><button type="button" class="opt" aria-pressed="true"><b>Tropical</b><span>Western standard</span></button><button type="button" class="opt" disabled><b>Sidereal (Vedic)</b><span>Coming later</span></button></div>');
     out.push('<button type="button" class="link" data-act="learn:vedic">Why are there two zodiacs?</button><div class="lbl">House system</div>');
@@ -2151,7 +2233,7 @@ function buildPetReport(p, c, settings, family) {
     out.push('<section class="stack-s"><h2>Numerology system</h2><div class="grid2"><button type="button" class="opt" aria-pressed="' + (s.numSys === 'pyth') + '" data-act="numsys:pyth"><b>Pythagorean</b><span>Most widely used</span></button><button type="button" class="opt" aria-pressed="' + (s.numSys === 'chaldean') + '" data-act="numsys:chaldean"><b>Chaldean</b><span>Older, sound-based</span></button></div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px"><div><b id="mlabel" style="font-size:14px">Keep master numbers</b><div class="small">11, 22 and 33 don’t get reduced</div></div><button type="button" class="switch" role="switch" aria-checked="' + s.masters + '" aria-labelledby="mlabel" data-act="masters"><i></i></button></div></section>');
     // privacy
-    out.push('<section class="stack-s"><h2>Privacy</h2><p class="small" style="margin:0;color:var(--ink2)">Your charts are stored in this browser only. Your name, birth date, time and place are never sent to us. Two things do leave your device: the place name you type into the search, which goes to Open-Meteo\u2019s free place lookup, and, if you buy Pro, your payment, which is handled by Stripe. We never see your card. Stripe passes us the email you used so we can send your Pro code. We keep that email with your code so we can send it again if you lose it, and use it for nothing else. No ads, no tracking, no selling data.</p>' +
+    out.push('<section class="stack-s" id="your-info"><h2>Securing your information</h2>' + privacyHTML() +
       '<h2 style="margin-top:6px">Refunds</h2><p class="small" style="margin:0;color:var(--ink2)">Every Pro pass is a one-off payment. Nothing renews and nothing is charged again. If Pro isn\u2019t what you expected, email <b>' + SUPPORT_EMAIL + '</b> within 14 days of buying and we\u2019ll refund you in full, no questions asked. This doesn\u2019t limit any rights you have under consumer law where you live.</p><button type="button" class="btn-danger" data-act="wipe">' + (ui.confirmWipe ? 'Tap again to delete everything' : 'Delete all my data') + '</button></section>');
     out.push('<footer class="foot">Duology · astrology and numerology, explained<br>An SCVD app<br>All calculations run on your device.<br>Questions? ' + SUPPORT_EMAIL + '</footer></div>');
     return out.join('');
@@ -2402,6 +2484,7 @@ function buildPetReport(p, c, settings, family) {
       case 'close-paywall': if (!ui.payBusy) { ui.paywall = null; ui.payMsg = ''; ui.codeMsg = ''; render(); } break;
       case 'buy': buy(arg); break;
       case 'print-report': printReport(); break;
+      case 'backup': doBackup(arg); break;
       case 'apply-code': applyCode(arg); break;
       case 'restore': restore(); break;
       case 'copy-code': copyCode(); break;
@@ -2464,6 +2547,7 @@ function buildPetReport(p, c, settings, family) {
     if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); el.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
   });
   root.addEventListener('change', function (e) {
+    if (e.target.id === 'f-import') { doImport(e.target.files && e.target.files[0]); e.target.value = ''; return; }
     if (e.target.id === 'f-bday' && e.target.value) {
       var bp = e.target.value.split('-').map(Number);
       var sl = Astro.positions(Astro.jdFromMs(Date.UTC(bp[0], bp[1] - 1, bp[2], 12))).sun, dd = sl % 30;
