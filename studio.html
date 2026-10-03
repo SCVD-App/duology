@@ -113,6 +113,7 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 .v-calc{font-family:var(--serif);font-size:84px;font-weight:600;text-align:center;font-variant-numeric:tabular-nums;color:var(--v-ink);line-height:1.15}.v-calc.big{font-size:104px;color:var(--v-accent)}
 .cy{color:#FFD25E}.cr{color:#FF7A7A}.cb{color:#62B4FF}.cg{color:#7FDB9A}
 .v-chips{display:flex;gap:24px;flex-wrap:wrap;justify-content:center}.v-chip{display:inline-flex;align-items:center;gap:16px;font-size:42px;font-weight:700;padding:12px 32px 12px 14px;border-radius:999px;border:4px solid currentColor;background:var(--v-panel)}.v-chip b{font-family:var(--serif);font-size:56px;min-width:76px;height:76px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;line-height:1}.v-chip b{color:var(--v-bg)}.v-chip.cy b{background:#FFD25E}.v-chip.cr b{background:#FF7A7A}.v-chip.cb b{background:#62B4FF}.v-chip.cg b{background:#7FDB9A}
+.v-numrow.tight{padding:10px 36px}.v-numrow.tight span{font-size:46px}.v-numrow.master{border-color:#62B4FF}.v-numrow.master b{color:#62B4FF}.v-numrow em{font-style:normal;color:var(--v-muted);font-size:40px}
 .v-czgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px 50px;font-size:120px;line-height:1.1;text-align:center}
 .v-czny{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;width:100%}.v-czny div{background:var(--v-panel);border:2px solid var(--v-line);border-radius:24px;padding:22px 30px;display:flex;flex-direction:column;gap:4px}.v-czny b{font-family:var(--serif);font-size:72px;line-height:1}.v-czny span{font-size:46px;color:#FFD25E;font-weight:700}.v-czny em{font-style:normal;font-size:40px;color:var(--v-muted)}
 .v-czrow{display:flex;align-items:center;gap:24px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:20px;padding:10px 32px}.v-czrow .e{font-size:64px;line-height:1}.v-czrow b{font-family:var(--serif);font-size:52px;min-width:210px}.v-czrow .ys{display:grid;grid-template-columns:repeat(4,auto);gap:2px 26px;margin-left:auto;font-size:38px;line-height:1.15}.v-czrow .ys i{font-style:normal}.v-czrow span{font-size:38px;white-space:nowrap;color:var(--v-muted);font-variant-numeric:tabular-nums}
@@ -1404,7 +1405,7 @@ function buildNumShort(sky, which) {
 // ===== NUMBERS SHORT END =====
 
 // ===== BIRTHDAY NUMBER SHORT =====
-var BDAY_SHORT = { 1: 'the self-starter', 2: 'the peacemaker', 3: 'the spark', 4: 'the builder', 5: 'the adventurer', 6: 'the carer', 7: 'the deep thinker', 8: 'the go-getter', 9: 'the big heart' };
+var BDAY_SHORT = { 1: 'the self-starter', 2: 'the peacemaker', 3: 'the spark', 4: 'the builder', 5: 'the adventurer', 6: 'the carer', 7: 'the deep thinker', 8: 'the go-getter', 9: 'the big heart', 11: 'the intuitive one', 22: 'the master builder' };
 var BDAY_EX = [7, 27, 14, 19, 3, 25, 8, 16, 31, 12];
 function buildBdayShort(sky) {
   var rnd = seeded(sky.y * 17 + sky.m * 3), day = BDAY_EX[Math.floor(rnd() * BDAY_EX.length)], r = reduceSteps(day);
@@ -1413,7 +1414,7 @@ function buildBdayShort(sky) {
   return { calc: calc, labels: ['Hook', 'How', 'Meanings', 'CTA'], parts: [
     { id: 'hook', text: 'Born on the ' + ord(day) + '? Then your Birthday Number is ' + r.n + '. Here\u2019s yours in five seconds.' },
     { id: 'how', text: 'Take the day of the month you were born. Just the day. If it\u2019s two digits, add them together. ' + (day > 9 ? 'The ' + ord(day) + ' is ' + spokenReduce(day) + '. ' : '') + 'The ' + ord(ex2) + ' is ' + spokenReduce(ex2) + '. Born on the 11th, 22nd or 29th? That\u2019s a master number, 11 or 22.' },
-    { id: 'meanings', text: 'Numerology reads it as the talent you came in with. ' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return n + ', ' + BDAY_SHORT[n] + '.'; }).join(' ') },
+    { id: 'meanings', text: 'Numerology reads it as the talent you came in with. ' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return n + ', ' + BDAY_SHORT[n] + '.'; }).join(' ') + ' Master numbers: 11, the intuitive one, a supercharged 2. 22, the master builder, a supercharged 4.' },
     { id: 'cta', text: 'Comment the day you were born and I\u2019ll tell you your number. Want your Life Path and star sign with it? That\u2019s Duology. Link in bio.' }
   ] };
 }
@@ -1761,7 +1762,7 @@ function buildCzShort(sky) {
       (c.day > 9 ? '<div class="a3">' + line(C('cy', 'The ' + ord(c.day) + ' → ' + chain(c.r.steps.slice(1)))) + '</div>' : '<div class="a3">' + line(C('cy', 'The ' + ord(c.day) + ' → ' + c.r.n)) + '</div>') +
       '<div class="a4">' + line(C('cy', 'The ' + ord(c.ex2) + ' → ' + chain(c.r2.steps.slice(1)))) + '</div>' +
       '<div class="a5 v-chips">' + chip('cb', '11', 'born on the 11th or 29th') + chip('cb', '22', 'born on the 22nd') + '</div><div class="a6 v-sub" style="font-size:48px">Master numbers: keep them as they are</div></div>';
-    if (i === 2) return '<div class="v v-tall" style="gap:14px"><div class="a1 v-kicker" style="margin-bottom:20px">The talent you came in with</div>' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n, k) { return '<div class="a' + Math.min(6, 2 + Math.floor(k / 2)) + ' v-numrow"><b>' + n + '</b><span>' + BDAY_SHORT[n] + '</span></div>'; }).join('') + '</div>';
+    if (i === 2) return '<div class="v v-tall" style="gap:12px"><div class="a1 v-kicker" style="margin-bottom:10px">What yours means</div>' + [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22].map(function (n, k) { return '<div class="a' + Math.min(6, 2 + Math.floor(k / 2)) + ' v-numrow tight' + (n > 9 ? ' master' : '') + '"><b>' + n + '</b><span>' + BDAY_SHORT[n] + (n === 11 ? ' <em>· super 2</em>' : n === 22 ? ' <em>· super 4</em>' : '') + '</span></div>'; }).join('') + '</div>';
     return '<div class="v v-tall"><div class="a1 v-h1" style="font-size:110px;text-align:center">Comment the day<br>you were born</div><div class="a2 v-sub" style="font-size:56px;text-align:center">I\u2019ll tell you your number</div><div class="a3" style="margin-top:60px">' + wordmark(140) + '</div><div class="a4 v-url" style="font-size:48px">Link in bio</div></div>';
   }
   function scene916cz(i, o) {
