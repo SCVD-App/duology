@@ -111,6 +111,11 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 .v-tall .v-kicker{font-size:48px}
 .v-ev-tall{width:100%;flex-direction:column;gap:14px;padding:40px}.v-ev-tall .v-evd{font-size:110px;text-align:left}.v-ev-tall .v-evd span{font-size:36px}.v-ev-tall b{font-size:58px}.v-ev-tall div div{font-size:42px}
 .v-calc{font-family:var(--serif);font-size:84px;font-weight:600;text-align:center;font-variant-numeric:tabular-nums;color:var(--v-ink);line-height:1.15}.v-calc.big{font-size:104px;color:var(--v-accent)}
+.cy{color:#FFD25E}.cr{color:#FF7A7A}.cb{color:#62B4FF}.cg{color:#7FDB9A}
+.v-chips{display:flex;gap:24px;flex-wrap:wrap;justify-content:center}.v-chip{display:inline-flex;align-items:center;gap:16px;font-size:42px;font-weight:700;padding:12px 32px 12px 14px;border-radius:999px;border:4px solid currentColor;background:var(--v-panel)}.v-chip b{font-family:var(--serif);font-size:56px;min-width:76px;height:76px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;line-height:1}.v-chip b{color:var(--v-bg)}.v-chip.cy b{background:#FFD25E}.v-chip.cr b{background:#FF7A7A}.v-chip.cb b{background:#62B4FF}.v-chip.cg b{background:#7FDB9A}
+.v-czgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px 50px;font-size:120px;line-height:1.1;text-align:center}
+.v-czny{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;width:100%}.v-czny div{background:var(--v-panel);border:2px solid var(--v-line);border-radius:24px;padding:22px 30px;display:flex;flex-direction:column;gap:4px}.v-czny b{font-family:var(--serif);font-size:72px;line-height:1}.v-czny span{font-size:46px;color:#FFD25E;font-weight:700}.v-czny em{font-style:normal;font-size:40px;color:var(--v-muted)}
+.v-czrow{display:flex;align-items:center;gap:24px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:20px;padding:6px 28px}.v-czrow .e{font-size:64px;line-height:1}.v-czrow b{font-family:var(--serif);font-size:52px;min-width:210px}.v-czrow span{font-size:38px;white-space:nowrap;color:var(--v-muted);font-variant-numeric:tabular-nums}
 .v-numrow{display:flex;align-items:center;gap:36px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:24px;padding:18px 36px}.v-numrow b{font-family:var(--serif);font-size:84px;color:var(--v-accent);min-width:60px;text-align:center;line-height:1}.v-numrow span{font-size:50px}
 .a1,.a2,.a3,.a4,.a5,.a6{opacity:0;animation:vin .8s cubic-bezier(.2,.7,.2,1) forwards}
 .a1{animation-delay:.1s}.a2{animation-delay:.4s}.a3{animation-delay:.8s}.a4{animation-delay:1.2s}.a5{animation-delay:1.6s}.a6{animation-delay:2s}
@@ -388,7 +393,7 @@ var MODE = { cardinal: 'starts things', fixed: 'holds steady', mutable: 'adapts'
 var RULER = { sun: [4], moon: [3], mercury: [2, 5], venus: [1, 6], mars: [0, 7], jupiter: [8, 11], saturn: [9, 10], uranus: [10], neptune: [11], pluto: [7] };
 var EXALT = { sun: 0, moon: 1, mercury: 5, venus: 11, mars: 9, jupiter: 3, saturn: 6 };
 var HOUSES = [null,
-  { area: "you: your body, your approach and first impressions", why: "It starts at your Rising sign, the eastern horizon when you were born, so it's the 'you' house." },
+  { area: "yourself, your body, your approach and first impressions", why: "It starts at your Rising sign, the eastern horizon when you were born, so it's the 'you' house." },
   { area: "money, possessions and what you value", why: "It comes straight after 'you', so it became what's yours: your resources." },
   { area: "communication, siblings, short trips and your local patch", why: "Next out from you and your stuff is your immediate world: the people and places close by." },
   { area: "home, family and roots", why: "It's the very bottom of the chart, the ground under your feet when you were born." },
@@ -399,7 +404,7 @@ var HOUSES = [null,
   { area: "travel, study, beliefs and the big picture", why: "It's opposite the 3rd (your local patch), so it's the far-away stuff: long trips and big ideas." },
   { area: "career, reputation and public life", why: "It sits at the top of the chart, the part of the sky that was overhead, so it's the side of you everyone can see." },
   { area: "friends, groups and hopes for the future", why: "It follows your public life, so it's your network and what you're working towards." },
-  { area: "the hidden stuff: rest, solitude and what goes on behind the scenes", why: "It's the slice of sky just before sunrise at your Rising sign: the dark before the day starts." }
+  { area: "rest, solitude, secrets and what goes on behind the scenes", why: "It's the slice of sky just before sunrise at your Rising sign: the dark before the day starts." }
 ];
 var ASPECTS = [
   { key: 'conj', name: 'Conjunction', angle: 0, orb: 8, easy: null, verb: 'lines up with', flavour: 'a merging',
@@ -437,6 +442,8 @@ var NUM_WHY = {
   33: "33 is two 3s. Numerologists treat it as a supercharged 6 (care), so it isn't reduced."
 };
 var LESSONS = [
+  { id: 'chinese', title: 'The Chinese zodiac (and why January babies get it wrong)',
+    body: "The Chinese zodiac is a separate tradition from Western astrology and from numerology. Instead of twelve signs through the year, it gives each whole year an animal: Rat, Ox, Tiger, Rabbit, Dragon, Snake, Horse, Goat, Monkey, Rooster, Dog and Pig, in that order. Each year also carries one of five elements (Wood, Fire, Earth, Metal, Water), so the full cycle takes 60 years to come back around. 2026 is a Fire Horse year, the first since 1966.\n\nThe catch: the Chinese year doesn\u2019t start on 1 January. It starts at Chinese New Year, the second new moon after the winter solstice, which lands somewhere between 21 January and 20 February. So if you were born in January or early February, you might belong to the year before. Plenty of websites and posts get this wrong. Duology works out the real Chinese New Year date for your birth year from the actual Sun and Moon, so it gets it right.\n\nTraditionally, animals four apart on the wheel get along (Rat, Dragon and Monkey are a team, for example), and the animal directly opposite is your clash." },
   { id: 'houses', title: 'Why are there 12 houses?',
     body: "Picture the sky around you at the moment you were born, sliced into 12 pieces like a pizza, starting from the eastern horizon.\n\nThe 6 slices below the horizon cover your private life (you, money, home, family, daily work). The 6 above cover your more public life (partners, career, friends).\n\nEach house got its meaning from where it sits. The 1st starts at the horizon where the Sun rises, so it's 'you'. The 7th is directly opposite, so it's 'the other person'. The 10th is overhead, so it's what everyone sees: your career and reputation.\n\nDifferent house systems cut the slices differently. You can switch between them in Settings and see what moves." },
   { id: 'time', title: 'Why do houses need a birth time?',
@@ -918,6 +925,99 @@ function moonToday(chart, nowMs) {
 }
 // ===== CONTENT END =====
 
+// ---------- Birthday Number ----------
+function birthdayNumber(dateStr, masters) {
+  var d = +dateStr.split('-')[2], r = reduceNum(d, masters);
+  return { n: r.n, day: d, working: d > 9 ? 'Born on the ' + ord(d) + ': ' + String(d).split('').join(' + ') + ' = ' + (r.n === d ? d : String(d).split('').reduce(function (a, b) { return a + +b; }, 0)) + (r.n !== String(d).split('').reduce(function (a, b) { return a + +b; }, 0) && r.n !== d ? ' → ' + r.n : '') : 'Born on the ' + ord(d) + ', already a single digit' };
+}
+var BDAY_GIFT = {
+  1: 'self-starter energy: you’re quick to take the lead and back your own ideas',
+  2: 'a gift for people: you read the room, smooth things over and make others feel heard',
+  3: 'a spark: humour, creativity and a way with words that lifts the people around you',
+  4: 'a builder’s streak: steady, reliable and the one who actually gets it finished',
+  5: 'restless curiosity: you adapt fast, learn by doing and get bored with the same old thing',
+  6: 'a caring core: you look after people, and home and family matter more than most',
+  7: 'a deep thinker: you need to understand how things work, and you need your own space',
+  8: 'drive: you’re ambitious, good with the practical side of money, and you like results',
+  9: 'a big heart: generous, idealistic and drawn to the bigger picture',
+  11: 'a master-number birthday: intuitive and inspiring, with a nervous energy to manage',
+  22: 'a master-number birthday: big plans and the patience to build them for real'
+};
+var BDAY_WHY = 'Your Birthday Number is just the day of the month you were born, reduced to one digit. Numerology reads it as a talent you came in with: the energy you lead with day to day, a sidekick to your Life Path, which is the bigger road you’re on.';
+
+// ---------- Chinese zodiac ----------
+// A separate tradition from Western astrology and numerology. The Chinese year starts at Chinese New
+// Year, the second new moon after the winter solstice (reckoned in China time, UTC+8), so it lands
+// between 21 January and 20 February. We work the date out from the real Sun and Moon.
+var CZ_ANIMALS = ['Rat', 'Ox', 'Tiger', 'Rabbit', 'Dragon', 'Snake', 'Horse', 'Goat', 'Monkey', 'Rooster', 'Dog', 'Pig'];
+var CZ_EMOJI = ['🐀', '🐂', '🐅', '🐇', '🐉', '🐍', '🐎', '🐐', '🐒', '🐓', '🐕', '🐖'];
+var CZ_TRAITS = [
+  'quick-witted, resourceful and good at spotting an opportunity before anyone else',
+  'patient, dependable and strong: slow to start, impossible to stop',
+  'brave, competitive and magnetic, with a taste for a challenge',
+  'gentle, tactful and quietly clever, with a love of peace and comfort',
+  'confident, ambitious and larger than life, a natural leader',
+  'wise, private and elegant, trusting your gut over the crowd',
+  'energetic, free-spirited and warm, happiest on the move',
+  'kind, creative and easy-going, with an eye for beauty',
+  'clever, playful and inventive, a problem-solver who gets bored easily',
+  'sharp, hard-working and honest, with an eye for detail',
+  'loyal, fair and protective, a friend for life',
+  'generous, good-natured and easy to love, with a soft spot for life’s pleasures'
+];
+var CZ_ELEMENTS = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'];
+var CZ_EL_TXT = { Wood: 'growth and generosity', Fire: 'passion and energy', Earth: 'stability and common sense', Metal: 'determination and focus', Water: 'intuition and flexibility' };
+var CZ_EL_WEST = { Fire: 'fire', Earth: 'earth', Water: 'water' };
+function czIndex(y) { return ((y - 4) % 12 + 12) % 12; }
+function czElement(y) { return CZ_ELEMENTS[Math.floor((((y - 4) % 10) + 10) % 10 / 2)]; }
+function czYang(y) { return (((y - 4) % 2) + 2) % 2 === 0; }
+var _cnyCache = {};
+function _elong(jd) { var p = Astro.positions(jd); return Astro.norm(p.moon - p.sun); }
+function _sunLon(jd) { return Astro.positions(jd).sun; }
+function chineseNewYearMs(y) {
+  if (_cnyCache[y]) return _cnyCache[y];
+  // winter solstice of the previous year (Sun at 270°)
+  var jd = Astro.jdFromMs(Date.UTC(y - 1, 11, 18)), a, b;
+  while (Astro.norm(_sunLon(jd) - 270) > 180) jd += 0.5;
+  a = jd - 0.5; b = jd;
+  for (var i = 0; i < 40; i++) { var m = (a + b) / 2; if (Astro.norm(_sunLon(m) - 270) > 180) a = m; else b = m; }
+  // A new moon on the same China-time calendar day as the solstice starts month 11 itself, so count
+  // only new moons from the following China day onwards.
+  var sd = new Date(Astro.msFromJd(b) + 8 * 3600000), dayEnd = Date.UTC(sd.getUTCFullYear(), sd.getUTCMonth(), sd.getUTCDate() + 1) - 8 * 3600000;
+  var solstice = Astro.jdFromMs(dayEnd), found = [], t = solstice, prev = _elong(t);
+  while (found.length < 3 && t < solstice + 100) {
+    var t2 = t + 0.5, e2 = _elong(t2);
+    if (e2 < prev) { // elongation wrapped through 0 = new moon
+      var lo = t, hi = t2;
+      for (var k = 0; k < 40; k++) { var mid = (lo + hi) / 2; if (_elong(mid) > 180) lo = mid; else hi = mid; }
+      found.push(hi);
+    }
+    t = t2; prev = e2;
+  }
+  // the calendar day of that new moon in China time, starting at midnight China time
+  // Chinese New Year always lands between 21 Jan and 20 Feb. The rare leap-month years (like the
+  // famous 2033 problem, which moves 2034's New Year to 19 Feb) push it one lunation later.
+  var pick = found[1], dd = new Date(Astro.msFromJd(pick) + 8 * 3600000);
+  if (dd.getUTCMonth() === 0 && dd.getUTCDate() < 21 && found[2]) pick = found[2];
+  var nm = Astro.msFromJd(pick) + 8 * 3600000, d = new Date(nm);
+  var ms = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - 8 * 3600000;
+  _cnyCache[y] = ms; return ms;
+}
+function chineseZodiac(utcMs) {
+  var y = new Date(utcMs + 8 * 3600000).getUTCFullYear();
+  var cny = chineseNewYearMs(y), cy = utcMs >= cny ? y : y - 1, cnyUsed = utcMs >= cny ? cny : chineseNewYearMs(y);
+  var i = czIndex(cy), el = czElement(cy);
+  return { year: cy, animal: CZ_ANIMALS[i], emoji: CZ_EMOJI[i], idx: i, element: el, yang: czYang(cy), traits: CZ_TRAITS[i],
+    beforeNY: utcMs < cny, cnyMs: cny, cnyYear: y,
+    friends: [(i + 4) % 12, (i + 8) % 12].map(function (k) { return CZ_ANIMALS[k]; }), clash: CZ_ANIMALS[(i + 6) % 12] };
+}
+function czNote(z) {
+  var d = new Date(z.cnyMs + 8 * 3600000).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+  return z.beforeNY
+    ? 'You were born before Chinese New Year (' + d + ' ' + z.cnyYear + '), so you belong to the year before: the ' + z.animal + ', not the ' + CZ_ANIMALS[czIndex(z.cnyYear)] + '. Lots of sites get this wrong.'
+    : 'Chinese New Year in ' + z.cnyYear + ' fell on ' + d + ', and you were born after it, so you’re the ' + z.animal + ' of ' + z.cnyYear + '.';
+}
+
 // ===== SIGNS START =====
 // General star-sign readings (no birth details), using solar houses.
 var DAY_MS = 86400000;
@@ -1284,8 +1384,8 @@ function buildNumShort(sky, which) {
     parts = [
       { id: 'hook', text: 'What’s your ' + Mon + ' number? Work it out in ten seconds.' },
       { id: 'step1', text: 'Step one: add your birth day and month, down to one digit. Say you were born on the ' + ord(d) + ' of ' + calc.moName + '. ' + (d > 9 ? d + ' becomes ' + dR.n + ', ' : '') + (mo > 9 ? calc.moName + ' is month ' + mo + ', which becomes ' + moR.n + ', ' : calc.moName + ' is ' + mo + ', ') + 'and ' + dR.n + ' plus ' + moR.n + ' is ' + a0 + (a0 > 9 ? ', which reduces to ' + aR.n : '') + '.' },
-      { id: 'step2', text: 'Step two: add the year. ' + sky.y + ' reduces to ' + yR.n + '. So ' + aR.n + ' plus ' + yR.n + ' is ' + py0 + (py0 > 9 ? ', which is ' + pyR.n : '') + '. That’s your Personal Year.' },
-      { id: 'step3', text: 'Step three: add the month. ' + Mon + ' is ' + (sky.m > 9 ? 'month ' + sky.m + ', which is ' + mR.n : mR.n) + '. ' + pyR.n + ' plus ' + mR.n + ' is ' + pm0 + (pm0 > 9 ? ', which is ' + pmR.n : '') + '. So for this birthday, ' + Mon + ' is a ' + pmR.n + '.' },
+      { id: 'step2', text: 'Step two: bring in your step one number, ' + aR.n + ', and add the year. ' + sky.y + ' reduces to ' + yR.n + '. So ' + aR.n + ' plus ' + yR.n + ' is ' + py0 + (py0 > 9 ? ', which is ' + pyR.n : '') + '. That’s your Personal Year.' },
+      { id: 'step3', text: 'Step three: take your Personal Year, ' + pyR.n + ', and add the month. ' + Mon + ' is ' + (sky.m > 9 ? 'month ' + sky.m + ', which is ' + mR.n : mR.n) + '. ' + pyR.n + ' plus ' + mR.n + ' is ' + pm0 + (pm0 > 9 ? ', which is ' + pmR.n : '') + '. So for this birthday, ' + Mon + ' is ' + an(pmR.n) + ' ' + pmR.n + '.' },
       { id: 'meanings', text: 'Here’s what yours means. ' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return n + ': ' + PM_SHORT[n] + '.'; }).join(' ') },
       { id: 'cta', text: 'Comment your number. Your star sign and numbers together? That’s Duology. Link in bio.' }
     ];
@@ -1302,6 +1402,41 @@ function buildNumShort(sky, which) {
   return { which: which, calc: calc, parts: parts, labels: labels };
 }
 // ===== NUMBERS SHORT END =====
+
+// ===== BIRTHDAY NUMBER SHORT =====
+var BDAY_SHORT = { 1: 'the self-starter', 2: 'the peacemaker', 3: 'the spark', 4: 'the builder', 5: 'the adventurer', 6: 'the carer', 7: 'the deep thinker', 8: 'the go-getter', 9: 'the big heart' };
+var BDAY_EX = [7, 27, 14, 19, 3, 25, 8, 16, 31, 12];
+function buildBdayShort(sky) {
+  var rnd = seeded(sky.y * 17 + sky.m * 3), day = BDAY_EX[Math.floor(rnd() * BDAY_EX.length)], r = reduceSteps(day);
+  var ex2 = day === 27 ? 19 : 27, r2 = reduceSteps(ex2);
+  var calc = { day: day, r: r, ex2: ex2, r2: r2, m29: reduceSteps(29) };
+  return { calc: calc, labels: ['Hook', 'How', 'Meanings', 'CTA'], parts: [
+    { id: 'hook', text: 'Born on the ' + ord(day) + '? Then your Birthday Number is ' + r.n + '. Here\u2019s yours in five seconds.' },
+    { id: 'how', text: 'Take the day of the month you were born. Just the day. If it\u2019s two digits, add them together. ' + (day > 9 ? 'The ' + ord(day) + ' is ' + spokenReduce(day) + '. ' : '') + 'The ' + ord(ex2) + ' is ' + spokenReduce(ex2) + '. Born on the 11th, 22nd or 29th? That\u2019s a master number, 11 or 22.' },
+    { id: 'meanings', text: 'Numerology reads it as the talent you came in with. ' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return n + ', ' + BDAY_SHORT[n] + '.'; }).join(' ') },
+    { id: 'cta', text: 'Comment the day you were born and I\u2019ll tell you your number. Want your Life Path and star sign with it? That\u2019s Duology. Link in bio.' }
+  ] };
+}
+// ===== CHINESE ZODIAC SHORT =====
+var CZ_EX = [[1990, 1, 20], [1985, 2, 10], [2001, 1, 15], [1996, 2, 5], [1977, 2, 3], [2004, 1, 14], [1993, 1, 19], [2015, 2, 12]];
+function anW(w) { return /^[AEIOU]/.test(w) ? 'an' : 'a'; }
+function czDate(ms) { return new Date(ms + 8 * 3600000).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', timeZone: 'UTC' }); }
+function buildCzShort(sky) {
+  var rnd = seeded(sky.y * 29 + sky.m * 7), ex = CZ_EX[Math.floor(rnd() * CZ_EX.length)];
+  var z = chineseZodiac(Date.UTC(ex[0], ex[1] - 1, ex[2], 4)), calYr = CZ_ANIMALS[czIndex(ex[0])];
+  var cur = Date.UTC(sky.y, sky.m - 1, 15) < chineseNewYearMs(sky.y) ? sky.y - 1 : sky.y, curNY = chineseNewYearMs(cur);
+  var calc = { ex: ex, z: z, calYr: calYr, cur: cur, curAnimal: CZ_ANIMALS[czIndex(cur)], curEl: czElement(cur), curEmoji: CZ_EMOJI[czIndex(cur)], curNY: curNY };
+  var exTxt = 'Born on the ' + ord(ex[2]) + ' of ' + MONTHS_LONG[ex[1] - 1] + ' ' + ex[0] + '? ' + (z.beforeNY
+    ? 'Chinese New Year that year was the ' + ord(new Date(z.cnyMs + 8 * 3600000).getUTCDate()) + ' of ' + MONTHS_LONG[new Date(z.cnyMs + 8 * 3600000).getUTCMonth()] + ', so you\u2019re ' + anW(z.element) + ' ' + z.element + ' ' + z.animal + ', not ' + anW(calYr) + ' ' + calYr + '.'
+    : 'Chinese New Year landed just before you, so you\u2019re ' + anW(z.element) + ' ' + z.element + ' ' + z.animal + '.');
+  return { calc: calc, labels: ['Hook', 'The catch', 'Example', 'The animals', 'CTA'], parts: [
+    { id: 'hook', text: 'What\u2019s your Chinese animal? Born in January or February? Check this first.' },
+    { id: 'catch', text: 'The Chinese year doesn\u2019t start on the 1st of January. It starts at Chinese New Year, the second new moon after the winter solstice, which lands somewhere between the 21st of January and the 20th of February. Born before it? You belong to the year before.' },
+    { id: 'example', text: exTxt },
+    { id: 'animals', text: 'The twelve, in order: ' + CZ_ANIMALS.join(', ') + '. ' + cur + ' is the year of the ' + calc.curEl + ' ' + calc.curAnimal + ', which started on the ' + ord(new Date(curNY + 8 * 3600000).getUTCDate()) + ' of ' + MONTHS_LONG[new Date(curNY + 8 * 3600000).getUTCMonth()] + '.' },
+    { id: 'cta', text: 'Comment your animal. Duology works it out from your exact birthday, right alongside your star sign and numbers. Link in bio.' }
+  ] };
+}
 
 // ===== STUDIO APP START =====
 (function () {
@@ -1326,7 +1461,7 @@ function buildNumShort(sky, which) {
   function secDur(s) { return Math.max(4, wordCount(s.text) / st.wpm * 60); }
   // ---------- voice files + playback engine + recorder ----------
   var audioSets = {}, audioCtx = null, run = null, recording = null;
-  function audioKey() { return ui.tab === 'video' ? 'v|' + mkey() : (ui.shortMode === 'num' ? 'n|' + mkey() + '|' + ui.numWhich : 's|' + mkey() + '|' + ui.shortSign); }
+  function audioKey() { return ui.tab === 'video' ? 'v|' + mkey() : (ui.shortMode === 'num' ? 'n|' + mkey() + '|' + ui.numWhich : ui.shortMode === 'bday' ? 'b|' + mkey() : ui.shortMode === 'cz' ? 'c|' + mkey() : 's|' + mkey() + '|' + ui.shortSign); }
   function curAudio() { return audioSets[audioKey()] || []; }
   function sceneCount() { return ui.tab === 'video' ? secsCache.length : curShort().parts.length; }
   function curIndex() { return ui.tab === 'video' ? ui.scene : ui.shortScene; }
@@ -1416,7 +1551,7 @@ function buildNumShort(sky, which) {
   }
   function recName(ext) {
     if (ui.tab === 'video') return 'duology-' + mkey() + '-forecast.' + ext;
-    return 'duology-' + mkey() + '-short-' + (ui.shortMode === 'num' ? (ui.numWhich ? 'month-' + ui.numWhich : 'numbers') : SIGNS[ui.shortSign].name.toLowerCase()) + '.' + ext;
+    return 'duology-' + mkey() + '-short-' + (ui.shortMode === 'num' ? (ui.numWhich ? 'month-' + ui.numWhich : 'numbers') : ui.shortMode === 'bday' ? 'birthday-number' : ui.shortMode === 'cz' ? 'chinese-zodiac' : SIGNS[ui.shortSign].name.toLowerCase()) + '.' + ext;
   }
   function finishRecording(msg) {
     if (!recording || !recording.rec) return;
@@ -1457,7 +1592,7 @@ function buildNumShort(sky, which) {
       tracks = tracks.concat(dest.stream.getAudioTracks());
     }
     var mixed = new MediaStream(tracks);
-    var mime = pickMime(st.recFormat !== 'webm'), wantMp4 = st.recFormat !== 'webm';
+    var mime = pickMime(st.recFormat === 'mp4'), wantMp4 = st.recFormat === 'mp4';
     var rec = new MediaRecorder(mixed, mime ? { mimeType: mime, videoBitsPerSecond: 10000000, audioBitsPerSecond: 192000 } : {});
     var chunks = [];
     rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
@@ -1471,7 +1606,7 @@ function buildNumShort(sky, which) {
       recording = null; ui.clean = false;
       if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
       ui.recMsg = (R.msg || 'Done!') + ' Your video (' + ext.toUpperCase() + ') is in your Downloads folder as ' + recName(ext) + '.' +
-        (wantMp4 && ext !== 'mp4' ? ' This browser couldn\u2019t record MP4, so it\u2019s WebM. That uploads fine to YouTube, but Instagram needs MP4: run it through HandBrake (Social 1080p preset) first.' : (ext === 'mp4' ? ' Ready for YouTube and Instagram.' : ' WebM suits YouTube. Instagram needs MP4.'));
+        (wantMp4 && ext !== 'mp4' ? ' This browser couldn\u2019t record MP4, so it\u2019s WebM. That uploads fine to YouTube, but Instagram needs MP4: run it through HandBrake (Social 1080p preset) first.' : (ext === 'mp4' ? ' Play it through once before posting: if it flashes green, switch back to WebM.' : ' Upload it to YouTube as is. For Instagram, once YouTube has processed it, open YouTube Studio \u2192 Content \u2192 \u22EE \u2192 Download, and post that MP4.'));
       render();
     };
     vt.addEventListener('ended', function () { finishRecording('Recording stopped early (sharing was stopped).'); });
@@ -1491,8 +1626,8 @@ function buildNumShort(sky, which) {
     return '<div class="s-voicepanel"><div class="s-vhead"><b>Scotty’s voice files</b><span class="s-meta">' + (set.length ? set.length + ' loaded · video runs about ' + fmtDur(tot) : 'Load the MP3s for this ' + (ui.tab === 'video' ? 'video' : 'Short') + ', named in scene order') + '</span></div>' +
       '<div class="s-actions" style="margin:8px 0"><label class="s-btn2 s-file">Load voice files<input type="file" id="voicefiles" accept="audio/*,.mp3,.wav,.m4a" multiple></label>' + (set.length ? '<button class="s-btn2" data-act="clearvoice">Clear</button>' : '') +
       '<button class="s-rec" data-act="record">● Record finished video</button>' +
-      '<label class="s-field" title="MP4 works on YouTube and Instagram. WebM is YouTube only.">File <select id="recformat"><option value="mp4"' + (st.recFormat !== 'webm' ? ' selected' : '') + '>MP4 (YouTube + Instagram)</option><option value="webm"' + (st.recFormat === 'webm' ? ' selected' : '') + '>WebM (YouTube only)</option></select></label></div>' +
-      (st.recFormat !== 'webm' && window.MediaRecorder && !mp4Ok() ? '<div class="s-vwarn">This browser can\u2019t record MP4, so it\u2019ll save WebM instead. Update Chrome to record MP4.</div>' : '') + extra + miss +
+      '<label class="s-field" title="WebM records cleanly on every PC. Chrome\u2019s MP4 recorder can produce glitchy (green-flashing) video on some PCs.">File <select id="recformat"><option value="webm"' + (st.recFormat !== 'mp4' ? ' selected' : '') + '>WebM (clean, recommended)</option><option value="mp4"' + (st.recFormat === 'mp4' ? ' selected' : '') + '>MP4 (experimental, can glitch)</option></select></label></div>' +
+      (st.recFormat === 'mp4' && window.MediaRecorder && !mp4Ok() ? '<div class="s-vwarn">This browser can\u2019t record MP4, so it\u2019ll save WebM instead. Update Chrome to record MP4.</div>' : '') + extra + miss +
       '<details class="s-vlist"' + (set.length ? ' open' : '') + '><summary>Which file goes with which scene</summary>' + rows + '</details>' +
       '<div class="s-music"><b>Background music</b> <span class="s-meta">' + (music ? esc(music.name) : 'optional, loops quietly under Scotty') + '</span>' +
       '<label class="s-btn2 s-file">' + (music ? 'Change track' : 'Load music') + '<input type="file" id="musicfile" accept="audio/*,.mp3,.wav,.m4a"></label>' + (music ? '<button class="s-btn2" data-act="clearmusic">Remove</button>' : '') +
@@ -1512,7 +1647,14 @@ function buildNumShort(sky, which) {
     ns.parts.forEach(function (p) { p.generated = p.text; var e = st.numEdits[k + '|' + p.id]; if (e != null) { p.text = e; p.edited = true; } });
     return ns;
   }
+  function extraShort(kind) {
+    var o = kind === 'bday' ? buildBdayShort(sky()) : buildCzShort(sky()), sk = kind === 'bday' ? 'bdEdits' : 'czEdits', k = mkey() + '|' + kind;
+    st[sk] = st[sk] || {};
+    o.parts.forEach(function (p) { p.generated = p.text; var e = st[sk][k + '|' + p.id]; if (e != null) { p.text = e; p.edited = true; } });
+    o.store = st[sk]; o.key = k; return o;
+  }
   function curShort() {
+    if (ui.shortMode === 'bday' || ui.shortMode === 'cz') { var xs = extraShort(ui.shortMode); return { parts: xs.parts, labels: xs.labels, scene: function (i) { return ui.shortMode === 'bday' ? scene916bday(i, xs) : scene916cz(i, xs); }, store: xs.store, key: xs.key, name: ui.shortMode === 'bday' ? 'Birthday Number' : 'Chinese zodiac' }; }
     if (ui.shortMode === 'num') { var ns = numShort(); return { parts: ns.parts, labels: ns.labels, scene: function (i) { return scene916num(i, ns); }, store: st.numEdits, key: mkey() + '|n' + ui.numWhich, name: ui.numWhich ? 'Personal Month ' + ui.numWhich : 'All numbers' }; }
     var sh = short(), S = sky();
     return { parts: sh.parts, labels: ['Hook', 'Focus', 'Key dates', 'Recharge + CTA'], scene: function (i) { return scene916(i, sh, S); }, store: st.shortEdits, key: mkey() + '|' + ui.shortSign, name: SIGNS[ui.shortSign].name };
@@ -1607,21 +1749,56 @@ function buildNumShort(sky, which) {
     return '<div class="v v-tall">' + (r.recharge.length ? '<div class="a1 v-kicker">Recharge days</div><div class="a2 v-h1" style="font-size:110px;text-align:center">' + r.recharge.join('<br>') + '</div>' : '') + '<div class="a3" style="margin-top:120px">' + wordmark(130) + '</div><div class="a4 v-sub" style="font-size:54px;text-align:center">Your version, built on your exact birth chart</div><div class="a5 v-url" style="font-size:44px">Link in bio</div></div>';
   }
 
+  function C(cls, t) { return '<span class="' + cls + '">' + t + '</span>'; }
+  function chain(steps) { return steps.join(' → '); }
+  function chip(cls, n, label) { return '<span class="v-chip ' + cls + '"><b>' + n + '</b>' + label + '</span>'; }
+  function scene916bday(i, o) {
+    var c = o.calc;
+    function line(t, big) { return '<div class="v-calc' + (big ? ' big' : '') + '">' + t + '</div>'; }
+    if (i === 0) return '<div class="v v-tall"><div class="a1 v-kicker">Numerology</div><div class="a2 v-h1" style="font-size:120px;text-align:center">Born on the ' + ord(c.day) + '?</div><div class="a3 v-bignum" style="font-size:520px">' + C('cy', c.r.n) + '</div><div class="a4 v-h1" style="font-size:96px;text-align:center">Your Birthday<br>Number</div></div>';
+    if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">How to work it out</div><div class="a2 v-sub" style="font-size:60px;text-align:center">Just the day you were born.<br>Two digits? Add them.</div>' +
+      (c.day > 9 ? '<div class="a3">' + line(C('cy', 'The ' + ord(c.day) + ' → ' + chain(c.r.steps.slice(1)))) + '</div>' : '<div class="a3">' + line(C('cy', 'The ' + ord(c.day) + ' → ' + c.r.n)) + '</div>') +
+      '<div class="a4">' + line(C('cy', 'The ' + ord(c.ex2) + ' → ' + chain(c.r2.steps.slice(1)))) + '</div>' +
+      '<div class="a5 v-chips">' + chip('cb', '11', 'born on the 11th or 29th') + chip('cb', '22', 'born on the 22nd') + '</div><div class="a6 v-sub" style="font-size:48px">Master numbers: keep them as they are</div></div>';
+    if (i === 2) return '<div class="v v-tall" style="gap:14px"><div class="a1 v-kicker" style="margin-bottom:20px">The talent you came in with</div>' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n, k) { return '<div class="a' + Math.min(6, 2 + Math.floor(k / 2)) + ' v-numrow"><b>' + n + '</b><span>' + BDAY_SHORT[n] + '</span></div>'; }).join('') + '</div>';
+    return '<div class="v v-tall"><div class="a1 v-h1" style="font-size:110px;text-align:center">Comment the day<br>you were born</div><div class="a2 v-sub" style="font-size:56px;text-align:center">I\u2019ll tell you your number</div><div class="a3" style="margin-top:60px">' + wordmark(140) + '</div><div class="a4 v-url" style="font-size:48px">Link in bio</div></div>';
+  }
+  function scene916cz(i, o) {
+    var c = o.calc, z = c.z;
+    function nyd(ms) { var dd = new Date(ms + 8 * 3600000); return dd.getUTCDate() + ' ' + MONTHS_LONG[dd.getUTCMonth()].slice(0, 3); }
+    if (i === 0) return '<div class="v v-tall"><div class="a1 v-kicker">Chinese zodiac</div><div class="a2 v-czgrid">' + CZ_EMOJI.map(function (e) { return '<span>' + e + '</span>'; }).join('') + '</div><div class="a3 v-h1" style="font-size:118px;text-align:center">What\u2019s your<br>Chinese animal?</div><div class="a4 v-sub" style="font-size:58px;text-align:center">' + C('cy', 'January + February babies:') + '<br>check this first</div></div>';
+    if (i === 1) { var yrs = [c.cur - 2, c.cur - 1, c.cur, c.cur + 1];
+      return '<div class="v v-tall"><div class="a1 v-kicker">The catch</div><div class="a2 v-h1" style="font-size:96px;text-align:center">The year starts at<br>Chinese New Year</div><div class="a3 v-sub" style="font-size:56px;text-align:center">Second new moon after the winter solstice:<br>' + C('cy', 'between 21 Jan and 20 Feb') + '</div>' +
+        '<div class="a4 v-czny">' + yrs.map(function (y) { return '<div><b>' + y + '</b><span>' + nyd(chineseNewYearMs(y)) + '</span><em>' + CZ_EMOJI[czIndex(y)] + ' ' + CZ_ANIMALS[czIndex(y)] + '</em></div>'; }).join('') + '</div>' +
+        '<div class="a5 v-sub" style="font-size:60px;text-align:center">' + C('cr', 'Born before it?') + ' You\u2019re the year before.</div></div>'; }
+    if (i === 2) return '<div class="v v-tall"><div class="a1 v-kicker">Example</div><div class="a2 v-h1" style="font-size:100px;text-align:center">' + c.ex[2] + ' ' + MONTHS_LONG[c.ex[1] - 1] + ' ' + c.ex[0] + '</div><div class="a3 v-sub" style="font-size:56px;text-align:center">Chinese New Year: ' + C('cy', nyd(z.cnyMs) + ' ' + z.cnyYear) + '</div>' +
+      '<div class="a4" style="font-size:300px;line-height:1">' + z.emoji + '</div><div class="a5 v-h1" style="font-size:120px;text-align:center">' + C('cb', z.element + ' ' + z.animal) + '</div>' + (z.beforeNY ? '<div class="a6 v-sub" style="font-size:60px">' + C('cr', '<s>not ' + anW(c.calYr) + ' ' + c.calYr + '</s>') + '</div>' : '') + '</div>';
+    if (i === 3) return '<div class="v v-tall" style="gap:12px"><div class="a1 v-kicker" style="margin-bottom:14px">The twelve animals</div>' + CZ_ANIMALS.map(function (a, k) {
+      var ys = []; for (var y = 1980; y <= 2027; y++) if (czIndex(y) === k) ys.push(y);
+      return '<div class="a' + Math.min(6, 2 + Math.floor(k / 3)) + ' v-czrow"><span class="e">' + CZ_EMOJI[k] + '</span><b>' + a + '</b><span>' + ys.slice(-4).join(' · ') + '</span></div>'; }).join('') +
+      '<div class="a6 v-sub" style="font-size:40px;margin-top:10px;text-align:center">Jan or Feb birthday? Check the New Year date</div></div>';
+    return '<div class="v v-tall"><div class="a1 v-h1" style="font-size:120px;text-align:center">Comment<br>your animal</div><div class="a2 v-sub" style="font-size:56px;text-align:center">' + c.cur + ': year of the ' + C('cb', c.curEl + ' ' + c.curAnimal) + ' ' + c.curEmoji + '</div><div class="a3" style="margin-top:60px">' + wordmark(140) + '</div><div class="a4 v-url" style="font-size:48px">Link in bio</div></div>';
+  }
   function scene916num(i, ns) {
     var c = ns.calc, Mon = c.Mon;
     function line(t, big) { return '<div class="v-calc' + (big ? ' big' : '') + '">' + t + '</div>'; }
     if (!ns.which) {
       if (i === 0) return '<div class="v v-tall"><div class="a1 v-kicker">Numerology</div><div class="a2 v-bignum" style="font-size:520px">?</div><div class="a3 v-h1" style="font-size:120px;text-align:center">Your ' + Mon + '<br>number</div><div class="a4 v-sub" style="font-size:60px">in 10 seconds</div></div>';
-      if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">Step 1 · Birth day + month</div><div class="a2 v-sub" style="font-size:56px;text-align:center">Example: ' + ord(c.d) + ' of ' + c.moName + '</div>' +
-        '<div class="a3">' + line(c.dR.steps.join(' → ')) + '</div><div class="a4">' + line(c.moName + ' = ' + c.moR.steps.join(' → ')) + '</div><div class="a5">' + line(c.dR.n + ' + ' + c.moR.n + ' = ' + c.aR.steps.join(' → '), true) + '</div></div>';
-      if (i === 2) return '<div class="v v-tall"><div class="a1 v-kicker">Step 2 · Add the year</div><div class="a2">' + line(c.y + ' → ' + c.yR.steps.slice(1).join(' → ')) + '</div><div class="a3">' + line(c.aR.n + ' + ' + c.yR.n + ' = ' + c.pyR.steps.join(' → '), true) + '</div><div class="a4 v-sub" style="font-size:60px">Personal Year ' + c.pyR.n + '</div></div>';
-      if (i === 3) return '<div class="v v-tall"><div class="a1 v-kicker">Step 3 · Add the month</div><div class="a2">' + line(Mon + ' = ' + c.mR.steps.join(' → ')) + '</div><div class="a3">' + line(c.pyR.n + ' + ' + c.mR.n + ' = ' + c.pmR.steps.join(' → ')) + '</div><div class="a4 v-bignum" style="font-size:380px">' + c.pmR.n + '</div><div class="a5 v-sub" style="font-size:54px">(for this example birthday)</div></div>';
+      if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">Step 1 · Day + month</div><div class="a2 v-sub" style="font-size:56px;text-align:center">Example: ' + ord(c.d) + ' of ' + c.moName + '</div>' +
+        '<div class="a3">' + line(C('cy', 'Day ' + chain(c.dR.steps))) + '</div><div class="a4">' + line(C('cy', c.moName + ' = ' + chain(c.moR.steps))) + '</div><div class="a5">' + line(C('cy', c.dR.n) + ' + ' + C('cy', c.moR.n) + ' = ' + C('cy', chain(c.aR.steps)), true) + '</div>' +
+        '<div class="a6 v-chips">' + chip('cy', c.aR.n, 'your Step 1 number') + '</div></div>';
+      if (i === 2) return '<div class="v v-tall"><div class="a1 v-kicker">Step 2 · Add the year</div><div class="a2">' + line(C('cr', c.y + ' → ' + chain(c.yR.steps.slice(1)))) + '</div>' +
+        '<div class="a3 v-chips">' + chip('cy', c.aR.n, 'from Step 1') + chip('cr', c.yR.n, 'for ' + c.y) + '</div>' +
+        '<div class="a4">' + line(C('cy', c.aR.n) + ' + ' + C('cr', c.yR.n) + ' = ' + C('cb', chain(c.pyR.steps)), true) + '</div><div class="a5 v-sub" style="font-size:64px">' + C('cb', 'Personal Year ' + c.pyR.n) + '</div></div>';
+      if (i === 3) return '<div class="v v-tall"><div class="a1 v-kicker">Step 3 · Add the month</div><div class="a2">' + line(C('cg', Mon + ' = ' + chain(c.mR.steps))) + '</div>' +
+        '<div class="a3 v-chips">' + chip('cb', c.pyR.n, 'from Step 2') + chip('cg', c.mR.n, 'for ' + Mon) + '</div>' +
+        '<div class="a4">' + line(C('cb', c.pyR.n) + ' + ' + C('cg', c.mR.n) + ' = ' + chain(c.pmR.steps)) + '</div><div class="a5 v-bignum" style="font-size:340px;color:var(--v-ink)">' + c.pmR.n + '</div><div class="a6 v-sub" style="font-size:54px">(for this example birthday)</div></div>';
       if (i === 4) return '<div class="v v-tall" style="gap:14px"><div class="a1 v-kicker" style="margin-bottom:20px">What yours means</div>' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n, k) { return '<div class="a' + Math.min(6, 2 + Math.floor(k / 2)) + ' v-numrow"><b>' + n + '</b><span>' + PM_SHORT[n] + '</span></div>'; }).join('') + '</div>';
       return '<div class="v v-tall"><div class="a1 v-h1" style="font-size:120px;text-align:center">Comment<br>your number</div><div class="a2 v-sub" style="font-size:56px;text-align:center">Star sign + numbers together?</div><div class="a3" style="margin-top:60px">' + wordmark(140) + '</div><div class="a4 v-url" style="font-size:48px">Link in bio</div></div>';
     }
     var n = ns.which, T = PY_THEME[n], D = NUM_DETAIL[n];
     if (i === 0) return '<div class="v v-tall"><div class="a1 v-kicker">' + Mon + ' · Personal Month</div><div class="a2 v-bignum" style="font-size:560px">' + n + '</div><div class="a3 v-h1" style="font-size:110px;text-align:center">' + T.title + '</div></div>';
-    if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">Quick check</div><div class="a2">' + line('Birth day + month → 1 digit') + '</div><div class="a3">' + line('+ ' + c.yR.n + ' for ' + c.y) + '</div><div class="a4">' + line('+ ' + c.mR.n + ' for ' + Mon) + '</div><div class="a5">' + line('Reduce to 1 digit', true) + '</div></div>';
+    if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">Quick check</div><div class="a2">' + line(C('cy', 'Day + month → 1 digit')) + '</div><div class="a3">' + line('+ ' + C('cr', c.yR.n + ' for ' + c.y)) + '</div><div class="a4">' + line('= ' + C('cb', 'Personal Year')) + '</div><div class="a5">' + line('+ ' + C('cg', c.mR.n + ' for ' + Mon)) + '</div><div class="a6">' + line('Reduce to 1 digit', true) + '</div></div>';
     if (i === 2) return '<div class="v v-tall"><div class="a1 v-bignum" style="font-size:300px">' + n + '</div><div class="a2 v-h1" style="font-size:96px;text-align:center">' + T.title + '</div><div class="a3 v-ev v-ev-tall"><div><b>At its best</b><div>' + D.good + '</div></div></div><div class="a4 v-ev v-ev-tall"><div><b>Watch out for</b><div>' + D.watch + '</div></div></div></div>';
     return '<div class="v v-tall"><div class="a1 v-h1" style="font-size:110px;text-align:center">Sound like<br>your month?</div><div class="a2 v-sub" style="font-size:56px">Tell me in the comments</div><div class="a3" style="margin-top:60px">' + wordmark(140) + '</div><div class="a4 v-url" style="font-size:48px">Link in bio</div></div>';
   }
@@ -1662,18 +1839,18 @@ function buildNumShort(sky, which) {
   }
   function viewShorts() {
     var cs = curShort(), n = cs.parts.length, i = Math.min(ui.shortScene, n - 1), p = cs.parts[i], all = cs.parts.map(function (x) { return x.text; }).join(' ');
-    var picker = ui.shortMode === 'sign'
+    var picker = ui.shortMode === 'bday' ? '<p class="s-hint" style="margin:0">Evergreen: one Short covers every birthday. The example day changes with the month, so you can re-post it.</p>' : ui.shortMode === 'cz' ? '<p class="s-hint" style="margin:0">Evergreen, with the New Year dates worked out from the real Sun and Moon. Great to post in January, ahead of Chinese New Year.</p>' : ui.shortMode === 'sign'
       ? SIGNS.map(function (x, k) { return '<button data-act="ssign:' + k + '" aria-pressed="' + (ui.shortSign === k) + '">' + x.glyph + VS + ' ' + x.name + '</button>'; }).join('')
       : '<button data-act="nwhich:0" aria-pressed="' + (ui.numWhich === 0) + '">All 9 (work it out)</button>' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (k) { return '<button data-act="nwhich:' + k + '" aria-pressed="' + (ui.numWhich === k) + '">Month ' + k + '</button>'; }).join('');
     var secs = all.length ? wordCount(all) / st.wpm * 60 : 0;
-    return '<div class="s-pad"><div class="s-signs" style="margin-bottom:10px"><button data-act="smode:sign" aria-pressed="' + (ui.shortMode === 'sign') + '">Star sign Shorts</button><button data-act="smode:num" aria-pressed="' + (ui.shortMode === 'num') + '">Numbers Shorts</button></div>' +
+    return '<div class="s-pad"><div class="s-signs" style="margin-bottom:10px"><button data-act="smode:sign" aria-pressed="' + (ui.shortMode === 'sign') + '">Star sign Shorts</button><button data-act="smode:num" aria-pressed="' + (ui.shortMode === 'num') + '">Numbers Shorts</button><button data-act="smode:bday" aria-pressed="' + (ui.shortMode === 'bday') + '">Birthday Number</button><button data-act="smode:cz" aria-pressed="' + (ui.shortMode === 'cz') + '">Chinese zodiac</button></div>' +
       '<div class="s-signs">' + picker + '</div>' +
       (ui.shortMode === 'num' ? '<p class="s-hint" style="margin-top:-6px">Start with the ‘All 9’ Short each month: viewers work out their own number and comment it. Only add the single-number ones if the analytics say they’re pulling views.</p>' : '') +
       '<div class="s-shortwrap"><div><div class="s-stage s-tall" id="stage" data-w="1080" data-h="1920"><div class="s-canvas" style="width:1080px;height:1920px">' + cs.scene(i) + '</div></div></div>' +
       '<div class="s-shortside">' + stageControls(n, i, cs.labels[i], Math.max(4, wordCount(p.text) / st.wpm * 60)) +
       voicePanel() + '<div class="s-dur ' + (secs <= 60 ? 'ok' : 'warn') + '">' + fmtDur(secs) + ' · ' + wordCount(all) + ' words (under 60s is the sweet spot)</div>' +
       cs.parts.map(function (x, k) { return '<section class="s-sec"><div class="s-sechead"><b>' + cs.labels[k] + '</b>' + (x.edited ? '<span class="s-edited">edited</span><button class="s-link" data-act="sreset:' + x.id + '">Reset</button>' : '') + '</div><textarea data-short="' + x.id + '" rows="' + Math.max(2, Math.ceil(x.text.length / 70)) + '">' + esc(x.text) + '</textarea></section>'; }).join('') +
-      '<div class="s-actions"><button class="s-cta" data-act="copy-short">Copy this Short\u2019s script</button><button class="s-btn2" data-act="dl-shorts">Download all ' + (ui.shortMode === 'num' ? 'Numbers' : '12 sign') + ' Shorts scripts</button></div>' +
+      '<div class="s-actions"><button class="s-cta" data-act="copy-short">Copy this Short\u2019s script</button><button class="s-btn2" data-act="dl-shorts">' + (ui.shortMode === 'bday' || ui.shortMode === 'cz' ? 'Download this script (.txt)' : 'Download all ' + (ui.shortMode === 'num' ? 'Numbers' : '12 sign') + ' Shorts scripts') + '</button></div>' +
       '<p class="s-hint">These are 9:16, so the same recordings work as Instagram Reels and TikToks.</p></div></div></div>';
   }
   function viewYouTube(secs) {
@@ -1739,7 +1916,8 @@ function buildNumShort(sky, which) {
     else if (act === 'copy-short') copy(curShort().parts.map(function (p) { return p.text; }).join(' '), el);
     else if (act === 'dl-shorts') {
       var out = [], kk;
-      if (ui.shortMode === 'num') {
+      if (ui.shortMode === 'bday' || ui.shortMode === 'cz') { var cx = curShort(), tc = cx.parts.map(function (p) { return p.text; }).join(' '); download(recName('txt'), '=== ' + cx.name.toUpperCase() + ' · ' + fmtDur(wordCount(tc) / st.wpm * 60) + ' ===\n' + cx.parts.map(function (p, k) { return '[' + cx.labels[k] + '] ' + p.text; }).join('\n\n') + '\n'); }
+      else if (ui.shortMode === 'num') {
         var keepN = ui.numWhich;
         for (kk = 0; kk <= 9; kk++) { ui.numWhich = kk; var ns = numShort(), tn = ns.parts.map(function (p) { return p.text; }).join(' '); out.push('=== ' + (kk ? 'PERSONAL MONTH ' + kk : 'ALL NUMBERS (WORK IT OUT)') + ' · ' + fmtDur(wordCount(tn) / st.wpm * 60) + ' ===\n' + tn + '\n'); }
         ui.numWhich = keepN; download('duology-' + mkey() + '-numbers-shorts.txt', out.join('\n'));

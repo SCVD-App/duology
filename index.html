@@ -527,7 +527,7 @@ var MODE = { cardinal: 'starts things', fixed: 'holds steady', mutable: 'adapts'
 var RULER = { sun: [4], moon: [3], mercury: [2, 5], venus: [1, 6], mars: [0, 7], jupiter: [8, 11], saturn: [9, 10], uranus: [10], neptune: [11], pluto: [7] };
 var EXALT = { sun: 0, moon: 1, mercury: 5, venus: 11, mars: 9, jupiter: 3, saturn: 6 };
 var HOUSES = [null,
-  { area: "you: your body, your approach and first impressions", why: "It starts at your Rising sign, the eastern horizon when you were born, so it's the 'you' house." },
+  { area: "yourself, your body, your approach and first impressions", why: "It starts at your Rising sign, the eastern horizon when you were born, so it's the 'you' house." },
   { area: "money, possessions and what you value", why: "It comes straight after 'you', so it became what's yours: your resources." },
   { area: "communication, siblings, short trips and your local patch", why: "Next out from you and your stuff is your immediate world: the people and places close by." },
   { area: "home, family and roots", why: "It's the very bottom of the chart, the ground under your feet when you were born." },
@@ -538,7 +538,7 @@ var HOUSES = [null,
   { area: "travel, study, beliefs and the big picture", why: "It's opposite the 3rd (your local patch), so it's the far-away stuff: long trips and big ideas." },
   { area: "career, reputation and public life", why: "It sits at the top of the chart, the part of the sky that was overhead, so it's the side of you everyone can see." },
   { area: "friends, groups and hopes for the future", why: "It follows your public life, so it's your network and what you're working towards." },
-  { area: "the hidden stuff: rest, solitude and what goes on behind the scenes", why: "It's the slice of sky just before sunrise at your Rising sign: the dark before the day starts." }
+  { area: "rest, solitude, secrets and what goes on behind the scenes", why: "It's the slice of sky just before sunrise at your Rising sign: the dark before the day starts." }
 ];
 var ASPECTS = [
   { key: 'conj', name: 'Conjunction', angle: 0, orb: 8, easy: null, verb: 'lines up with', flavour: 'a merging',
@@ -576,6 +576,8 @@ var NUM_WHY = {
   33: "33 is two 3s. Numerologists treat it as a supercharged 6 (care), so it isn't reduced."
 };
 var LESSONS = [
+  { id: 'chinese', title: 'The Chinese zodiac (and why January babies get it wrong)',
+    body: "The Chinese zodiac is a separate tradition from Western astrology and from numerology. Instead of twelve signs through the year, it gives each whole year an animal: Rat, Ox, Tiger, Rabbit, Dragon, Snake, Horse, Goat, Monkey, Rooster, Dog and Pig, in that order. Each year also carries one of five elements (Wood, Fire, Earth, Metal, Water), so the full cycle takes 60 years to come back around. 2026 is a Fire Horse year, the first since 1966.\n\nThe catch: the Chinese year doesn\u2019t start on 1 January. It starts at Chinese New Year, the second new moon after the winter solstice, which lands somewhere between 21 January and 20 February. So if you were born in January or early February, you might belong to the year before. Plenty of websites and posts get this wrong. Duology works out the real Chinese New Year date for your birth year from the actual Sun and Moon, so it gets it right.\n\nTraditionally, animals four apart on the wheel get along (Rat, Dragon and Monkey are a team, for example), and the animal directly opposite is your clash." },
   { id: 'houses', title: 'Why are there 12 houses?',
     body: "Picture the sky around you at the moment you were born, sliced into 12 pieces like a pizza, starting from the eastern horizon.\n\nThe 6 slices below the horizon cover your private life (you, money, home, family, daily work). The 6 above cover your more public life (partners, career, friends).\n\nEach house got its meaning from where it sits. The 1st starts at the horizon where the Sun rises, so it's 'you'. The 7th is directly opposite, so it's 'the other person'. The 10th is overhead, so it's what everyone sees: your career and reputation.\n\nDifferent house systems cut the slices differently. You can switch between them in Settings and see what moves." },
   { id: 'time', title: 'Why do houses need a birth time?',
@@ -1057,6 +1059,99 @@ function moonToday(chart, nowMs) {
 }
 // ===== CONTENT END =====
 
+// ---------- Birthday Number ----------
+function birthdayNumber(dateStr, masters) {
+  var d = +dateStr.split('-')[2], r = reduceNum(d, masters);
+  return { n: r.n, day: d, working: d > 9 ? 'Born on the ' + ord(d) + ': ' + String(d).split('').join(' + ') + ' = ' + (r.n === d ? d : String(d).split('').reduce(function (a, b) { return a + +b; }, 0)) + (r.n !== String(d).split('').reduce(function (a, b) { return a + +b; }, 0) && r.n !== d ? ' → ' + r.n : '') : 'Born on the ' + ord(d) + ', already a single digit' };
+}
+var BDAY_GIFT = {
+  1: 'self-starter energy: you’re quick to take the lead and back your own ideas',
+  2: 'a gift for people: you read the room, smooth things over and make others feel heard',
+  3: 'a spark: humour, creativity and a way with words that lifts the people around you',
+  4: 'a builder’s streak: steady, reliable and the one who actually gets it finished',
+  5: 'restless curiosity: you adapt fast, learn by doing and get bored with the same old thing',
+  6: 'a caring core: you look after people, and home and family matter more than most',
+  7: 'a deep thinker: you need to understand how things work, and you need your own space',
+  8: 'drive: you’re ambitious, good with the practical side of money, and you like results',
+  9: 'a big heart: generous, idealistic and drawn to the bigger picture',
+  11: 'a master-number birthday: intuitive and inspiring, with a nervous energy to manage',
+  22: 'a master-number birthday: big plans and the patience to build them for real'
+};
+var BDAY_WHY = 'Your Birthday Number is just the day of the month you were born, reduced to one digit. Numerology reads it as a talent you came in with: the energy you lead with day to day, a sidekick to your Life Path, which is the bigger road you’re on.';
+
+// ---------- Chinese zodiac ----------
+// A separate tradition from Western astrology and numerology. The Chinese year starts at Chinese New
+// Year, the second new moon after the winter solstice (reckoned in China time, UTC+8), so it lands
+// between 21 January and 20 February. We work the date out from the real Sun and Moon.
+var CZ_ANIMALS = ['Rat', 'Ox', 'Tiger', 'Rabbit', 'Dragon', 'Snake', 'Horse', 'Goat', 'Monkey', 'Rooster', 'Dog', 'Pig'];
+var CZ_EMOJI = ['🐀', '🐂', '🐅', '🐇', '🐉', '🐍', '🐎', '🐐', '🐒', '🐓', '🐕', '🐖'];
+var CZ_TRAITS = [
+  'quick-witted, resourceful and good at spotting an opportunity before anyone else',
+  'patient, dependable and strong: slow to start, impossible to stop',
+  'brave, competitive and magnetic, with a taste for a challenge',
+  'gentle, tactful and quietly clever, with a love of peace and comfort',
+  'confident, ambitious and larger than life, a natural leader',
+  'wise, private and elegant, trusting your gut over the crowd',
+  'energetic, free-spirited and warm, happiest on the move',
+  'kind, creative and easy-going, with an eye for beauty',
+  'clever, playful and inventive, a problem-solver who gets bored easily',
+  'sharp, hard-working and honest, with an eye for detail',
+  'loyal, fair and protective, a friend for life',
+  'generous, good-natured and easy to love, with a soft spot for life’s pleasures'
+];
+var CZ_ELEMENTS = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'];
+var CZ_EL_TXT = { Wood: 'growth and generosity', Fire: 'passion and energy', Earth: 'stability and common sense', Metal: 'determination and focus', Water: 'intuition and flexibility' };
+var CZ_EL_WEST = { Fire: 'fire', Earth: 'earth', Water: 'water' };
+function czIndex(y) { return ((y - 4) % 12 + 12) % 12; }
+function czElement(y) { return CZ_ELEMENTS[Math.floor((((y - 4) % 10) + 10) % 10 / 2)]; }
+function czYang(y) { return (((y - 4) % 2) + 2) % 2 === 0; }
+var _cnyCache = {};
+function _elong(jd) { var p = Astro.positions(jd); return Astro.norm(p.moon - p.sun); }
+function _sunLon(jd) { return Astro.positions(jd).sun; }
+function chineseNewYearMs(y) {
+  if (_cnyCache[y]) return _cnyCache[y];
+  // winter solstice of the previous year (Sun at 270°)
+  var jd = Astro.jdFromMs(Date.UTC(y - 1, 11, 18)), a, b;
+  while (Astro.norm(_sunLon(jd) - 270) > 180) jd += 0.5;
+  a = jd - 0.5; b = jd;
+  for (var i = 0; i < 40; i++) { var m = (a + b) / 2; if (Astro.norm(_sunLon(m) - 270) > 180) a = m; else b = m; }
+  // A new moon on the same China-time calendar day as the solstice starts month 11 itself, so count
+  // only new moons from the following China day onwards.
+  var sd = new Date(Astro.msFromJd(b) + 8 * 3600000), dayEnd = Date.UTC(sd.getUTCFullYear(), sd.getUTCMonth(), sd.getUTCDate() + 1) - 8 * 3600000;
+  var solstice = Astro.jdFromMs(dayEnd), found = [], t = solstice, prev = _elong(t);
+  while (found.length < 3 && t < solstice + 100) {
+    var t2 = t + 0.5, e2 = _elong(t2);
+    if (e2 < prev) { // elongation wrapped through 0 = new moon
+      var lo = t, hi = t2;
+      for (var k = 0; k < 40; k++) { var mid = (lo + hi) / 2; if (_elong(mid) > 180) lo = mid; else hi = mid; }
+      found.push(hi);
+    }
+    t = t2; prev = e2;
+  }
+  // the calendar day of that new moon in China time, starting at midnight China time
+  // Chinese New Year always lands between 21 Jan and 20 Feb. The rare leap-month years (like the
+  // famous 2033 problem, which moves 2034's New Year to 19 Feb) push it one lunation later.
+  var pick = found[1], dd = new Date(Astro.msFromJd(pick) + 8 * 3600000);
+  if (dd.getUTCMonth() === 0 && dd.getUTCDate() < 21 && found[2]) pick = found[2];
+  var nm = Astro.msFromJd(pick) + 8 * 3600000, d = new Date(nm);
+  var ms = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - 8 * 3600000;
+  _cnyCache[y] = ms; return ms;
+}
+function chineseZodiac(utcMs) {
+  var y = new Date(utcMs + 8 * 3600000).getUTCFullYear();
+  var cny = chineseNewYearMs(y), cy = utcMs >= cny ? y : y - 1, cnyUsed = utcMs >= cny ? cny : chineseNewYearMs(y);
+  var i = czIndex(cy), el = czElement(cy);
+  return { year: cy, animal: CZ_ANIMALS[i], emoji: CZ_EMOJI[i], idx: i, element: el, yang: czYang(cy), traits: CZ_TRAITS[i],
+    beforeNY: utcMs < cny, cnyMs: cny, cnyYear: y,
+    friends: [(i + 4) % 12, (i + 8) % 12].map(function (k) { return CZ_ANIMALS[k]; }), clash: CZ_ANIMALS[(i + 6) % 12] };
+}
+function czNote(z) {
+  var d = new Date(z.cnyMs + 8 * 3600000).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+  return z.beforeNY
+    ? 'You were born before Chinese New Year (' + d + ' ' + z.cnyYear + '), so you belong to the year before: the ' + z.animal + ', not the ' + CZ_ANIMALS[czIndex(z.cnyYear)] + '. Lots of sites get this wrong.'
+    : 'Chinese New Year in ' + z.cnyYear + ' fell on ' + d + ', and you were born after it, so you’re the ' + z.animal + ' of ' + z.cnyYear + '.';
+}
+
 // ===== SIGNS START =====
 // General star-sign readings (no birth details), using solar houses.
 var DAY_MS = 86400000;
@@ -1469,6 +1564,9 @@ function buildReport(p, c, settings) {
     var pr = numberPairs(lp, ex, so, pe)[0];
     o.push('Your Expression number, from every letter of your birth name, is ' + ex.n + ', the ' + NUM_SHORT[ex.n] + '. It’s read as the toolkit you came with. ' + (pr ? pr.text.replace(/^They’re/, 'Your Life Path and Expression are') : ''));
   }
+  var bd = birthdayNumber(p.date, settings.masters);
+  o.push('Then there\u2019s the day itself. You were born on the ' + ord(bd.day) + ', which gives you a Birthday Number of ' + bd.n + '. Numerology reads it as the energy you lead with day to day. For ' + an(bd.n) + ' ' + bd.n + ', that\u2019s ' + BDAY_GIFT[bd.n] + '. ' +
+    (rootNum(bd.n) === rootNum(lp.n) ? 'It\u2019s the same number as your Life Path, so the way you show up every day and the road you\u2019re on pull in exactly the same direction.' : FAMILY[rootNum(bd.n)] === FAMILY[rootNum(lp.n)] ? 'It\u2019s in the same family as your Life Path, so your day-to-day energy suits the bigger road you\u2019re on.' : 'It\u2019s from a different family to your Life Path, so day to day you bring something the bigger road doesn\u2019t ask for. Numerologists would call that a useful extra string to your bow.'));
   secs.push({ h: 'Your road: Life Path ' + lp.n, paras: o });
 
   // ---- 6b. Birth name vs the name you go by now ----
@@ -1523,6 +1621,11 @@ function buildReport(p, c, settings) {
   o.push('For what the planets are doing to your chart over the next 30 days, 90 days and 12 months, see My forecast.');
   secs.push({ h: 'Where you are right now', paras: o });
 
+  var cz = chineseZodiac(c.utcMs);
+  secs.push({ h: 'Bonus: your Chinese zodiac', paras: [
+    'Chinese astrology is a separate tradition from everything above, but it\u2019s one people always ask about. By the Chinese calendar ' + 'you\u2019re' + ' a' + (cz.element === 'Earth' ? 'n' : '') + ' ' + cz.element + ' ' + cz.animal + ' ' + cz.emoji + ', read as ' + cz.traits + '. The ' + cz.element + ' element adds ' + CZ_EL_TXT[cz.element] + '.',
+    czNote(cz) + ' Traditionally the ' + cz.animal + ' gets on best with the ' + cz.friends.join(' and the ') + ', and clashes with the ' + cz.clash + '.'
+  ] });
   secs.push({ h: 'Keep in mind', paras: ['Astrology and numerology are old systems for describing people, not lab results. Read this the way you’d read a thoughtful letter from someone who knows the traditions well: keep what rings true, and leave the rest. Every claim here is traced back to a placement or a number you can tap on in the app to see the working.'] });
 
   return { title: 'What your stars and numbers say about you', name: p.name, first: first, sections: secs,
@@ -1676,6 +1779,11 @@ function buildPetReport(p, c, settings, family) {
   o.push(F('The old Chaldean numerologists paired each number with a planet. ' + first + '’s Life Path belongs to ' + PLANETS[lpPlanet].name + ', and in {p2} chart ' + PLANETS[lpPlanet].name + ' sits in ' + SIGNS[S(lpPlanet)].name + ', where it shows up ' + SIGNS[S(lpPlanet)].style + '.'));
   secs.push({ h: 'By the numbers', paras: o });
 
+  var cz = chineseZodiac(c.utcMs);
+  secs.push({ h: 'Bonus: your Chinese zodiac', paras: [
+    'Just for fun: by the Chinese calendar ' + first + ' is' + ' a' + (cz.element === 'Earth' ? 'n' : '') + ' ' + cz.element + ' ' + cz.animal + ' ' + cz.emoji + ', read as ' + cz.traits + '. The ' + cz.element + ' element adds ' + CZ_EL_TXT[cz.element] + '.',
+    'Traditionally the ' + cz.animal + ' gets on best with the ' + cz.friends.join(' and the ') + ', and clashes with the ' + cz.clash + '.'
+  ] });
   secs.push({ h: 'Keep in mind', paras: [F('This is a reading built on centuries-old rules for people, translated for a ' + noun + ', and meant to be enjoyed. For anything to do with ' + first + '’s health or behaviour, your vet or a trainer is the one to ask.')] });
 
   return { title: 'What the stars and numbers say about ' + first, name: p.name, first: first, sections: secs, pet: true,
@@ -1914,6 +2022,7 @@ function buildPetReport(p, c, settings, family) {
     CHART_POINTS.concat(c.hasTime ? ['asc'] : []).forEach(function (id) { cnt[SIGNS[signOf(c.pos[id])].el]++; });
     var top = Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; })[0];
     out.push('<section class="stack-s"><h2>Your element mix</h2><div class="bal">' + ['fire', 'earth', 'air', 'water'].map(function (e) { return '<div><b>' + cnt[e] + '</b><small>' + e[0].toUpperCase() + e.slice(1) + '</small></div>'; }).join('') + '</div><p class="small" style="margin:0;color:var(--ink2)">Counting which element each planet' + (c.hasTime ? ' (plus your Rising sign)' : '') + ' sits in. Yours leans <b>' + top + '</b> (' + ELEMENT[top] + '). Astrologers use this as a quick read on your overall flavour.</p></section>');
+    out.push(czCard(c));
     // aspects
     var aps = !free ? c.aspects.slice(0, 4) : (ui.showAllAsp ? c.aspects : c.aspects.slice(0, 10));
     out.push('<section class="stack-s"><h2>The lines in the middle</h2><p class="small" style="margin:0">Those are aspects: the angles between planets. Some angles are read as easy, some as friction. Tightest first.</p><div>' + aps.map(function (ap) {
@@ -1997,6 +2106,19 @@ function buildPetReport(p, c, settings, family) {
     return out.join('');
   }
 
+  function czCard(c) {
+    var z = chineseZodiac(c.utcMs), sunEl = SIGNS[signOf(c.pos.sun)].el, w = CZ_EL_WEST[z.element];
+    var tie = w ? (w === sunEl ? 'Your Chinese year element, ' + z.element + ', is the same element as your Sun sign (' + SIGNS[signOf(c.pos.sun)].name + '). Two separate traditions pointing the same way.' : 'Your Chinese year element is ' + z.element + ', while your Sun sign (' + SIGNS[signOf(c.pos.sun)].name + ') is a ' + sunEl + ' sign: two different flavours from two different traditions.')
+      : z.element + ' has no match among the four Western elements, which is one reason the two systems are best read side by side rather than mixed.';
+    var nameP = c.profile.kind === 'pet' ? c.profile.name.split(/\s+/)[0] + ' is' : (c.profile.id === store.profiles[0].id ? 'You\u2019re' : esc(c.profile.name.split(/\s+/)[0]) + ' is');
+    return '<section class="stack-s"><h2>Bonus: your Chinese zodiac</h2><div class="card num"><div class="num-head"><div class="big" style="font-size:30px">' + z.emoji + '</div><div><div class="k">Chinese astrology \u00B7 ' + z.year + '</div><div class="m">' + nameP + ' a' + (z.element === 'Earth' ? 'n' : '') + ' ' + z.element + ' ' + z.animal + '</div></div></div>' +
+      sec('The ' + z.animal, 'Chinese astrology reads ' + z.animal + ' years as ' + z.traits + '.') +
+      sec('The ' + z.element + ' part', 'Each year also carries one of five elements in a 60-year cycle. ' + z.element + ' adds ' + CZ_EL_TXT[z.element] + ', and it\u2019s a ' + (z.yang ? 'yang (outgoing)' : 'yin (inward)') + ' year.') +
+      sec('Best matches and the clash', 'Traditionally the ' + z.animal + ' gets on best with the ' + z.friends.join(' and the ') + ', and clashes with the ' + z.clash + ', the animal directly opposite on the Chinese wheel.') +
+      sec('Next to your Western chart', tie) +
+      '<div class="work">' + czNote(z) + '</div>' +
+      '<div class="small">Chinese astrology is a separate tradition from the Western chart and numbers above. We include it because so many people ask. <button type="button" class="link" style="min-height:0" data-act="learn:chinese">How the Chinese zodiac works</button></div></div></section>';
+  }
   function reportEntry(p) {
     return '<div class="card pro-card r-entry no-print" style="border-color:var(--rust);background:var(--surface)"><span class="lock" style="color:var(--rust)">' + (isPro() ? 'Your reading' : ICON.lock + 'New \u00B7 Pro') + '</span><b class="t">' + (p.kind === 'pet' ? 'What the stars and numbers say about ' + esc(p.name.split(/\s+/)[0]) : 'What your stars and numbers say about ' + (p.id === store.profiles[0].id ? 'you' : esc(p.name.split(/\s+/)[0]))) + '</b><div class="small" style="color:var(--ink2)">Your chart and your numbers, read together as one plain-English report. About a 6-minute read' + (isPro() ? ', and you can save it as a PDF.' : '. The opening section is free.') + '</div><button type="button" class="btn" data-act="tab:report">Read ' + (isPro() ? 'the report' : 'the opening') + '</button></div>';
   }
@@ -2046,11 +2168,11 @@ function buildPetReport(p, c, settings, family) {
     }).join('') + '</tbody></table></div>');
     o.push('<p class="r-note">' + (c.hasTime ? houseSys()[0].toUpperCase() + houseSys().slice(1).replace('whole', 'Whole Sign') + ' houses. ' : 'No birth time, so no Rising sign or houses, and the Moon is for noon. ') + 'R = retrograde when you were born.</p>');
     var lp = lifePath(p.date, s.masters), yr = new Date().getFullYear(), py = personalYear(p.date, yr);
-    var rows = [['Life Path', lp, 'Full birth date'], ['Expression', nameNumber(p.name, s.numSys, s.masters, 'all'), 'Every letter of the name'],
+    var rows = [['Life Path', lp, 'Full birth date'], ['Birthday Number', birthdayNumber(p.date, s.masters), 'Day you were born'], ['Expression', nameNumber(p.name, s.numSys, s.masters, 'all'), 'Every letter of the name'],
       ['Soul Urge', nameNumber(p.name, s.numSys, s.masters, 'vowels'), 'The vowels'], ['Personality', nameNumber(p.name, s.numSys, s.masters, 'cons'), 'The consonants'],
       ['Personal Year ' + yr, py, 'Birthday + this year']];
-    if (p.nowName) rows.splice(2, 0, ['Name now', nameNumber(p.nowName, s.numSys, s.masters, 'all'), esc(p.nowName)]);
-    if (p.kind === 'pet') rows = rows.slice(0, 2);
+    if (p.nowName) rows.splice(3, 0, ['Name now', nameNumber(p.nowName, s.numSys, s.masters, 'all'), esc(p.nowName)]);
+    if (p.kind === 'pet') rows = rows.slice(0, 3);
     rows = rows.filter(function (r) { return r[1]; });
     o.push('<h2>Your numbers at a glance</h2><table class="r-tbl r-num"><thead><tr><th>Number</th><th></th><th>How we got there</th></tr></thead><tbody>' + rows.map(function (r) {
       return '<tr><td><b>' + r[0] + '</b><br><small>' + r[2] + '</small></td><td class="n">' + r[1].n + '</td><td class="w">' + esc(r[1].working) + '</td></tr>';
@@ -2164,6 +2286,8 @@ function buildPetReport(p, c, settings, family) {
     if (!isPro()) {
       out.push(numCard('Life Path', lp, 'Your birth date can never change, so numerology treats it as the main road you\u2019re on.', [['What it\u2019s for', 'Your Life Path is the big one: the overall direction of your life, and the number everything else gets compared against, including your Personal Year.']], true));
       out.push('<h2>Your other numbers</h2><p class="small" style="margin:0">Here they are. Pro explains each one, shows the working, and how they play off your Life Path.</p>');
+      var bdF = birthdayNumber(p.date, s.masters);
+      out.push(lockedRow(bdF.n, 'Birthday Number', NUM_MEAN[bdF.n], 'numbers'));
       out.push(lockedRow(py.n, 'Personal Year ' + yr, PY_THEME[py.n].title, 'numbers'));
       out.push(lockedRow(pm.n, 'Personal Month', PY_THEME[pm.n].title, 'numbers'));
       if (ex) out.push(lockedRow(ex.n, 'Expression', NUM_MEAN[ex.n], 'numbers'));
@@ -2186,6 +2310,8 @@ function buildPetReport(p, c, settings, family) {
     out.push('<div class="card num"><div class="k">Coming up: ' + (yr + 1) + '</div><div class="m">Personal Year ' + nextPy.n + ': ' + PY_THEME[nextPy.n].title + '</div>' + sec('What to expect', PY_THEME[nextPy.n].text) + sec('With your Life Path ' + lp.n + ': ' + fitNext.kind.toLowerCase(), fitNext.text) + '</div>');
     out.push('<h2>Your core numbers</h2>');
     out.push(numCard('Life Path', lp, 'Your birth date can never change, so numerology treats it as the main road you\u2019re on.', [['What it\u2019s for', 'Your Life Path is the big one: the overall direction of your life, and the number everything else gets compared against, including your Personal Year.']], true));
+    var bdN = birthdayNumber(p.date, s.masters);
+    out.push(numCard('Birthday Number', bdN, BDAY_WHY, [['What yours says', 'Born on the ' + ord(bdN.day) + ', so your Birthday Number is ' + bdN.n + '. That\u2019s ' + BDAY_GIFT[bdN.n] + '.']], true));
     if (ex) out.push(numCard('Expression', ex, 'Every letter of your full birth name, read as your natural talents: the toolkit you came with.', [], true));
     var nowX = p.nowName ? nameNumber(p.nowName, s.numSys, s.masters, 'all') : null;
     if (nowX) out.push(numCard('Name you go by now: ' + esc(p.nowName), nowX, 'Numerology reads your birth name as the blueprint and the name you live under as a second layer on top: how you show up today. Your birth name works out to ' + (ex ? ex.n : '?') + '.', [], true));
