@@ -115,7 +115,7 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 .v-chips{display:flex;gap:24px;flex-wrap:wrap;justify-content:center}.v-chip{display:inline-flex;align-items:center;gap:16px;font-size:42px;font-weight:700;padding:12px 32px 12px 14px;border-radius:999px;border:4px solid currentColor;background:var(--v-panel)}.v-chip b{font-family:var(--serif);font-size:56px;min-width:76px;height:76px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;line-height:1}.v-chip b{color:var(--v-bg)}.v-chip.cy b{background:#FFD25E}.v-chip.cr b{background:#FF7A7A}.v-chip.cb b{background:#62B4FF}.v-chip.cg b{background:#7FDB9A}
 .v-czgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px 50px;font-size:120px;line-height:1.1;text-align:center}
 .v-czny{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;width:100%}.v-czny div{background:var(--v-panel);border:2px solid var(--v-line);border-radius:24px;padding:22px 30px;display:flex;flex-direction:column;gap:4px}.v-czny b{font-family:var(--serif);font-size:72px;line-height:1}.v-czny span{font-size:46px;color:#FFD25E;font-weight:700}.v-czny em{font-style:normal;font-size:40px;color:var(--v-muted)}
-.v-czrow{display:flex;align-items:center;gap:24px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:20px;padding:6px 28px}.v-czrow .e{font-size:64px;line-height:1}.v-czrow b{font-family:var(--serif);font-size:52px;min-width:210px}.v-czrow span{font-size:38px;white-space:nowrap;color:var(--v-muted);font-variant-numeric:tabular-nums}
+.v-czrow{display:flex;align-items:center;gap:24px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:20px;padding:10px 32px}.v-czrow .e{font-size:64px;line-height:1}.v-czrow b{font-family:var(--serif);font-size:52px;min-width:210px}.v-czrow .ys{display:grid;grid-template-columns:repeat(4,auto);gap:2px 26px;margin-left:auto;font-size:38px;line-height:1.15}.v-czrow .ys i{font-style:normal}.v-czrow span{font-size:38px;white-space:nowrap;color:var(--v-muted);font-variant-numeric:tabular-nums}
 .v-numrow{display:flex;align-items:center;gap:36px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:24px;padding:18px 36px}.v-numrow b{font-family:var(--serif);font-size:84px;color:var(--v-accent);min-width:60px;text-align:center;line-height:1}.v-numrow span{font-size:50px}
 .a1,.a2,.a3,.a4,.a5,.a6{opacity:0;animation:vin .8s cubic-bezier(.2,.7,.2,1) forwards}
 .a1{animation-delay:.1s}.a2{animation-delay:.4s}.a3{animation-delay:.8s}.a4{animation-delay:1.2s}.a5{animation-delay:1.6s}.a6{animation-delay:2s}
@@ -1433,7 +1433,7 @@ function buildCzShort(sky) {
     { id: 'hook', text: 'What\u2019s your Chinese animal? Born in January or February? Check this first.' },
     { id: 'catch', text: 'The Chinese year doesn\u2019t start on the 1st of January. It starts at Chinese New Year, the second new moon after the winter solstice, which lands somewhere between the 21st of January and the 20th of February. Born before it? You belong to the year before.' },
     { id: 'example', text: exTxt },
-    { id: 'animals', text: 'The twelve, in order: ' + CZ_ANIMALS.join(', ') + '. ' + cur + ' is the year of the ' + calc.curEl + ' ' + calc.curAnimal + ', which started on the ' + ord(new Date(curNY + 8 * 3600000).getUTCDate()) + ' of ' + MONTHS_LONG[new Date(curNY + 8 * 3600000).getUTCMonth()] + '.' },
+    { id: 'animals', hold: 4, text: 'The twelve, in order: ' + CZ_ANIMALS.join(', ') + '. ' + cur + ' is the year of the ' + calc.curEl + ' ' + calc.curAnimal + ', which started on the ' + ord(new Date(curNY + 8 * 3600000).getUTCDate()) + ' of ' + MONTHS_LONG[new Date(curNY + 8 * 3600000).getUTCMonth()] + '.' },
     { id: 'cta', text: 'Comment your animal. Duology works it out from your exact birthday, right alongside your star sign and numbers. Link in bio.' }
   ] };
 }
@@ -1466,8 +1466,9 @@ function buildCzShort(sky) {
   function sceneCount() { return ui.tab === 'video' ? secsCache.length : curShort().parts.length; }
   function curIndex() { return ui.tab === 'video' ? ui.scene : ui.shortScene; }
   function setIndex(i) { if (ui.tab === 'video') ui.scene = i; else ui.shortScene = i; }
-  function estDur(i) { return ui.tab === 'video' ? secDur(secsCache[i]) : Math.max(4, wordCount(curShort().parts[i].text) / st.wpm * 60); }
-  function sceneDur(i) { var a = curAudio()[i]; return a && a.dur ? a.dur + 1.1 : estDur(i); }
+  function holdOf(i) { if (ui.tab === 'video') return 0; var p = curShort().parts[i]; return (p && p.hold) || 0; }
+  function estDur(i) { return ui.tab === 'video' ? secDur(secsCache[i]) : Math.max(4, wordCount(curShort().parts[i].text) / st.wpm * 60) + holdOf(i); }
+  function sceneDur(i) { var a = curAudio()[i]; return a && a.dur ? a.dur + 1.1 + holdOf(i) : estDur(i); }
   function slug(i, label) { return String(i + 1).padStart(2, '0') + '-' + String(label).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 28) + '.mp3'; }
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   function loadVoiceFiles(fileList) {
@@ -1533,7 +1534,7 @@ function buildCzShort(sky) {
       if (a && a.dur) {
         r.t = setTimeout(function () {
           if (r.cancelled) return;
-          var done = false, next = function () { if (done || r.cancelled) return; done = true; a.el.onended = null; r.t = setTimeout(function () { step(i + 1); }, 500); };
+          var done = false, next = function () { if (done || r.cancelled) return; done = true; a.el.onended = null; r.t = setTimeout(function () { step(i + 1); }, 500 + holdOf(i) * 1000); };
           a.el.currentTime = 0; r.audio = a.el; a.el.onended = next;
           var p = a.el.play(); if (p && p.catch) p.catch(function () { r.t = setTimeout(next, a.dur * 1000); });
           setTimeout(next, a.dur * 1000 + 1500);
@@ -1774,9 +1775,9 @@ function buildCzShort(sky) {
     if (i === 2) return '<div class="v v-tall"><div class="a1 v-kicker">Example</div><div class="a2 v-h1" style="font-size:100px;text-align:center">' + c.ex[2] + ' ' + MONTHS_LONG[c.ex[1] - 1] + ' ' + c.ex[0] + '</div><div class="a3 v-sub" style="font-size:56px;text-align:center">Chinese New Year: ' + C('cy', nyd(z.cnyMs) + ' ' + z.cnyYear) + '</div>' +
       '<div class="a4" style="font-size:300px;line-height:1">' + z.emoji + '</div><div class="a5 v-h1" style="font-size:120px;text-align:center">' + C('cb', z.element + ' ' + z.animal) + '</div>' + (z.beforeNY ? '<div class="a6 v-sub" style="font-size:60px">' + C('cr', '<s>not ' + anW(c.calYr) + ' ' + c.calYr + '</s>') + '</div>' : '') + '</div>';
     if (i === 3) return '<div class="v v-tall" style="gap:12px"><div class="a1 v-kicker" style="margin-bottom:14px">The twelve animals</div>' + CZ_ANIMALS.map(function (a, k) {
-      var ys = []; for (var y = 1980; y <= 2027; y++) if (czIndex(y) === k) ys.push(y);
-      return '<div class="a' + Math.min(6, 2 + Math.floor(k / 3)) + ' v-czrow"><span class="e">' + CZ_EMOJI[k] + '</span><b>' + a + '</b><span>' + ys.slice(-4).join(' · ') + '</span></div>'; }).join('') +
-      '<div class="a6 v-sub" style="font-size:40px;margin-top:10px;text-align:center">Jan or Feb birthday? Check the New Year date</div></div>';
+      var ys = []; for (var y = 1936; y <= 2031; y++) if (czIndex(y) === k) ys.push(y);
+      return '<div class="a' + Math.min(6, 2 + Math.floor(k / 3)) + ' v-czrow"><span class="e">' + CZ_EMOJI[k] + '</span><b>' + a + '</b><span class="ys">' + ys.map(function (y) { return '<i' + (y === c.cur ? ' class="cb"' : '') + '>' + y + '</i>'; }).join('') + '</span></div>'; }).join('') +
+      '<div class="a6 v-sub" style="font-size:36px;margin-top:10px;text-align:center">Jan or Feb birthday? Check the New Year date</div></div>';
     return '<div class="v v-tall"><div class="a1 v-h1" style="font-size:120px;text-align:center">Comment<br>your animal</div><div class="a2 v-sub" style="font-size:56px;text-align:center">' + c.cur + ': year of the ' + C('cb', c.curEl + ' ' + c.curAnimal) + ' ' + c.curEmoji + '</div><div class="a3" style="margin-top:60px">' + wordmark(140) + '</div><div class="a4 v-url" style="font-size:48px">Link in bio</div></div>';
   }
   function scene916num(i, ns) {
