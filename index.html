@@ -2402,7 +2402,7 @@ function buildPetReport(p, c, settings, family) {
         return '<button type="button" class="plan' + (pl.best ? ' best' : '') + '" data-act="buy:' + pl.id + '"' + (busy ? ' disabled' : '') + '>' + (pl.best ? '<span class="badge">Best value</span>' : '') + '<span><b>' + pl.name + '</b><span class="small">' + (ui.payBusy === pl.id ? 'Opening secure checkout\u2026' : pl.sub) + '</span></span><span class="price">' + pl.price + '</span></button>';
       }).join('') + '</div>' +
       (ui.payMsg ? '<div class="err" role="alert">' + esc(ui.payMsg) + '</div>' : '') +
-      '<p class="small" style="margin:0;text-align:center">One-off payment. No subscription, no auto-renew.<br>Secure checkout by Stripe, in US dollars. Your bank converts it.<br>Not happy? Full refund within 14 days.</p>' +
+      '<p class="small" style="margin:0;text-align:center">One-off payment. No subscription, no auto-renew.<br>Secure checkout by Stripe, in US dollars. Your bank converts it.<br>Not happy in the first 14 days? Full refund, no questions asked.</p>' +
       codeForm('pw') + '</div></div>';
   }
   function claimSheet() {

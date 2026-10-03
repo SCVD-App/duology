@@ -120,6 +120,7 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 .t-tag{display:inline-block;font-size:40px;font-weight:700;letter-spacing:6px;text-transform:uppercase;padding:10px 30px;border-radius:999px;background:rgba(245,243,238,.12);color:var(--v-ink)}.t-tag.pro{background:var(--v-accent);color:var(--v-bg)}
 .t-ticks{list-style:none;display:flex;flex-direction:column;gap:14px;font-size:46px;color:var(--v-ink)}.t-ticks li::before{content:"\2713";color:var(--v-accent);font-weight:700;margin-right:20px}
 .t-plan{position:relative;width:100%;display:flex;justify-content:space-between;align-items:center;background:var(--v-panel);border:2px solid var(--v-line);border-radius:30px;padding:40px 50px}.t-plan.best{border:4px solid var(--v-accent)}.t-best{position:absolute;top:-26px;left:46px;background:var(--v-accent);color:var(--v-bg);font-size:30px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:6px 20px;border-radius:999px}
+.t-terms{font-size:42px;line-height:1.4;color:var(--v-muted);text-align:center;max-width:900px}.t-terms b{display:block;color:var(--v-ink);font-size:46px;margin-bottom:10px;white-space:nowrap}
 .t-len{font-size:32px;letter-spacing:4px;text-transform:uppercase;color:var(--v-brass);font-weight:700}.t-name{font-family:var(--serif);font-size:66px;font-weight:600;line-height:1.1}.t-price{font-size:72px;font-weight:700;font-variant-numeric:tabular-nums}
 .v-numrow.tight{padding:10px 36px}.v-numrow.tight span{font-size:46px}.v-numrow.master{border-color:#62B4FF}.v-numrow.master b{color:#62B4FF}.v-numrow em{font-style:normal;color:var(--v-muted);font-size:40px}
 .v-czgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px 50px;font-size:120px;line-height:1.1;text-align:center}
@@ -1470,7 +1471,7 @@ function buildTourShort(sky) {
     { id: 'pro2', text: 'Your personal forecast for the next twelve months, and all your numbers, and how they fit together.' },
     { id: 'family', text: 'Keep the whole family’s charts in the one app. Up to ten.' },
     { id: 'pets', text: 'And just when you think it can’t get any better, your pets get a chart too. Seriously.', hold: 1 },
-    { id: 'price', text: 'Pro is a one-off pass, from three ninety-nine. No subscription, nothing renews.' },
+    { id: 'price', text: 'Pro is a one-off pass, from three ninety-nine. No subscription, no auto-renewals. You opt in on your terms, and if you\u2019re not happy in the first fourteen days, you get a full refund, no questions asked.' },
     { id: 'cta', text: 'Start free. Link in bio.' }
   ] };
 }
@@ -1830,7 +1831,7 @@ function buildTourShort(sky) {
     if (i === 6) return '<div class="v v-tall t-scene"><div class="a1 v-kicker" style="text-align:center">And just when you think<br>it can’t get any better…</div><div class="a2 v-h1 t-h">Your pets get<br>a chart too. <em class="t-em">Seriously.</em></div><div class="a3">' + tphone('pet', 'big') + '</div><div class="a4 v-sub" style="font-size:46px">🐕 🐈 🐎 🐦 🐇</div></div>';
     if (i === 7) return '<div class="v v-tall t-scene"><div class="a1 v-h1 t-h">Pay once.<br>Nothing renews.</div>' +
       [['30 days', 'New Moon', 'US$3.99', ''], ['12 months', 'Full Circle', 'US$24.99', ' best'], ['Lifetime', 'Written in the Stars', 'US$39.99', '']].map(function (p, k) { return '<div class="a' + (k + 2) + ' t-plan' + p[3] + '">' + (p[3] ? '<span class="t-best">Best value</span>' : '') + '<div><div class="t-len">' + p[0] + '</div><div class="t-name">' + p[1] + '</div></div><div class="t-price">' + p[2] + '</div></div>'; }).join('') +
-      '<div class="a5 v-sub" style="font-size:44px;text-align:center">No subscription · 14-day refund</div></div>';
+      '<div class="a5 t-terms"><b>No subscription, no auto\u2011renewals.</b>With Duology you opt in on your terms, and if for any reason you aren\u2019t happy in the first 14 days, we\u2019ll refund you in full, no questions asked.</div></div>';
     return '<div class="v v-tall"><div class="a1 v-h1" style="font-size:150px;text-align:center">Start free</div><div class="a2 v-sub" style="font-size:56px;text-align:center">No sign-up. About a minute.</div><div class="a3" style="margin-top:50px">' + wordmark(150) + '</div><div class="a4 v-url" style="font-size:52px">Link in bio</div><div class="a5 v-sub" style="font-size:40px">scvd.app/duology</div></div>';
   }
   function scene916num(i, ns) {
