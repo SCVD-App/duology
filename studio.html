@@ -134,6 +134,7 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 .a-glyph{font-size:380px;line-height:1;color:var(--v-brass)}.a-txt{font-size:64px;line-height:1.35;max-width:900px;color:var(--v-ink)}
 .a-card-scene{align-items:flex-start;justify-content:center;padding:140px 100px}.a-num-sm{font-size:44px;letter-spacing:5px;text-transform:uppercase;color:var(--v-brass);font-weight:700}.a-ic{font-size:180px;line-height:1}
 .a-watch{margin-top:40px;font-size:50px;color:var(--v-muted);border-left:6px solid var(--v-accent);padding-left:30px}.a-watch b{color:var(--v-ink)}
+.s-kitwrap{border-color:var(--ui-accent,#7c8cff)}.s-kit{margin-top:12px}.s-kit-h{display:flex;align-items:center;gap:10px;margin-bottom:6px}.s-kit-h b{flex:1}.s-kit textarea{width:100%;font:13px/1.45 system-ui,sans-serif;resize:vertical}
 .m-cta{margin-top:50px;text-align:center;font-size:50px;line-height:1.35;color:var(--v-muted);max-width:900px;border:3px solid var(--v-accent);border-radius:34px;padding:34px 44px;background:var(--v-panel)}.m-cta b{display:block;font-family:var(--serif);font-size:84px;color:var(--v-accent);margin-bottom:8px}
 .w-glyphs{display:flex;gap:40px;font-size:150px;color:var(--v-brass)}.w-ev{gap:30px}.w-date{font-family:var(--serif);font-size:110px;font-weight:600;text-align:center;line-height:1}.w-date span{display:block;font-family:var(--sans);font-size:38px;letter-spacing:6px;text-transform:uppercase;color:var(--v-brass);font-weight:700;margin-bottom:10px}
 .w-plain{font-size:52px;line-height:1.35;text-align:center;max-width:900px}.w-signs{display:flex;flex-direction:column;gap:22px;width:100%}.w-sign{display:flex;align-items:center;gap:36px;background:var(--v-panel);border:2px solid var(--v-line);border-radius:30px;padding:26px 40px}.w-sign .g{font-size:110px;color:var(--v-accent);line-height:1;min-width:120px;text-align:center}.w-sign b{display:block;font-family:var(--serif);font-size:70px;font-weight:600}.w-sign span{font-size:42px;color:var(--v-muted)}
@@ -1598,6 +1599,77 @@ function buildWeekShort(weekOff) {
   parts.push({ id: 'cta', text: 'Comment your sign. Want your own week, from your exact birth chart? That’s Duology. Link in bio.' }); labels.push('CTA'); scenes.push({ t: 'cta' });
   return { scenes: scenes, start: start, end: end, range: range, events: evs, still: (W.still && (!evs.length || evs.length < 2)) ? W.still : null, lead: lead, feel: feel, parts: parts, labels: labels };
 }
+// ===== POST KIT: YouTube title/description/tags + Instagram caption for every Short =====
+var APP_URL = 'https://scvd-app.github.io/duology';
+var EV_TAG = { 'station|venus|rx': 'venusretrograde', 'station|mercury|rx': 'mercuryretrograde', 'station|mars|rx': 'marsretrograde', 'new': 'newmoon', 'full': 'fullmoon' };
+function evShort(e) { var t = e.sky.title; return t.replace(' turns retrograde', ' retrograde').replace(' goes direct', ' direct').replace(' moves into ', ' into '); }
+function pArt(p) { return (p === 'sun' || p === 'moon' ? 'the ' : '') + PLANETS[p].name; }
+function postKit(mode, o, sky) {
+  var yt = {}, ig = {}, L = [];
+  var disc = 'For reflection and entertainment.';
+  if (mode === 'week') {
+    var evs = (o.still ? [o.still] : []).concat(o.events), heads = evs.map(evShort);
+    var tagKey = o.lead ? (o.lead.type === 'station' ? 'station|' + o.lead.p + '|' + (o.lead.rx ? 'rx' : 'd') : o.lead.type) : '';
+    var feelN = o.feel.map(function (s) { return SIGNS[s].name; });
+    yt.title = heads.slice(0, 2).join(' + ') + ': your week, ' + o.range.replace(' to ', '–') + ' #shorts';
+    if (yt.title.length > 100) yt.title = heads[0] + ': your week, ' + o.range.replace(' to ', '–') + ' #shorts';
+    L = ['Your week in the sky, ' + o.range + '.', ''];
+    evs.forEach(function (e) { L.push((e === o.still ? 'Still running (since ' + dShort(e.ms) + '): ' : dayName(e.ms) + ' ' + dShort(e.ms) + ': ') + e.sky.title + '. ' + evPlain(e)); });
+    L.push('', 'Feeling it most: ' + feelN.join(', ') + '.', '', 'Comment your sign 👇', '', 'Want your own week, worked out from your exact birth chart? Duology is free to start:', APP_URL, '', disc, '', '#astrology #horoscope #shorts');
+    yt.tags = ['astrology', 'weekly horoscope', 'horoscope this week', 'astrology this week'].concat(heads.map(function (h) { return h.toLowerCase(); })).concat(feelN.map(function (n) { return n.toLowerCase() + ' horoscope'; })).concat(['zodiac', 'duology', 'shorts']);
+    ig.caption = 'Your week in the sky: ' + o.range.replace(' to ', '–') + ' 🪐\n\n' + evs.map(function (e) { return (e === o.still ? 'Still running: ' : dShort(e.ms) + ': ') + e.sky.title; }).join('\n') + '\n\nFeeling it most: ' + feelN.join(', ') + '.\n\nComment your sign 👇 Your own week from your exact birth chart → link in bio\n\n#astrology #weeklyhoroscope #' + (EV_TAG[tagKey] || 'zodiac') + ' #' + (EV_TAG[tagKey] ? 'zodiac' : 'horoscope') + ' #duology';
+  } else if (mode === 'arch' && !o.n) {
+    yt.title = 'Numerology in 60 seconds: everything comes down to one number #shorts';
+    L = ['Numerology has one rule: reduce it. Add the digits until there’s only one left.', '', 'House number 147 → 1 + 4 + 7 = 12 → 1 + 2 = 3. That’s a 3 house.', '', 'The nine archetypes and their ruling planets:', [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (k) { return k + ' ' + ARCH[k].name.replace('The ', '') + ' (' + PLANETS[ARCH[k].planet].name + ')'; }).join(' · '), '', 'Land on 11, 22 or 33? Stop there. Master numbers are supercharged versions of the 2, 4 and 6.', '', 'Comment your house number and I’ll tell you what you live in 👇', '', 'Mathing can be hard. Let the app do it for you, free:', APP_URL, '', disc, '', '#numerology #numerologyforbeginners #shorts'];
+    yt.tags = ['numerology', 'numerology for beginners', 'how numerology works', 'numerology explained', 'numerology numbers meaning', 'house number numerology', 'master numbers', 'life path number', 'numerology planets', 'duology', 'shorts'];
+    ig.caption = 'Numerology in one rule: reduce it ✨\n\nAdd the digits until there’s one left. House number 147 → 1+4+7 = 12 → 1+2 = 3. A 3 house.\n\nEvery number from 1 to 9 is an archetype with a ruling planet. 11, 22 and 33 are the supercharged master numbers.\n\nComment your house number 👇\n\nMathing can be hard. Let the app do it for you → link in bio\n\n#numerology #numerologyforbeginners #housenumber #spirituality #duology';
+  } else if (mode === 'arch') {
+    var A = ARCH[o.n], P = PLANETS[A.planet], nm = A.name.replace('The ', ''), PN = pArt(A.planet);
+    yt.title = 'The number ' + o.n + ' in numerology: ' + A.name + ' (money, love + happiness) #shorts';
+    L = ['The number ' + o.n + ': ' + A.name + ', ruled by ' + PN + '.' + (o.n > 9 ? ' A master number: a supercharged ' + A.root + '.' : ''), '', '💰 Money: ' + A.money, '❤️ Love: ' + A.love, '☀️ Happiness: ' + A.happy, 'Watch out for: ' + A.watch.charAt(0).toLowerCase() + A.watch.slice(1) + '.', '', 'Where to find your ' + o.n + 's: your Life Path, your Personal Year, your Birthday Number, even your house number. Reduce it, and if it lands on ' + o.n + ', that’s ' + o.n + ' energy.', '', 'Got ' + an(o.n) + ' ' + o.n + ' in your life? Comment where 👇', '', 'Mathing can be hard. Let the app do it for you, free:', APP_URL, '', disc, '', '#numerology #number' + o.n + ' #shorts'];
+    yt.tags = ['numerology', 'number ' + o.n + ' numerology', 'number ' + o.n + ' meaning', 'life path ' + o.n, 'numerology ' + o.n, nm.toLowerCase() + ' archetype', P.name.toLowerCase() + ' numerology', 'numerology money', 'numerology love', 'numerology for beginners', 'duology', 'shorts'];
+    if (o.n > 9) yt.tags.splice(5, 0, 'master number ' + o.n);
+    ig.caption = 'The number ' + o.n + ': ' + A.name + ' ' + P.glyph + '\n\nRuled by ' + PN + '.' + (o.n > 9 ? ' A master number, a supercharged ' + A.root + '.' : '') + '\n\n💰 ' + A.money + '\n❤️ ' + A.love + '\n☀️ ' + A.happy + '\n\nGot ' + an(o.n) + ' ' + o.n + ' in your life? Comment where 👇\nMathing can be hard. Let the app do it for you → link in bio\n\n#numerology #number' + o.n + ' #lifepath' + o.n + ' #spirituality #duology';
+  } else if (mode === 'num') {
+    var c = o.calc, Mon = c.Mon;
+    if (!o.which) {
+      yt.title = 'How to find your numbers (numerology for beginners) #shorts';
+      L = ['Numerology is just adding. Here’s how to find your Life Path, Personal Year and Personal Month.', '', 'Example: ' + c.name + ', born ' + c.d + ' ' + c.moName + ' ' + c.by + '.', 'Life Path: ' + c.dR.n + ' + ' + c.moR.n + ' + ' + c.byR.n + ' = ' + c.lp0 + (c.lp0 > 9 ? ' → ' + c.lpR.n : '') + '. Life Path ' + c.lpR.n + '.', 'Personal Year ' + c.y + ': ' + c.dR.n + ' + ' + c.moR.n + ' + ' + c.yR.n + ' = ' + c.py0 + (c.py0 > 9 ? ' → ' + c.pyR.n : '') + '.', 'Personal Month (' + Mon + '): ' + c.pyR.n + ' + ' + c.mR.n + ' = ' + c.pm0 + (c.pm0 > 9 ? ' → ' + c.pmR.n : '') + '.', '', 'Comment your ' + Mon + ' number and I’ll tell you what it means 👇', '', 'Mathing can be hard. Let the app do it for you, free:', APP_URL, '', disc, '', '#numerology #lifepath #shorts'];
+      yt.tags = ['numerology', 'how to calculate life path number', 'life path number', 'personal year number', 'personal month', 'numerology for beginners', 'numerology ' + c.y, Mon.toLowerCase() + ' ' + c.y + ' numerology', 'duology', 'shorts'];
+      ig.caption = 'How to find your numbers 🔢 (if you can add, you can do this)\n\nLife Path = day + month + birth year\nPersonal Year = day + month + ' + c.y + '\nPersonal Month = Personal Year + ' + Mon + '\nReduce each to one digit.\n\nComment your ' + Mon + ' number 👇\nMathing can be hard. Let the app do it for you → link in bio\n\n#numerology #lifepathnumber #personalyear #numerologyforbeginners #duology';
+    } else {
+      var T = PY_THEME[o.which];
+      yt.title = 'Personal Month ' + o.which + ' in ' + Mon + ': ' + T.title + ' #shorts';
+      L = ['In a Personal Month ' + o.which + ' this ' + Mon + '? Numerology reads it as ' + T.title.toLowerCase() + ': a month that wants ' + T.wants + '.', '', 'Quick check: reduce your birth day and birth month to one digit each, add them, add ' + c.yR.n + ' for ' + c.y + ', then ' + c.mR.n + ' for ' + Mon + '. Reduce to one digit.', '', 'Sound like your month? Comment below 👇', '', 'Mathing can be hard. Let the app do it for you, free:', APP_URL, '', disc, '', '#numerology #personalmonth #shorts'];
+      yt.tags = ['numerology', 'personal month ' + o.which, 'personal month number', Mon.toLowerCase() + ' numerology', 'numerology ' + o.which, 'personal year', 'duology', 'shorts'];
+      ig.caption = 'Personal Month ' + o.which + ' this ' + Mon + ': ' + T.title + ' ✨\n\nA month that wants ' + T.wants + '.\n\nSound like yours? Comment below 👇\nMathing can be hard. Let the app do it for you → link in bio\n\n#numerology #personalmonth #' + Mon.toLowerCase() + c.y + ' #lifepath #duology';
+    }
+  } else if (mode === 'bday') {
+    yt.title = 'Your birthday says more than your star sign does 👀 #shorts';
+    L = ['Your Birthday Number is just the day of the month you were born, reduced to one digit. Numerology reads it as the talent you came in with.', '', [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (k) { return k + ' ' + BDAY_SHORT[k]; }).join(' · '), 'Born on the 11th, 22nd or 29th? Master numbers: 11 ' + BDAY_SHORT[11] + ', 22 ' + BDAY_SHORT[22] + '.', '', 'Comment the day you were born 👇', '', 'Mathing can be hard. Let the app do it for you, free:', APP_URL, '', disc, '', '#numerology #birthdaynumber #shorts'];
+    yt.tags = ['numerology', 'birthday number', 'birthday number numerology', 'what does my birthday mean', 'numerology meanings', 'life path number', 'numerology for beginners', 'duology', 'shorts'];
+    ig.caption = 'Your Birthday Number: the talent you came in with ✨\n\nTake the day you were born and add the digits.\n\nComment the day you were born 👇\nMathing can be hard. Let the app do it for you → link in bio\n\n#numerology #birthdaynumber #numerologynumbers #astrologyandnumerology #duology';
+  } else if (mode === 'cz') {
+    yt.title = 'January baby? You’ve probably got the wrong Chinese zodiac animal 🐉 #shorts';
+    L = ['The Chinese year starts at Chinese New Year (21 Jan – 20 Feb), not 1 January. Born before it? You belong to the year before.', '', 'The twelve, in order: ' + CZ_ANIMALS.join(', ') + '.', '', 'Comment your animal 👇', '', 'Duology works it out from your exact birthday, free:', APP_URL, '', disc, '', '#chinesezodiac #chinesenewyear #shorts'];
+    yt.tags = ['chinese zodiac', 'chinese zodiac animals', 'what is my chinese zodiac', 'chinese new year', 'january birthday chinese zodiac', 'chinese astrology', 'duology', 'shorts'];
+    ig.caption = 'Born in January or early February? Check your Chinese animal again 👀\n\nThe Chinese year starts at Chinese New Year (21 Jan – 20 Feb). Born before it? You’re the year before.\n\nComment your animal 👇\n\n#chinesezodiac #chinesenewyear #chineseastrology #astrology #duology';
+  } else if (mode === 'tour') {
+    yt.title = 'Your stars + numbers, explained (and yes, your dog gets a chart too) #shorts';
+    L = ['Duology puts your real birth chart and your numerology side by side, in plain English.', '', 'Free: your birth chart, Sun, Moon + Rising, Life Path, Chinese animal, every sign every month.', 'Pro: every placement, your full reading + PDF, your year ahead, the whole family’s charts, and your pets.', '', 'One-off passes from US$3.99. No subscription, no auto-renewals, and a full refund in the first 14 days, no questions asked.', '', 'Start free:', APP_URL, '', '#astrology #numerology #shorts'];
+    yt.tags = ['astrology app', 'numerology app', 'birth chart', 'free birth chart', 'astrology and numerology', 'pet astrology', 'duology', 'shorts'];
+    ig.caption = 'Your stars and your numbers, finally explained ✨\n\nFree: your real birth chart, Big Three, Life Path, Chinese animal, every sign every month.\nPro: every placement, your full reading + PDF, the whole family’s charts… and your pets 🐕🐈\n\nOne-off passes from US$3.99. Nothing renews.\n\nStart free → link in bio\n\n#astrology #numerology #birthchart #zodiac #duology';
+  } else {
+    var S = SIGNS[o.si];
+    yt.title = S.name + ' ' + sky.label.split(' ')[0] + ' ' + sky.y + ' in under a minute ' + S.glyph + ' #shorts';
+    L = [S.name + ', here’s your ' + sky.label + ' in under a minute: your focus, key dates and recharge days.', '', 'Your own month, from your exact birth chart, free:', APP_URL, '', disc, '', '#' + S.name.toLowerCase() + ' #horoscope #shorts'];
+    yt.tags = [S.name.toLowerCase(), S.name.toLowerCase() + ' horoscope', S.name.toLowerCase() + ' ' + sky.label.toLowerCase(), 'horoscope ' + sky.label.toLowerCase(), 'astrology', 'zodiac', 'duology', 'shorts'];
+    ig.caption = S.name + ' ' + S.glyph + ' your ' + sky.label + ' in under a minute\n\nComment if this lands 👇 Your own month from your exact birth chart → link in bio\n\n#' + S.name.toLowerCase() + ' #horoscope #astrology #zodiac #duology';
+  }
+  yt.desc = L.join('\n');
+  var seen = {}; yt.tags = yt.tags.filter(function (t) { t = t.toLowerCase(); if (seen[t]) return false; seen[t] = 1; return true; });
+  return { yt: yt, ig: ig };
+}
 
 // ===== STUDIO APP START =====
 (function () {
@@ -2059,6 +2131,22 @@ function buildWeekShort(weekOff) {
       '<div class="s-stage" id="stage" data-w="1920" data-h="1080"><div class="s-canvas" style="width:1920px;height:1080px">' + scene16(s, sky()) + '</div></div>' +
       '<div class="s-voice"><b>Voiceover for this scene</b><p>' + esc(s.text) + '</p></div>' + voicePanel() + '</div>';
   }
+  function curKit() {
+    var m = ui.shortMode, o;
+    if (m === 'week' || m === 'arch' || m === 'bday' || m === 'cz' || m === 'tour') o = extraShort(m);
+    else if (m === 'num') o = numShort();
+    else o = { si: ui.shortSign };
+    return postKit(m, o, sky());
+  }
+  function kitPanel() {
+    var k = curKit(); ui.kit = k;
+    var box = function (lab, id, txt, rows, meta) { return '<div class="s-kit"><div class="s-kit-h"><b>' + lab + '</b>' + (meta ? '<span class="s-meta">' + meta + '</span>' : '') + '<button class="s-btn2" data-act="kitcopy:' + id + '">Copy</button></div><textarea readonly rows="' + rows + '">' + esc(txt) + '</textarea></div>'; };
+    return '<section class="s-sec s-kitwrap"><div class="s-sechead"><b>Post kit</b><span class="s-hint" style="margin:0">Ready to paste. Worked out from this Short, so it updates when you change month, week or number.</span></div>' +
+      box('YouTube title', 'title', k.yt.title, 2, k.yt.title.length + '/100') +
+      box('YouTube description', 'desc', k.yt.desc, 12) +
+      box('YouTube tags', 'tags', k.yt.tags.join(', '), 3, k.yt.tags.join(', ').length + '/500') +
+      box('Instagram caption', 'ig', k.ig.caption, 10, (k.ig.caption.match(/#/g) || []).length + ' hashtags (max 5)') + '</section>';
+  }
   function viewShorts() {
     var cs = curShort(), n = cs.parts.length, i = Math.min(ui.shortScene, n - 1), p = cs.parts[i], all = cs.parts.map(function (x) { return x.text; }).join(' ');
     var picker = ui.shortMode === 'week' ? [0, 1, 2, 3].map(function (k) { var st0 = weekStartOf(Date.now() + k * 7 * DAY_MS); return '<button data-act="wkoff:' + k + '" aria-pressed="' + (ui.weekOff === k) + '">' + (k === 0 ? 'This week' : k === 1 ? 'Next week' : 'Week of') + ' \u00B7 ' + dShort(st0) + '</button>'; }).join('') + '<p class="s-hint" style="margin:6px 0 0;width:100%">Weeks run Monday to Sunday. Post it Monday morning. The events come from the real sky, and the signs that feel it most come from the week\u2019s biggest event.</p>' : ui.shortMode === 'arch' ? ARCH_ORDER.map(function (k) { return '<button data-act="anum:' + k + '" aria-pressed="' + (ui.archN === k) + '">' + (k ? k + ' \u00B7 ' + ARCH[k].name.replace('The ', '') : 'Numerology 101') + '</button>'; }).join('') + '<p class="s-hint" style="margin:6px 0 0;width:100%">An evergreen series: start with Numerology 101, then one number at a time. Money, love, happiness and the ruling planet, then how to find that number in your own life.</p>' : ui.shortMode === 'tour' ? '<p class="s-hint" style="margin:0">The landing page as a Reel: free features, Pro, family, pets and the passes. Evergreen, so pin it to your profile and re-post it whenever you like.</p>' : ui.shortMode === 'bday' ? '<p class="s-hint" style="margin:0">Evergreen: one Short covers every birthday. The example day changes with the month, so you can re-post it.</p>' : ui.shortMode === 'cz' ? '<p class="s-hint" style="margin:0">Evergreen, with the New Year dates worked out from the real Sun and Moon. Great to post in January, ahead of Chinese New Year.</p>' : ui.shortMode === 'sign'
@@ -2073,7 +2161,7 @@ function buildWeekShort(weekOff) {
       voicePanel() + '<div class="s-dur ' + (secs <= 60 ? 'ok' : 'warn') + '">' + fmtDur(secs) + ' · ' + wordCount(all) + ' words (under 60s is the sweet spot)</div>' +
       cs.parts.map(function (x, k) { return '<section class="s-sec"><div class="s-sechead"><b>' + cs.labels[k] + '</b>' + (x.edited ? '<span class="s-edited">edited</span><button class="s-link" data-act="sreset:' + x.id + '">Reset</button>' : '') + '</div><textarea data-short="' + x.id + '" rows="' + Math.max(2, Math.ceil(x.text.length / 70)) + '">' + esc(x.text) + '</textarea></section>'; }).join('') +
       '<div class="s-actions"><button class="s-cta" data-act="copy-short">Copy this Short\u2019s script</button><button class="s-btn2" data-act="dl-shorts">' + (ui.shortMode === 'bday' || ui.shortMode === 'cz' || ui.shortMode === 'tour' || ui.shortMode === 'arch' || ui.shortMode === 'week' ? 'Download this script (.txt)' : 'Download all ' + (ui.shortMode === 'num' ? 'Numbers' : '12 sign') + ' Shorts scripts') + '</button></div>' +
-      '<p class="s-hint">These are 9:16, so the same recordings work as Instagram Reels and TikToks.</p></div></div></div>';
+      kitPanel() + '<p class="s-hint">These are 9:16, so the same recordings work as Instagram Reels and TikToks.</p></div></div></div>';
   }
   function viewYouTube(secs) {
     var pk = ytPackage(sky(), secs, st.wpm);
@@ -2132,6 +2220,7 @@ function buildWeekShort(weekOff) {
     else if (act === 'sreset') { var cs0 = curShort(); delete cs0.store[cs0.key + '|' + arg]; persist(); render(); }
     else if (act === 'ssign') { stopRun(); ui.shortSign = +arg; ui.shortScene = 0; render(); }
     else if (act === 'smode') { stopRun(); ui.shortMode = arg; ui.shortScene = 0; render(); }
+    else if (act === 'kitcopy') { var kk2 = ui.kit || curKit(); copy(arg === 'title' ? kk2.yt.title : arg === 'desc' ? kk2.yt.desc : arg === 'tags' ? kk2.yt.tags.join(', ') : kk2.ig.caption, el); }
     else if (act === 'wkoff') { stopRun(); ui.weekOff = +arg; ui.shortScene = 0; render(); }
     else if (act === 'anum') { stopRun(); ui.archN = +arg; ui.shortScene = 0; render(); }
     else if (act === 'nwhich') { stopRun(); ui.numWhich = +arg; ui.shortScene = 0; render(); }
