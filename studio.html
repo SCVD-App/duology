@@ -1136,6 +1136,25 @@ function skyMonth(y, m) {
   return sky;
 }
 
+// A rolling window of the sky (2 or 4 weeks), for the fortnightly sign Shorts
+var _winCache = {};
+function skyWindow(startMs, days) {
+  var key = startMs + '|' + days; if (_winCache[key]) return _winCache[key];
+  var end = startMs + days * DAY_MS, seen = {}, ev = [], d0 = new Date(startMs), d1 = new Date(end - 1);
+  var y = d0.getFullYear(), m = d0.getMonth() + 1;
+  while (y < d1.getFullYear() || (y === d1.getFullYear() && m <= d1.getMonth() + 1)) {
+    skyMonth(y, m).events.forEach(function (e) { var k = e.type + e.p + e.q + e.sign + Math.round(e.ms / 3600000); if (e.ms >= startMs && e.ms < end && !seen[k]) { seen[k] = 1; var c = {}; for (var f in e) c[f] = e[f]; ev.push(c); } });
+    m++; if (m > 12) { m = 1; y++; }
+  }
+  ev.sort(function (a, b) { return a.ms - b.ms; }); ev.forEach(function (e, i) { e.id = 'w' + i; });
+  var moon6 = []; for (var t6 = startMs; t6 < end; t6 += DAY_MS / 4) moon6.push({ ms: t6, sign: signOf(Astro.positions(Astro.jdFromMs(t6)).moon) });
+  var f = function (ms, mo) { return new Date(ms).getDate() + (mo ? ' ' + new Date(ms).toLocaleDateString('en-AU', { month: 'short' }) : ''); };
+  var sameM = d0.getMonth() === d1.getMonth();
+  var sky = { win: true, days: days, y: d0.getFullYear(), m: d0.getMonth() + 1, start: startMs, end: end, events: ev, moon6: moon6, um: universalMonth(d0.getFullYear(), d0.getMonth() + 1), mid: Astro.positions(Astro.jdFromMs((startMs + end) / 2)),
+    label: f(startMs, !sameM) + ' \u2013 ' + f(end - 1, true), spoken: d0.getDate() + (sameM ? '' : ' ' + d0.toLocaleDateString('en-AU', { month: 'long' })) + ' to ' + d1.getDate() + ' ' + d1.toLocaleDateString('en-AU', { month: 'long' }), span: days === 14 ? 'two weeks' : 'four weeks' };
+  _winCache[key] = sky; return sky;
+}
+
 function pName(p) { return PLANETS[p].name; }
 function dFmt(ms) { return new Date(ms).toLocaleDateString('en-AU', { day: 'numeric', month: 'long' }); }
 
@@ -1290,8 +1309,9 @@ function tzOffsetLabel() { var m = -new Date().getTimezoneOffset(), s = m < 0 ? 
 var EVERY = { jupiter: 'once a year or so', saturn: 'every two and a half years', uranus: 'every seven years', neptune: 'every fourteen years', pluto: 'once in a couple of decades' };
 function wordCount(t) { return (t.trim().match(/\S+/g) || []).length; }
 function lc1(t) { return /^(New|Full|Solar|Lunar|Numerology|A |An |The )/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t; }
-function spokenRange(r) {
+function spokenRange(r, ref) {
   var a = new Date(r.a), b = new Date(r.b);
+  if (ref && a.getMonth() !== new Date(ref).getMonth()) return 'the ' + ord(a.getDate()) + (a.getDate() === b.getDate() ? '' : ' to the ' + ord(b.getDate())) + ' of ' + monthName(r.a);
   return a.getDate() === b.getDate() ? 'the ' + ord(a.getDate()) : 'the ' + ord(a.getDate()) + (a.getMonth() !== b.getMonth() ? ' of ' + monthName(r.a) : '') + ' to the ' + ord(b.getDate());
 }
 function stripTags(t) { return t.replace(/<[^>]+>/g, '').replace(/(\d+)°(\d+)'/g, function (m, d) { return d + (d === '1' ? ' degree' : ' degrees'); }).replace(/(\d+)°/g, '$1 degrees'); }
@@ -1371,12 +1391,12 @@ function buildScript(sky, depthKey, order) {
 function buildShort(sky, si) {
   var r = signReading(sky, si), S = r.sign, Mon = monthName(sky.start);
   var p = [];
-  p.push({ id: 'hook', text: S.name + ', here’s your ' + Mon + ' in under a minute.' });
-  p.push({ id: 'theme', text: 'This month leans on your ' + ord(r.theme) + ' house: ' + HOUSES[r.theme].area + '. That’s where the sky is busiest for you.' });
-  var t2 = r.top.slice(0, 2); p.push({ id: 'items', text: t2.map(function (it, k) { var same = k && dayOrd(it.ms) === dayOrd(t2[0].ms); return (k ? (same ? 'Also on the ' : 'Then on the ') : 'On the ') + dayOrd(it.ms) + ', ' + lc1(it.title) + '. ' + it.read; }).join(' ') });
-  p.push({ id: 'cta', text: (r.rechargeRaw.length ? 'Your recharge days are ' + r.rechargeRaw.map(spokenRange).join(' and ') + '. ' : '') + 'That’s the general version for every ' + S.name + '. For yours, built on your exact birth chart, get Duology. The link’s in the bio.' });
+  p.push({ id: 'hook', text: sky.win ? S.name + ', here’s your next ' + sky.span + ', ' + sky.spoken + ', in under a minute.' : S.name + ', here’s your ' + Mon + ' in under a minute.' });
+  p.push({ id: 'theme', text: (sky.win ? 'These ' + sky.span + ' lean' : 'This month leans') + ' on your ' + ord(r.theme) + ' house: ' + HOUSES[r.theme].area + '. That’s where the sky is busiest for you.' });
+  var t2 = r.items.slice().sort(function (a, b) { return b.score - a.score || a.ms - b.ms; }).slice(0, 2).sort(function (a, b) { return a.ms - b.ms; }); p.push({ id: 'items', text: t2.map(function (it, k) { var same = k && dayOrd(it.ms) === dayOrd(t2[0].ms); return (k ? (same ? 'Also on the ' : 'Then on the ') : 'On the ') + dayOrd(it.ms) + ', ' + lc1(it.title) + '. ' + it.read; }).join(' ') });
+  p.push({ id: 'cta', text: (r.rechargeRaw.length ? 'Your recharge days are ' + r.rechargeRaw.map(function (x) { return spokenRange(x, sky.win ? sky.start : null); }).join(' and ') + '. ' : '') + 'That’s the general version for every ' + S.name + '. For yours, built on your exact birth chart, get Duology. The link’s in the bio.' });
   p.forEach(function (x) { x.text = stripTags(x.text); });
-  return { r: r, parts: p };
+  return { r: r, parts: p, t2: t2 };
 }
 
 function fmtDur(sec) { sec = Math.round(sec); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
@@ -1660,11 +1680,12 @@ function postKit(mode, o, sky) {
     yt.tags = ['astrology app', 'numerology app', 'birth chart', 'free birth chart', 'astrology and numerology', 'pet astrology', 'duology', 'shorts'];
     ig.caption = 'Your stars and your numbers, finally explained ✨\n\nFree: your real birth chart, Big Three, Life Path, Chinese animal, every sign every month.\nPro: every placement, your full reading + PDF, the whole family’s charts… and your pets 🐕🐈\n\nOne-off passes from US$3.99. Nothing renews.\n\nStart free → link in bio\n\n#astrology #numerology #birthchart #zodiac #duology';
   } else {
-    var S = SIGNS[o.si];
-    yt.title = S.name + ' ' + sky.label.split(' ')[0] + ' ' + sky.y + ' in under a minute ' + S.glyph + ' #shorts';
-    L = [S.name + ', here’s your ' + sky.label + ' in under a minute: your focus, key dates and recharge days.', '', 'Your own month, from your exact birth chart, free:', APP_URL, '', disc, '', '#' + S.name.toLowerCase() + ' #horoscope #shorts'];
-    yt.tags = [S.name.toLowerCase(), S.name.toLowerCase() + ' horoscope', S.name.toLowerCase() + ' ' + sky.label.toLowerCase(), 'horoscope ' + sky.label.toLowerCase(), 'astrology', 'zodiac', 'duology', 'shorts'];
-    ig.caption = S.name + ' ' + S.glyph + ' your ' + sky.label + ' in under a minute\n\nComment if this lands 👇 Your own month from your exact birth chart → link in bio\n\n#' + S.name.toLowerCase() + ' #horoscope #astrology #zodiac #duology';
+    var S = SIGNS[o.si], per = sky.win ? 'next ' + sky.span + ' (' + sky.label + ')' : sky.label, sn = S.name.toLowerCase();
+    var mlab = new Date(sky.start).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' }).toLowerCase();
+    yt.title = sky.win ? S.name + ': your next ' + sky.span + ', ' + sky.label + ' ' + S.glyph + ' #shorts' : S.name + ' ' + sky.label.split(' ')[0] + ' ' + sky.y + ' in under a minute ' + S.glyph + ' #shorts';
+    L = [S.name + ', here\u2019s your ' + per + ' in under a minute: your focus, key dates and recharge days.', '', 'Your own forecast, from your exact birth chart, free:', APP_URL, '', disc, '', '#' + sn + ' #horoscope #shorts'];
+    yt.tags = [sn, sn + ' horoscope', sn + ' ' + mlab, 'horoscope ' + mlab].concat(sky.win ? [sn + ' next ' + sky.span, sn + ' fortnight horoscope', 'fortnightly horoscope'] : []).concat(['astrology', 'zodiac', 'duology', 'shorts']);
+    ig.caption = S.name + ' ' + S.glyph + ' your ' + per + ' in under a minute\n\nComment if this lands \uD83D\uDC47 Your own forecast from your exact birth chart \u2192 link in bio\n\n#' + sn + ' #horoscope #astrology #zodiac #duology';
   }
   yt.desc = L.join('\n');
   var seen = {}; yt.tags = yt.tags.filter(function (t) { t = t.toLowerCase(); if (seen[t]) return false; seen[t] = 1; return true; });
@@ -1686,6 +1707,8 @@ function postKit(mode, o, sky) {
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function mkey() { return ui.y + '-' + ui.m; }
   function sky() { return skyMonth(ui.y, ui.m); }
+  function signSky() { var per = ui.signPer || 'month'; return per === 'month' ? sky() : skyWindow(weekStartOf(Date.now()) + (ui.signOff || 0) * 7 * DAY_MS, per === '2w' ? 14 : 28); }
+  function signKey() { var S = signSky(); return S.win ? 'w' + S.start + '-' + S.days : mkey(); }
   function sections() {
     var secs = buildScript(sky(), st.depth, st.order), k = mkey();
     secs.forEach(function (s) { s.generated = s.text; var e = st.edits[k + '|' + s.id]; if (e != null) { s.text = e; s.edited = true; } });
@@ -1694,7 +1717,7 @@ function postKit(mode, o, sky) {
   function secDur(s) { return Math.max(4, wordCount(s.text) / st.wpm * 60); }
   // ---------- voice files + playback engine + recorder ----------
   var audioSets = {}, audioCtx = null, run = null, recording = null;
-  function audioKey() { return ui.tab === 'video' ? 'v|' + mkey() : (ui.shortMode === 'num' ? 'n|' + mkey() + '|' + ui.numWhich : ui.shortMode === 'bday' ? 'b|' + mkey() : ui.shortMode === 'cz' ? 'c|' + mkey() : ui.shortMode === 'tour' ? 't|' + mkey() : ui.shortMode === 'arch' ? 'a|' + mkey() + '|' + ui.archN : ui.shortMode === 'week' ? 'w|' + weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS) : 's|' + mkey() + '|' + ui.shortSign); }
+  function audioKey() { return ui.tab === 'video' ? 'v|' + mkey() : (ui.shortMode === 'num' ? 'n|' + mkey() + '|' + ui.numWhich : ui.shortMode === 'bday' ? 'b|' + mkey() : ui.shortMode === 'cz' ? 'c|' + mkey() : ui.shortMode === 'tour' ? 't|' + mkey() : ui.shortMode === 'arch' ? 'a|' + mkey() + '|' + ui.archN : ui.shortMode === 'week' ? 'w|' + weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS) : 's|' + signKey() + '|' + ui.shortSign); }
   function curAudio() { return audioSets[audioKey()] || []; }
   function sceneCount() { return ui.tab === 'video' ? secsCache.length : curShort().parts.length; }
   function curIndex() { return ui.tab === 'video' ? ui.scene : ui.shortScene; }
@@ -1785,7 +1808,7 @@ function postKit(mode, o, sky) {
   }
   function recName(ext) {
     if (ui.tab === 'video') return 'duology-' + mkey() + '-forecast.' + ext;
-    return 'duology-' + mkey() + '-short-' + (ui.shortMode === 'num' ? (ui.numWhich ? 'month-' + ui.numWhich : 'numbers') : ui.shortMode === 'bday' ? 'birthday-number' : ui.shortMode === 'cz' ? 'chinese-zodiac' : ui.shortMode === 'tour' ? 'app-tour' : ui.shortMode === 'arch' ? (ui.archN ? 'number-' + ui.archN : 'numerology-101') : ui.shortMode === 'week' ? 'week-' + new Date(weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS)).toISOString().slice(0, 10) : SIGNS[ui.shortSign].name.toLowerCase()) + '.' + ext;
+    return 'duology-' + mkey() + '-short-' + (ui.shortMode === 'num' ? (ui.numWhich ? 'month-' + ui.numWhich : 'numbers') : ui.shortMode === 'bday' ? 'birthday-number' : ui.shortMode === 'cz' ? 'chinese-zodiac' : ui.shortMode === 'tour' ? 'app-tour' : ui.shortMode === 'arch' ? (ui.archN ? 'number-' + ui.archN : 'numerology-101') : ui.shortMode === 'week' ? 'week-' + new Date(weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS)).toISOString().slice(0, 10) : SIGNS[ui.shortSign].name.toLowerCase() + (signSky().win ? '-' + new Date(signSky().start).toISOString().slice(5, 10) + '-' + signSky().days + 'd' : '')) + '.' + ext;
   }
   function finishRecording(msg) {
     if (!recording || !recording.rec) return;
@@ -1871,7 +1894,7 @@ function postKit(mode, o, sky) {
       '<p class="s-hint">How it works: click Record, pick <b>This tab</b> when Chrome asks, then hands off. The Studio goes full screen, plays every scene in time with Scotty, and downloads the finished video when it’s done. Keep this tab on screen while it records, and press F11 first for the sharpest picture. Press Esc to stop early.</p></div>';
   }
   function short() {
-    var sh = buildShort(sky(), ui.shortSign), k = mkey() + '|' + ui.shortSign;
+    var sh = buildShort(signSky(), ui.shortSign), k = signKey() + '|' + ui.shortSign;
     sh.parts.forEach(function (p) { p.generated = p.text; var e = st.shortEdits[k + '|' + p.id]; if (e != null) { p.text = e; p.edited = true; } });
     return sh;
   }
@@ -1890,8 +1913,8 @@ function postKit(mode, o, sky) {
   function curShort() {
     if (ui.shortMode === 'bday' || ui.shortMode === 'cz' || ui.shortMode === 'tour' || ui.shortMode === 'arch' || ui.shortMode === 'week') { var xs = extraShort(ui.shortMode); return { parts: xs.parts, labels: xs.labels, scene: function (i) { return ui.shortMode === 'bday' ? scene916bday(i, xs) : ui.shortMode === 'tour' ? scene916tour(i, xs) : ui.shortMode === 'arch' ? scene916arch(i, xs) : ui.shortMode === 'week' ? scene916week(i, xs) : scene916cz(i, xs); }, store: xs.store, key: xs.key, name: ui.shortMode === 'bday' ? 'Birthday Number' : ui.shortMode === 'tour' ? 'App tour' : ui.shortMode === 'arch' ? (ui.archN ? 'Number ' + ui.archN : 'Numerology 101') : ui.shortMode === 'week' ? 'Week of ' + xs.range : 'Chinese zodiac' }; }
     if (ui.shortMode === 'num') { var ns = numShort(); return { parts: ns.parts, labels: ns.labels, scene: function (i) { return scene916num(i, ns); }, store: st.numEdits, key: mkey() + '|n' + ui.numWhich, name: ui.numWhich ? 'Personal Month ' + ui.numWhich : 'All numbers' }; }
-    var sh = short(), S = sky();
-    return { parts: sh.parts, labels: ['Hook', 'Focus', 'Key dates', 'Recharge + CTA'], scene: function (i) { return scene916(i, sh, S); }, store: st.shortEdits, key: mkey() + '|' + ui.shortSign, name: SIGNS[ui.shortSign].name };
+    var sh = short(), S = signSky();
+    return { parts: sh.parts, labels: ['Hook', 'Focus', 'Key dates', 'Recharge + CTA'], scene: function (i) { return scene916(i, sh, S); }, store: st.shortEdits, key: signKey() + '|' + ui.shortSign, name: SIGNS[ui.shortSign].name };
   }
   function download(name, text) {
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' })); a.download = name; document.body.appendChild(a); a.click();
@@ -1976,10 +1999,10 @@ function postKit(mode, o, sky) {
   }
   // ---------- scenes (9:16, 1080x1920) ----------
   function scene916(i, sh, S) {
-    var r = sh.r, Sg = r.sign, Mon = d(S.start, { month: 'long' }), hl = {}; r.top.forEach(function (t) { t.houses.forEach(function (h) { hl[h] = hl[h] || 1; }); }); hl[r.theme] = 2;
-    if (i === 0) return '<div class="v v-tall"><div class="a1 v-signglyph" style="font-size:420px">' + Sg.glyph + VS + '</div><div class="a2 v-h1" style="font-size:150px;text-align:center">' + Sg.name + '</div><div class="a3 v-sub" style="font-size:64px">' + Mon + ' in under a minute</div><div class="a4" style="margin-top:80px">' + wordmark(90) + '</div></div>';
+    var r = sh.r, Sg = r.sign, Mon = S.win ? S.label : d(S.start, { month: 'long' }), hl = {}; r.top.forEach(function (t) { t.houses.forEach(function (h) { hl[h] = hl[h] || 1; }); }); hl[r.theme] = 2;
+    if (i === 0) return '<div class="v v-tall"><div class="v-signglyph" style="font-size:420px">' + Sg.glyph + VS + '</div><div class="v-h1" style="font-size:150px;text-align:center">' + Sg.name + '</div><div class="a3 v-sub" style="font-size:64px;text-align:center">' + (S.win ? 'Your next ' + (S.days === 14 ? '2' : '4') + ' weeks<br>' + S.label : Mon + ' in under a minute') + '</div><div class="a4" style="margin-top:80px">' + wordmark(90) + '</div></div>';
     if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">Your focus</div><div class="a2 v-h1" style="text-align:center;font-size:92px">Your ' + ord(r.theme) + ' house</div><div class="a3 v-sub" style="font-size:60px;text-align:center">' + HOUSE_SHORT[r.theme] + '</div><div class="a4" style="margin-top:60px">' + ringSVG(r.si, hl, 820) + '</div></div>';
-    if (i === 2) return '<div class="v v-tall" style="justify-content:flex-start;padding-top:260px"><div class="a1 v-kicker">Key dates</div>' + r.top.slice(0, 2).map(function (t, k) { return '<div class="a' + (k + 2) + ' v-ev v-ev-tall"><div class="v-evd"><span>' + d(t.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(t.ms).getDate() + '</div><div><b>' + esc(t.title) + '</b><div>' + esc(t.read) + '</div></div></div>'; }).join('') + '</div>';
+    if (i === 2) return '<div class="v v-tall" style="justify-content:flex-start;padding-top:260px"><div class="a1 v-kicker">Key dates</div>' + (sh.t2 || r.top.slice(0, 2)).map(function (t, k) { return '<div class="a' + (k + 2) + ' v-ev v-ev-tall"><div class="v-evd"><span>' + d(t.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(t.ms).getDate() + '</div><div><b>' + esc(t.title) + '</b><div>' + esc(t.read) + '</div></div></div>'; }).join('') + '</div>';
     return '<div class="v v-tall">' + (r.recharge.length ? '<div class="a1 v-kicker">Recharge days</div><div class="a2 v-h1" style="font-size:110px;text-align:center">' + r.recharge.join('<br>') + '</div>' : '') + '<div class="a3" style="margin-top:120px">' + wordmark(130) + '</div><div class="a4 v-sub" style="font-size:54px;text-align:center">Your version, built on your exact birth chart</div><div class="a5 v-url" style="font-size:44px">Link in bio</div></div>';
   }
 
@@ -2136,7 +2159,7 @@ function postKit(mode, o, sky) {
     if (m === 'week' || m === 'arch' || m === 'bday' || m === 'cz' || m === 'tour') o = extraShort(m);
     else if (m === 'num') o = numShort();
     else o = { si: ui.shortSign };
-    return postKit(m, o, sky());
+    return postKit(m, o, m === 'sign' ? signSky() : sky());
   }
   function kitPanel() {
     var k = curKit(); ui.kit = k;
@@ -2150,7 +2173,7 @@ function postKit(mode, o, sky) {
   function viewShorts() {
     var cs = curShort(), n = cs.parts.length, i = Math.min(ui.shortScene, n - 1), p = cs.parts[i], all = cs.parts.map(function (x) { return x.text; }).join(' ');
     var picker = ui.shortMode === 'week' ? [0, 1, 2, 3].map(function (k) { var st0 = weekStartOf(Date.now() + k * 7 * DAY_MS); return '<button data-act="wkoff:' + k + '" aria-pressed="' + (ui.weekOff === k) + '">' + (k === 0 ? 'This week' : k === 1 ? 'Next week' : 'Week of') + ' \u00B7 ' + dShort(st0) + '</button>'; }).join('') + '<p class="s-hint" style="margin:6px 0 0;width:100%">Weeks run Monday to Sunday. Post it Monday morning. The events come from the real sky, and the signs that feel it most come from the week\u2019s biggest event.</p>' : ui.shortMode === 'arch' ? ARCH_ORDER.map(function (k) { return '<button data-act="anum:' + k + '" aria-pressed="' + (ui.archN === k) + '">' + (k ? k + ' \u00B7 ' + ARCH[k].name.replace('The ', '') : 'Numerology 101') + '</button>'; }).join('') + '<p class="s-hint" style="margin:6px 0 0;width:100%">An evergreen series: start with Numerology 101, then one number at a time. Money, love, happiness and the ruling planet, then how to find that number in your own life.</p>' : ui.shortMode === 'tour' ? '<p class="s-hint" style="margin:0">The landing page as a Reel: free features, Pro, family, pets and the passes. Evergreen, so pin it to your profile and re-post it whenever you like.</p>' : ui.shortMode === 'bday' ? '<p class="s-hint" style="margin:0">Evergreen: one Short covers every birthday. The example day changes with the month, so you can re-post it.</p>' : ui.shortMode === 'cz' ? '<p class="s-hint" style="margin:0">Evergreen, with the New Year dates worked out from the real Sun and Moon. Great to post in January, ahead of Chinese New Year.</p>' : ui.shortMode === 'sign'
-      ? SIGNS.map(function (x, k) { return '<button data-act="ssign:' + k + '" aria-pressed="' + (ui.shortSign === k) + '">' + x.glyph + VS + ' ' + x.name + '</button>'; }).join('')
+      ? '<div class="s-signs" style="width:100%;margin-bottom:6px">' + [['month', 'Monthly'], ['2w', 'Next 2 weeks'], ['4w', 'Next 4 weeks']].map(function (x) { return '<button data-act="sper:' + x[0] + '" aria-pressed="' + ((ui.signPer || 'month') === x[0]) + '">' + x[1] + '</button>'; }).join('') + ((ui.signPer || 'month') !== 'month' ? [0, 1].map(function (k) { return '<button data-act="soff:' + k + '" aria-pressed="' + ((ui.signOff || 0) === k) + '">From ' + (k ? 'next' : 'this') + ' Monday \u00B7 ' + dShort(weekStartOf(Date.now()) + k * 7 * DAY_MS) + '</button>'; }).join('') + '<span class="s-hint" style="margin:0 0 0 8px;align-self:center">' + signSky().label + '</span>' : '') + '</div>' + SIGNS.map(function (x, k) { return '<button data-act="ssign:' + k + '" aria-pressed="' + (ui.shortSign === k) + '">' + x.glyph + VS + ' ' + x.name + '</button>'; }).join('')
       : '<button data-act="nwhich:0" aria-pressed="' + (ui.numWhich === 0) + '">All 9 (work it out)</button>' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (k) { return '<button data-act="nwhich:' + k + '" aria-pressed="' + (ui.numWhich === k) + '">Month ' + k + '</button>'; }).join('');
     var secs = all.length ? wordCount(all) / st.wpm * 60 : 0;
     return '<div class="s-pad"><div class="s-signs" style="margin-bottom:10px"><button data-act="smode:sign" aria-pressed="' + (ui.shortMode === 'sign') + '">Star sign Shorts</button><button data-act="smode:week" aria-pressed="' + (ui.shortMode === 'week') + '">Your week</button><button data-act="smode:num" aria-pressed="' + (ui.shortMode === 'num') + '">Numbers Shorts</button><button data-act="smode:bday" aria-pressed="' + (ui.shortMode === 'bday') + '">Birthday Number</button><button data-act="smode:cz" aria-pressed="' + (ui.shortMode === 'cz') + '">Chinese zodiac</button><button data-act="smode:tour" aria-pressed="' + (ui.shortMode === 'tour') + '">App tour</button><button data-act="smode:arch" aria-pressed="' + (ui.shortMode === 'arch') + '">Number archetypes</button></div>' +
@@ -2221,6 +2244,8 @@ function postKit(mode, o, sky) {
     else if (act === 'ssign') { stopRun(); ui.shortSign = +arg; ui.shortScene = 0; render(); }
     else if (act === 'smode') { stopRun(); ui.shortMode = arg; ui.shortScene = 0; render(); }
     else if (act === 'kitcopy') { var kk2 = ui.kit || curKit(); copy(arg === 'title' ? kk2.yt.title : arg === 'desc' ? kk2.yt.desc : arg === 'tags' ? kk2.yt.tags.join(', ') : kk2.ig.caption, el); }
+    else if (act === 'sper') { stopRun(); ui.signPer = arg; ui.shortScene = 0; render(); }
+    else if (act === 'soff') { stopRun(); ui.signOff = +arg; ui.shortScene = 0; render(); }
     else if (act === 'wkoff') { stopRun(); ui.weekOff = +arg; ui.shortScene = 0; render(); }
     else if (act === 'anum') { stopRun(); ui.archN = +arg; ui.shortScene = 0; render(); }
     else if (act === 'nwhich') { stopRun(); ui.numWhich = +arg; ui.shortScene = 0; render(); }
