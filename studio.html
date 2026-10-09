@@ -1418,7 +1418,7 @@ function ytPackage(sky, secs, wpm) {
     (lead ? lead.sky.title + '! ' : '') + 'What ' + Mon + ' Means for Your Sign'
   ];
   var desc = 'Your ' + Mon + ' ' + sky.y + ' forecast for every star sign, worked out from where the planets actually are, with the why behind every call. No glyphs, no gatekeeping.\n\n' +
-    'Get the version built on YOUR exact birth chart, with your own houses and dates: https://scvd-app.github.io/duology/\n\n' +
+    'Get the version built on YOUR exact birth chart, with your own houses and dates: https://scvd.app/duology\n\n' +
     'Chapters\n' + chapters.join('\n') + '\n\n' +
     'Dates are in ' + tzCity() + ' time (' + tzOffsetLabel() + '). If you\u2019re in the Americas or Europe, some events land the day before for you. This video is for reflection and entertainment, not a prediction. Narration is AI-generated. The script and all calculations are our own.\n\n' +
     '#astrology #horoscope #numerology #' + Mon.toLowerCase() + sky.y;
@@ -1620,7 +1620,7 @@ function buildWeekShort(weekOff) {
   return { scenes: scenes, start: start, end: end, range: range, events: evs, still: (W.still && (!evs.length || evs.length < 2)) ? W.still : null, lead: lead, feel: feel, parts: parts, labels: labels };
 }
 // ===== POST KIT: YouTube title/description/tags + Instagram caption for every Short =====
-var APP_URL = 'https://scvd-app.github.io/duology';
+var APP_URL = 'https://scvd.app/duology';
 var EV_TAG = { 'station|venus|rx': 'venusretrograde', 'station|mercury|rx': 'mercuryretrograde', 'station|mars|rx': 'marsretrograde', 'new': 'newmoon', 'full': 'fullmoon' };
 function evShort(e) { var t = e.sky.title; return t.replace(' turns retrograde', ' retrograde').replace(' goes direct', ' direct').replace(' moves into ', ' into '); }
 function pArt(p) { return (p === 'sun' || p === 'moon' ? 'the ' : '') + PLANETS[p].name; }
@@ -1808,7 +1808,7 @@ function postKit(mode, o, sky) {
   }
   function recName(ext) {
     if (ui.tab === 'video') return 'duology-' + mkey() + '-forecast.' + ext;
-    return 'duology-' + mkey() + '-short-' + (ui.shortMode === 'num' ? (ui.numWhich ? 'month-' + ui.numWhich : 'numbers') : ui.shortMode === 'bday' ? 'birthday-number' : ui.shortMode === 'cz' ? 'chinese-zodiac' : ui.shortMode === 'tour' ? 'app-tour' : ui.shortMode === 'arch' ? (ui.archN ? 'number-' + ui.archN : 'numerology-101') : ui.shortMode === 'week' ? 'week-' + new Date(weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS)).toISOString().slice(0, 10) : SIGNS[ui.shortSign].name.toLowerCase() + (signSky().win ? '-' + new Date(signSky().start).toISOString().slice(5, 10) + '-' + signSky().days + 'd' : '')) + '.' + ext;
+    return 'duology-' + mkey() + '-short-' + (ui.shortMode === 'num' ? (ui.numWhich ? 'month-' + ui.numWhich : 'numbers') : ui.shortMode === 'bday' ? 'birthday-number' : ui.shortMode === 'cz' ? 'chinese-zodiac' : ui.shortMode === 'tour' ? 'app-tour' : ui.shortMode === 'arch' ? (ui.archN ? 'number-' + ui.archN : 'numerology-101') : ui.shortMode === 'week' ? 'week-' + new Date(weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS)).getFullYear() + '-' + localMD(weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS)) : SIGNS[ui.shortSign].name.toLowerCase() + (signSky().win ? '-' + localMD(signSky().start) + '-' + signSky().days + 'd' : '')) + '.' + ext;
   }
   function finishRecording(msg) {
     if (!recording || !recording.rec) return;
@@ -1994,7 +1994,7 @@ function postKit(mode, o, sky) {
         r.top.slice(0, 2).map(function (t, i) { return '<div class="a' + (i + 3) + ' v-ev"><div class="v-evd"><span>' + d(t.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(t.ms).getDate() + '</div><div><b>' + esc(t.title) + '</b><div>' + esc(t.read) + '</div></div></div>'; }).join('') +
         (r.recharge.length ? '<div class="a6 v-recharge"><b>Recharge days</b> ' + r.recharge.join(', ') + '</div>' : '') + '</div></div>';
     }
-    if (sc.type === 'cta') return '<div class="v v-center"><div class="a1 v-kicker">That’s the general weather for your sign</div><div class="a2 v-h1" style="text-align:center;font-size:96px;max-width:1500px">Your chart is your street,<br>not your state.</div><div class="a3" style="margin-top:40px">' + wordmark(120) + '</div><div class="a4 v-sub">Your exact birth chart, houses and dates · link in the description</div><div class="a5 v-url">scvd-app.github.io/duology</div></div>';
+    if (sc.type === 'cta') return '<div class="v v-center"><div class="a1 v-kicker">That’s the general weather for your sign</div><div class="a2 v-h1" style="text-align:center;font-size:96px;max-width:1500px">Your chart is your street,<br>not your state.</div><div class="a3" style="margin-top:40px">' + wordmark(120) + '</div><div class="a4 v-sub">Your exact birth chart, houses and dates · link in the description</div><div class="a5 v-url">scvd.app/duology</div></div>';
     return '';
   }
   // ---------- scenes (9:16, 1080x1920) ----------
@@ -2161,6 +2161,47 @@ function postKit(mode, o, sky) {
     else o = { si: ui.shortSign };
     return postKit(m, o, m === 'sign' ? signSky() : sky());
   }
+  // ---------- thumbnails (canvas, so they download as real PNGs) ----------
+  function localMD(ms) { var d = new Date(ms); return String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function cssVar(n, fb) { var v = getComputedStyle(document.documentElement).getPropertyValue(n).trim(); return v || fb; }
+  function drawCover(si, S, W, H) {
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H; var g = cv.getContext('2d');
+    var bg = cssVar('--v-bg', '#14131A'), ink = cssVar('--v-ink', '#EEEAF2'), mut = cssVar('--v-muted', '#B3ADBF'), acc = cssVar('--v-accent', '#A9B6FF');
+    var serif = "'Fraunces', Georgia, serif", sans = "'Instrument Sans', 'Segoe UI', system-ui, sans-serif", glyphFont = "'Segoe UI Symbol', 'Noto Sans Symbols', 'Apple Symbols', 'DejaVu Sans', sans-serif";
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    var rg = g.createRadialGradient(W / 2, H * 0.36, 0, W / 2, H * 0.36, Math.max(W, H) * 0.55); rg.addColorStop(0, 'rgba(169,182,255,0.14)'); rg.addColorStop(1, 'rgba(169,182,255,0)'); g.fillStyle = rg; g.fillRect(0, 0, W, H);
+    var Sg = SIGNS[si], glyph = Sg.glyph + '\uFE0E';
+    var sub1 = S.win ? 'Your next ' + (S.days === 14 ? '2' : '4') + ' weeks' : new Date(S.start).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+    var sub2 = S.win ? S.label : 'in under a minute';
+    function word(x, y, size, align) { g.textBaseline = 'alphabetic'; g.font = '600 ' + size + 'px ' + serif; var a = 'Du', b = 'ology'; g.font = '600 ' + size + 'px ' + serif; var wa = g.measureText(a).width; g.font = 'italic 500 ' + size + 'px ' + serif; var wb = g.measureText(b).width; var x0 = align === 'left' ? x : x - (wa + wb) / 2; g.textAlign = 'left'; g.font = '600 ' + size + 'px ' + serif; g.fillStyle = ink; g.fillText(a, x0, y); g.font = 'italic 500 ' + size + 'px ' + serif; g.fillStyle = acc; g.fillText(b, x0 + wa, y); }
+    g.textBaseline = 'middle';
+    if (H > W) {
+      g.textAlign = 'center'; g.fillStyle = acc; g.font = '420px ' + glyphFont; g.fillText(glyph, W / 2, H * 0.33);
+      g.fillStyle = ink; g.font = '600 170px ' + serif; g.fillText(Sg.name, W / 2, H * 0.53);
+      g.fillStyle = mut; g.font = '500 72px ' + sans; g.fillText(sub1, W / 2, H * 0.62); g.fillText(sub2, W / 2, H * 0.665);
+      word(W / 2, H * 0.78, 110, 'center');
+    } else {
+      g.textAlign = 'center'; g.fillStyle = acc; g.font = '330px ' + glyphFont; g.fillText(glyph, W * 0.27, H * 0.5);
+      g.textAlign = 'left'; var x = W * 0.5;
+      g.fillStyle = ink; g.font = '600 130px ' + serif; g.fillText(Sg.name, x, H * 0.33);
+      g.fillStyle = mut; g.font = '500 52px ' + sans; g.fillText(sub1, x, H * 0.53); g.fillText(sub2, x, H * 0.62);
+      word(x, H * 0.85, 76, 'left');
+    }
+    return cv;
+  }
+  function thumbName(si, S, W, H) { return 'duology-thumb-' + SIGNS[si].name.toLowerCase() + '-' + (S.win ? localMD(S.start) + '-' + S.days + 'd' : mkey()) + '-' + (H > W ? '9x16' : '16x9') + '.png'; }
+  function saveThumb(si, W, H) {
+    var S = signSky();
+    return Promise.all([document.fonts.load("600 170px 'Fraunces'"), document.fonts.load("italic 500 110px 'Fraunces'"), document.fonts.load("500 72px 'Instrument Sans'")]).catch(function () {}).then(function () {
+      var cv = drawCover(si, S, W, H);
+      return new Promise(function (res) { cv.toBlob(function (b) { downloadBlob(thumbName(si, S, W, H), b); res(); }, 'image/png'); });
+    });
+  }
+  function thumbPanel() {
+    if (ui.shortMode !== 'sign') return '';
+    return '<section class="s-sec s-kitwrap"><div class="s-sechead"><b>Thumbnails</b><span class="s-hint" style="margin:0">Upload as a custom thumbnail on YouTube, or as the cover on Instagram, so it always shows the glyph.</span></div>' +
+      '<div class="s-actions" style="margin-top:8px"><button class="s-cta" data-act="thumb:916">This sign \u00B7 9:16</button><button class="s-btn2" data-act="thumb:169">This sign \u00B7 16:9</button><button class="s-btn2" data-act="thumb:all">All 12 signs \u00B7 9:16</button></div></section>';
+  }
   function kitPanel() {
     var k = curKit(); ui.kit = k;
     var box = function (lab, id, txt, rows, meta) { return '<div class="s-kit"><div class="s-kit-h"><b>' + lab + '</b>' + (meta ? '<span class="s-meta">' + meta + '</span>' : '') + '<button class="s-btn2" data-act="kitcopy:' + id + '">Copy</button></div><textarea readonly rows="' + rows + '">' + esc(txt) + '</textarea></div>'; };
@@ -2184,7 +2225,7 @@ function postKit(mode, o, sky) {
       voicePanel() + '<div class="s-dur ' + (secs <= 60 ? 'ok' : 'warn') + '">' + fmtDur(secs) + ' · ' + wordCount(all) + ' words (under 60s is the sweet spot)</div>' +
       cs.parts.map(function (x, k) { return '<section class="s-sec"><div class="s-sechead"><b>' + cs.labels[k] + '</b>' + (x.edited ? '<span class="s-edited">edited</span><button class="s-link" data-act="sreset:' + x.id + '">Reset</button>' : '') + '</div><textarea data-short="' + x.id + '" rows="' + Math.max(2, Math.ceil(x.text.length / 70)) + '">' + esc(x.text) + '</textarea></section>'; }).join('') +
       '<div class="s-actions"><button class="s-cta" data-act="copy-short">Copy this Short\u2019s script</button><button class="s-btn2" data-act="dl-shorts">' + (ui.shortMode === 'bday' || ui.shortMode === 'cz' || ui.shortMode === 'tour' || ui.shortMode === 'arch' || ui.shortMode === 'week' ? 'Download this script (.txt)' : 'Download all ' + (ui.shortMode === 'num' ? 'Numbers' : '12 sign') + ' Shorts scripts') + '</button></div>' +
-      kitPanel() + '<p class="s-hint">These are 9:16, so the same recordings work as Instagram Reels and TikToks.</p></div></div></div>';
+      thumbPanel() + kitPanel() + '<p class="s-hint">These are 9:16, so the same recordings work as Instagram Reels and TikToks.</p></div></div></div>';
   }
   function viewYouTube(secs) {
     var pk = ytPackage(sky(), secs, st.wpm);
@@ -2243,6 +2284,10 @@ function postKit(mode, o, sky) {
     else if (act === 'sreset') { var cs0 = curShort(); delete cs0.store[cs0.key + '|' + arg]; persist(); render(); }
     else if (act === 'ssign') { stopRun(); ui.shortSign = +arg; ui.shortScene = 0; render(); }
     else if (act === 'smode') { stopRun(); ui.shortMode = arg; ui.shortScene = 0; render(); }
+    else if (act === 'thumb') {
+      if (arg === 'all') { var chain0 = Promise.resolve(); for (var t0 = 0; t0 < 12; t0++) (function (k) { chain0 = chain0.then(function () { return saveThumb(k, 1080, 1920); }).then(function () { return sleep(350); }); })(t0); }
+      else if (arg === '169') saveThumb(ui.shortSign, 1280, 720); else saveThumb(ui.shortSign, 1080, 1920);
+    }
     else if (act === 'kitcopy') { var kk2 = ui.kit || curKit(); copy(arg === 'title' ? kk2.yt.title : arg === 'desc' ? kk2.yt.desc : arg === 'tags' ? kk2.yt.tags.join(', ') : kk2.ig.caption, el); }
     else if (act === 'sper') { stopRun(); ui.signPer = arg; ui.shortScene = 0; render(); }
     else if (act === 'soff') { stopRun(); ui.signOff = +arg; ui.shortScene = 0; render(); }
