@@ -135,6 +135,13 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 .a-card-scene{align-items:flex-start;justify-content:center;padding:140px 100px}.a-num-sm{font-size:44px;letter-spacing:5px;text-transform:uppercase;color:var(--v-brass);font-weight:700}.a-ic{font-size:180px;line-height:1}
 .a-watch{margin-top:40px;font-size:50px;color:var(--v-muted);border-left:6px solid var(--v-accent);padding-left:30px}.a-watch b{color:var(--v-ink)}
 .s-kitwrap{border-color:var(--ui-accent,#7c8cff)}.s-kit{margin-top:12px}.s-kit-h{display:flex;align-items:center;gap:10px;margin-bottom:6px}.s-kit-h b{flex:1}.s-kit textarea{width:100%;font:13px/1.45 system-ui,sans-serif;resize:vertical}
+.ru-scene{gap:16px;padding:90px 70px;justify-content:flex-start}.ru-top{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:6px}.ru-top b{font-family:var(--serif);font-size:78px;font-weight:600}.ru-top em{font-style:normal;font-size:40px;color:var(--v-muted)}
+.ru-head,.ru-row{display:grid;grid-template-columns:170px 1fr 260px;align-items:center;width:900px}.ru-head{font-size:28px;letter-spacing:4px;text-transform:uppercase;color:var(--v-brass);font-weight:700;padding:0 30px}.ru-head span:nth-child(3){text-align:right}
+.ru-table{display:flex;flex-direction:column;gap:8px}.ru-row{background:var(--v-panel);border:2px solid var(--v-line);border-radius:20px;padding:6px 30px;height:88px}.ru-row b{font-family:var(--serif);font-size:58px;font-weight:600;color:var(--v-accent)}.ru-row .pl{font-size:40px;display:flex;align-items:center;gap:18px}.ru-row .pl i{font-style:normal;font-size:50px;color:var(--v-brass);width:56px;text-align:center}.ru-row .sg{text-align:right;font-size:54px;color:var(--v-muted);letter-spacing:10px}.ru-row .sg i{font-style:normal}
+.ru-row.m{opacity:.75}.ru-row.m b{color:#62B4FF}.ru-row.on{border:4px solid #FFD25E;background:rgba(255,210,94,.08)}.ru-row.on b{color:#FFD25E}.ru-row .sg i.me{color:#FFD25E}.ru-cap{font-size:40px;color:var(--v-muted);text-align:center;margin-top:8px}
+.ru-row.dim{opacity:.28}.q-hook{gap:18px}.q-date{font-family:var(--serif);font-size:150px;font-weight:600;line-height:1;text-align:center;margin-top:20px}.q-date span{display:block;font-family:var(--sans);font-size:44px;letter-spacing:8px;color:var(--v-brass);font-weight:700}.q-title{font-size:84px;text-align:center;line-height:1.1;color:#FFD25E;max-width:920px}
+.q-also{font-size:42px;color:var(--v-muted);text-align:center;max-width:900px}.q-also b{color:var(--v-brass);text-transform:uppercase;letter-spacing:4px;font-size:34px;margin-right:10px}
+.q-rule{display:flex;align-items:center;gap:36px;margin-top:40px}.q-rule .g{font-size:170px;color:var(--v-accent);line-height:1}.q-rule .p{font-size:150px;color:var(--v-brass);line-height:1}.q-rule .eq{font-size:90px;color:var(--v-muted)}.q-rule b{font-family:var(--serif);font-size:190px;color:#FFD25E;line-height:1}
 .h-scene{gap:28px;padding:110px 90px}.h-scene .m-cta{margin-top:10px;padding:26px 40px}.h-scene .m-cta b{font-size:70px}.h-grid{display:grid;grid-template-columns:repeat(3,130px);gap:16px}.h-grid span{height:130px;border-radius:26px;background:var(--v-panel);border:2px solid var(--v-line);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:90px;font-weight:600;color:var(--v-muted)}.h-grid span.on.a{border:4px solid #FFD25E;color:#FFD25E}.h-grid span.on.b{border:4px solid #62B4FF;color:#62B4FF}
 .h-vs{display:flex;align-items:center;gap:40px}.h-vs div{display:flex;flex-direction:column;align-items:center;gap:4px}.h-vs .g{font-size:90px;color:var(--v-accent);line-height:1}.h-vs b{font-family:var(--serif);font-size:96px;line-height:1}.h-vs em{font-style:normal;font-size:40px;color:var(--v-muted)}.h-vs .ne{font-size:120px;color:var(--v-muted)}
 .m-cta{margin-top:50px;text-align:center;font-size:50px;line-height:1.35;color:var(--v-muted);max-width:900px;border:3px solid var(--v-accent);border-radius:34px;padding:34px 44px;background:var(--v-panel)}.m-cta b{display:block;font-family:var(--serif);font-size:84px;color:var(--v-accent);margin-bottom:8px}
@@ -1390,17 +1397,34 @@ function buildScript(sky, depthKey, order) {
   return secs;
 }
 
-function buildShort(sky, si) {
+// numbers anchored by their ruling planet, and the signs each planet rules
+var NUM_RULE = [[1, 'sun', [4]], [2, 'moon', [3]], [3, 'jupiter', [8, 11]], [4, 'uranus', [10]], [5, 'mercury', [2, 5]], [6, 'venus', [1, 6]], [7, 'neptune', [11]], [8, 'saturn', [9, 10]], [9, 'mars', [0, 7]], [11, 'moon', [3]], [22, 'uranus', [10]], [33, 'venus', [1, 6]]];
+function signNumber(si) { var pl = SIGN_RULER[si]; for (var k = 0; k < 9; k++) if (NUM_RULE[k][1] === pl) return NUM_RULE[k][0]; return 1; }
+function buildShort(sky, si, quick) {
   var r = signReading(sky, si), S = r.sign, Mon = monthName(sky.start);
   var p = [];
+  if (quick) {
+    var qs = function (it) { return it.score + (it.houses.indexOf(1) >= 0 ? 4 : 0); };
+    var best = r.items.slice().sort(function (a, b) { return qs(b) - qs(a) || a.ms - b.ms; });
+    var b1 = best[0], b2 = best[1];
+    var qA = (si % 9) + 1, qB = ((si + 4) % 9) + 1, qrp = SIGN_RULER[si], qrn = signNumber(si), the = function (pl) { return (pl === 'sun' || pl === 'moon' ? 'the ' : '') + PLANETS[pl].name; };
+    var t1 = b1 ? b1.title.replace(new RegExp(' in ' + S.name + '$'), ' in your sign') : '';
+    p.push({ id: 'qhook', text: b1 ? S.name + ': on the ' + dayOrd(b1.ms) + ', ' + lc1(t1) + '.' : S.name + ': your next ' + (sky.span || 'month') + '.' });
+    p.push({ id: 'qmean', text: (b1 ? b1.read : '') + (b2 ? ' Also watch the ' + dayOrd(b2.ms) + ': ' + lc1(b2.title) + '.' : '') });
+    p.push({ id: 'qrule', text: (r.rechargeRaw.length ? 'Recharge days: ' + r.rechargeRaw.map(function (x) { return spokenRange(x, sky.win ? sky.start : null); }).join(' and ') + '. ' : '') + S.name + ' is ruled by ' + the(qrp) + ', the planet of the number ' + qrn + '.' });
+    p.push({ id: 'qcta', text: 'But ' + (/^[AEIOU]/.test(S.name) ? 'an' : 'a') + ' ' + S.name + ' ' + qA + ' lives this differently to ' + (/^[AEIOU]/.test(S.name) ? 'an' : 'a') + ' ' + S.name + ' ' + qB + '. Your chart and your numbers together: Duology. Link in bio.' });
+    p.forEach(function (x) { x.text = stripTags(x.text); });
+    return { quick: true, r: r, parts: p, b1: b1, b2: b2, nA: qA, nB: qB, rn: qrn, rp: qrp, t1: t1 };
+  }
   p.push({ id: 'hook', text: sky.win ? S.name + ', here’s your next ' + sky.span + ', ' + sky.spoken + ', in under a minute.' : S.name + ', here’s your ' + Mon + ' in under a minute.' });
   p.push({ id: 'theme', text: (sky.win ? 'These ' + sky.span + ' lean' : 'This month leans') + ' on your ' + ord(r.theme) + ' house: ' + HOUSES[r.theme].area + '. That’s where the sky is busiest for you.' });
   var t2 = r.items.slice().sort(function (a, b) { return b.score - a.score || a.ms - b.ms; }).slice(0, 2).sort(function (a, b) { return a.ms - b.ms; }); p.push({ id: 'items', text: t2.map(function (it, k) { var same = k && dayOrd(it.ms) === dayOrd(t2[0].ms); return (k ? (same ? 'Also on the ' : 'Then on the ') : 'On the ') + dayOrd(it.ms) + ', ' + lc1(it.title) + '. ' + it.read; }).join(' ') });
   var nA = (si % 9) + 1, nB = ((si + 4) % 9) + 1;
-  p.push({ id: 'recharge', text: (r.rechargeRaw.length ? 'Your recharge days are ' + r.rechargeRaw.map(function (x) { return spokenRange(x, sky.win ? sky.start : null); }).join(' and ') + '. ' : '') + 'That’s the general version for every ' + S.name + '.' });
+  var rp = SIGN_RULER[si], rn = signNumber(si);
+  p.push({ id: 'recharge', text: (r.rechargeRaw.length ? 'Your recharge days are ' + r.rechargeRaw.map(function (x) { return spokenRange(x, sky.win ? sky.start : null); }).join(' and ') + '. ' : '') + 'That’s the general version. Here’s the link to your numbers: ' + S.name + ' is ruled by ' + (rp === 'sun' || rp === 'moon' ? 'the ' : '') + PLANETS[rp].name + ', and ' + (rp === 'sun' || rp === 'moon' ? 'the ' : '') + PLANETS[rp].name + ' rules the number ' + rn + '.' + (CO_RULER[si] && CO_RULER[si] !== 'pluto' ? ' Its modern ruler, ' + PLANETS[CO_RULER[si]].name + ', rules the ' + (CO_RULER[si] === 'uranus' ? 4 : 7) + '.' : '') });
   p.push({ id: 'twist', text: 'But it’s only half the story. ' + (/^[AEIOU]/.test(S.name) ? 'An' : 'A') + ' ' + S.name + ' ' + nA + ', the ' + NUM_SHORT[nA] + ', lives this very differently to ' + (/^[AEIOU]/.test(S.name) ? 'an' : 'a') + ' ' + S.name + ' ' + nB + ', the ' + NUM_SHORT[nB] + '. For the full picture, your chart and your numbers together, get Duology. The link’s in the bio.' });
   p.forEach(function (x) { x.text = stripTags(x.text); });
-  return { r: r, parts: p, t2: t2, nA: nA, nB: nB };
+  return { r: r, parts: p, t2: t2, nA: nA, nB: nB, rn: rn };
 }
 
 function fmtDur(sec) { sec = Math.round(sec); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
@@ -1678,6 +1702,11 @@ function postKit(mode, o, sky) {
     L = ['The Chinese year starts at Chinese New Year (21 Jan – 20 Feb), not 1 January. Born before it? You belong to the year before.', '', 'The twelve, in order: ' + CZ_ANIMALS.join(', ') + '.', '', 'Comment your animal 👇', '', 'Duology works it out from your exact birthday, free:', APP_URL, '', disc, '', '#chinesezodiac #chinesenewyear #shorts'];
     yt.tags = ['chinese zodiac', 'chinese zodiac animals', 'what is my chinese zodiac', 'chinese new year', 'january birthday chinese zodiac', 'chinese astrology', 'duology', 'shorts'];
     ig.caption = 'Born in January or early February? Check your Chinese animal again 👀\n\nThe Chinese year starts at Chinese New Year (21 Jan – 20 Feb). Born before it? You’re the year before.\n\nComment your animal 👇\n\n#chinesezodiac #chinesenewyear #chineseastrology #astrology #duology';
+  } else if (mode === 'link') {
+    yt.title = 'Astrology and numerology are ONE system (here\u2019s the link) #shorts';
+    L = ['Every number in numerology has a ruling planet, and so does every star sign. That\u2019s the bridge between the two.', '', NUM_RULE.map(function (R) { return R[0] + ' \u2192 ' + PLANETS[R[1]].name + ' \u2192 ' + R[2].map(function (x) { return SIGNS[x].name; }).join(', '); }).join('\n'), '', 'Find your sign, find your number. Comment both (like \u201cLeo 1\u201d) \uD83D\uDC47', '', 'Mathing can be hard. Let the app do it for you, free:', APP_URL, '', disc, '', '#astrology #numerology #shorts'];
+    yt.tags = ['astrology and numerology', 'numerology planets', 'ruling planets', 'numerology and astrology connection', 'planetary rulers', 'life path number', 'zodiac signs', 'numerology for beginners', 'duology', 'shorts'];
+    ig.caption = 'Astrology and numerology: one system, not two \u2728\n\nEvery number has a ruling planet. Every sign has a ruling planet. Same planets.\n1 Sun \u2192 Leo \u00B7 2 Moon \u2192 Cancer \u00B7 9 Mars \u2192 Aries, Scorpio\u2026\n\nComment your sign + your number \uD83D\uDC47\nMathing can be hard. Let the app do it for you \u2192 link in bio\n\n#astrology #numerology #zodiac #lifepath #duology';
   } else if (mode === 'tour') {
     yt.title = 'Your stars + numbers, explained (and yes, your dog gets a chart too) #shorts';
     L = ['Duology puts your real birth chart and your numerology side by side, in plain English.', '', 'Free: your birth chart, Sun, Moon + Rising, Life Path, Chinese animal, every sign every month.', 'Pro: every placement, your full reading + PDF, your year ahead, the whole family’s charts, and your pets.', '', 'One-off passes from US$3.99. No subscription, no auto-renewals, and a full refund in the first 14 days, no questions asked.', '', 'Start free:', APP_URL, '', '#astrology #numerology #shorts'];
@@ -1694,6 +1723,19 @@ function postKit(mode, o, sky) {
   yt.desc = L.join('\n');
   var seen = {}; yt.tags = yt.tags.filter(function (t) { t = t.toLowerCase(); if (seen[t]) return false; seen[t] = 1; return true; });
   return { yt: yt, ig: ig };
+}
+
+// ===== THE LINK: numbers and signs share their ruling planets =====
+function buildLinkShort() {
+  var row = function (k) { var R = NUM_RULE[k], pl = R[1], P = PLANETS[pl]; return R[0] + ', ' + ((pl === 'sun' || pl === 'moon') ? 'the ' : '') + P.name + ', ruler of ' + R[2].map(function (x) { return SIGNS[x].name; }).join(' and '); };
+  return { labels: ['Hook', '1 to 3', '4 to 6', '7 to 9', 'Master numbers', 'CTA'], parts: [
+    { id: 'hook', text: 'Astrology and numerology aren\u2019t two different things. They share the same planets. Here\u2019s the link.' },
+    { id: 'r1', text: row(0) + '. ' + row(1) + '. ' + row(2) + '.' },
+    { id: 'r2', text: row(3) + '. ' + row(4) + '. ' + row(5) + '.' },
+    { id: 'r3', text: row(6) + '. ' + row(7) + '. ' + row(8) + '.' },
+    { id: 'masters', text: 'And the master numbers are the supercharged versions: 11 is the Moon turned up, 22 is Uranus, and 33 is Venus.' },
+    { id: 'cta', text: 'Find your sign, find your number. Comment both, like Leo 1. Mathing can be hard, so click the link in bio and let the app do it for you!' }
+  ] };
 }
 
 // ===== STUDIO APP START =====
@@ -1721,7 +1763,7 @@ function postKit(mode, o, sky) {
   function secDur(s) { return Math.max(4, wordCount(s.text) / st.wpm * 60); }
   // ---------- voice files + playback engine + recorder ----------
   var audioSets = {}, audioCtx = null, run = null, recording = null;
-  function audioKey() { return ui.tab === 'video' ? 'v|' + mkey() : (ui.shortMode === 'num' ? 'n|' + mkey() + '|' + ui.numWhich : ui.shortMode === 'bday' ? 'b|' + mkey() : ui.shortMode === 'cz' ? 'c|' + mkey() : ui.shortMode === 'tour' ? 't|' + mkey() : ui.shortMode === 'arch' ? 'a|' + mkey() + '|' + ui.archN : ui.shortMode === 'week' ? 'w|' + weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS) : 's|' + signKey() + '|' + ui.shortSign); }
+  function audioKey() { return ui.tab === 'video' ? 'v|' + mkey() : (ui.shortMode === 'num' ? 'n|' + mkey() + '|' + ui.numWhich : ui.shortMode === 'bday' ? 'b|' + mkey() : ui.shortMode === 'cz' ? 'c|' + mkey() : ui.shortMode === 'tour' ? 't|' + mkey() : ui.shortMode === 'link' ? 'l|link' : ui.shortMode === 'arch' ? 'a|' + mkey() + '|' + ui.archN : ui.shortMode === 'week' ? 'w|' + weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS) : 's|' + signKey() + '|' + ui.shortSign + (ui.signFmt === 'quick' ? '|q' : '')); }
   function curAudio() { return audioSets[audioKey()] || []; }
   function sceneCount() { return ui.tab === 'video' ? secsCache.length : curShort().parts.length; }
   function curIndex() { return ui.tab === 'video' ? ui.scene : ui.shortScene; }
@@ -1812,7 +1854,7 @@ function postKit(mode, o, sky) {
   }
   function recName(ext) {
     if (ui.tab === 'video') return 'duology-' + mkey() + '-forecast.' + ext;
-    return 'duology-' + mkey() + '-short-' + (ui.shortMode === 'num' ? (ui.numWhich ? 'month-' + ui.numWhich : 'numbers') : ui.shortMode === 'bday' ? 'birthday-number' : ui.shortMode === 'cz' ? 'chinese-zodiac' : ui.shortMode === 'tour' ? 'app-tour' : ui.shortMode === 'arch' ? (ui.archN ? 'number-' + ui.archN : 'numerology-101') : ui.shortMode === 'week' ? 'week-' + new Date(weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS)).getFullYear() + '-' + localMD(weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS)) : SIGNS[ui.shortSign].name.toLowerCase() + (signSky().win ? '-' + localMD(signSky().start) + '-' + signSky().days + 'd' : '')) + '.' + ext;
+    return 'duology-' + mkey() + '-short-' + (ui.shortMode === 'num' ? (ui.numWhich ? 'month-' + ui.numWhich : 'numbers') : ui.shortMode === 'bday' ? 'birthday-number' : ui.shortMode === 'cz' ? 'chinese-zodiac' : ui.shortMode === 'tour' ? 'app-tour' : ui.shortMode === 'link' ? 'stars-x-numbers' : ui.shortMode === 'arch' ? (ui.archN ? 'number-' + ui.archN : 'numerology-101') : ui.shortMode === 'week' ? 'week-' + new Date(weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS)).getFullYear() + '-' + localMD(weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS)) : SIGNS[ui.shortSign].name.toLowerCase() + (ui.signFmt === 'quick' ? '-quick' : '') + (signSky().win ? '-' + localMD(signSky().start) + '-' + signSky().days + 'd' : '')) + '.' + ext;
   }
   function finishRecording(msg) {
     if (!recording || !recording.rec) return;
@@ -1898,7 +1940,7 @@ function postKit(mode, o, sky) {
       '<p class="s-hint">How it works: click Record, pick <b>This tab</b> when Chrome asks, then hands off. The Studio goes full screen, plays every scene in time with Scotty, and downloads the finished video when it’s done. Keep this tab on screen while it records, and press F11 first for the sharpest picture. Press Esc to stop early.</p></div>';
   }
   function short() {
-    var sh = buildShort(signSky(), ui.shortSign), k = signKey() + '|' + ui.shortSign;
+    var sh = buildShort(signSky(), ui.shortSign, ui.signFmt === 'quick'), k = signKey() + '|' + ui.shortSign + (ui.signFmt === 'quick' ? '|q' : '');
     sh.parts.forEach(function (p) { p.generated = p.text; var e = st.shortEdits[k + '|' + p.id]; if (e != null) { p.text = e; p.edited = true; } });
     return sh;
   }
@@ -1909,16 +1951,16 @@ function postKit(mode, o, sky) {
     return ns;
   }
   function extraShort(kind) {
-    var o = kind === 'bday' ? buildBdayShort(sky()) : kind === 'tour' ? buildTourShort(sky()) : kind === 'arch' ? buildArchShort(sky(), ui.archN) : kind === 'week' ? buildWeekShort(ui.weekOff) : buildCzShort(sky()), sk = kind === 'bday' ? 'bdEdits' : kind === 'tour' ? 'tourEdits' : kind === 'arch' ? 'archEdits' : kind === 'week' ? 'weekEdits' : 'czEdits', k = kind === 'week' ? 'week|' + o.start : mkey() + '|' + kind + (kind === 'arch' ? ui.archN : '');
+    var o = kind === 'bday' ? buildBdayShort(sky()) : kind === 'tour' ? buildTourShort(sky()) : kind === 'arch' ? buildArchShort(sky(), ui.archN) : kind === 'week' ? buildWeekShort(ui.weekOff) : kind === 'link' ? buildLinkShort() : buildCzShort(sky()), sk = kind === 'bday' ? 'bdEdits' : kind === 'tour' ? 'tourEdits' : kind === 'arch' ? 'archEdits' : kind === 'week' ? 'weekEdits' : kind === 'link' ? 'linkEdits' : 'czEdits', k = kind === 'week' ? 'week|' + o.start : kind === 'link' ? 'link' : mkey() + '|' + kind + (kind === 'arch' ? ui.archN : '');
     st[sk] = st[sk] || {};
     o.parts.forEach(function (p) { p.generated = p.text; var e = st[sk][k + '|' + p.id]; if (e != null) { p.text = e; p.edited = true; } });
     o.store = st[sk]; o.key = k; return o;
   }
   function curShort() {
-    if (ui.shortMode === 'bday' || ui.shortMode === 'cz' || ui.shortMode === 'tour' || ui.shortMode === 'arch' || ui.shortMode === 'week') { var xs = extraShort(ui.shortMode); return { parts: xs.parts, labels: xs.labels, scene: function (i) { return ui.shortMode === 'bday' ? scene916bday(i, xs) : ui.shortMode === 'tour' ? scene916tour(i, xs) : ui.shortMode === 'arch' ? scene916arch(i, xs) : ui.shortMode === 'week' ? scene916week(i, xs) : scene916cz(i, xs); }, store: xs.store, key: xs.key, name: ui.shortMode === 'bday' ? 'Birthday Number' : ui.shortMode === 'tour' ? 'App tour' : ui.shortMode === 'arch' ? (ui.archN ? 'Number ' + ui.archN : 'Numerology 101') : ui.shortMode === 'week' ? 'Week of ' + xs.range : 'Chinese zodiac' }; }
+    if (ui.shortMode === 'bday' || ui.shortMode === 'cz' || ui.shortMode === 'tour' || ui.shortMode === 'arch' || ui.shortMode === 'week' || ui.shortMode === 'link') { var xs = extraShort(ui.shortMode); return { parts: xs.parts, labels: xs.labels, scene: function (i) { return ui.shortMode === 'bday' ? scene916bday(i, xs) : ui.shortMode === 'tour' ? scene916tour(i, xs) : ui.shortMode === 'arch' ? scene916arch(i, xs) : ui.shortMode === 'week' ? scene916week(i, xs) : ui.shortMode === 'link' ? scene916link(i, xs) : scene916cz(i, xs); }, store: xs.store, key: xs.key, name: ui.shortMode === 'bday' ? 'Birthday Number' : ui.shortMode === 'tour' ? 'App tour' : ui.shortMode === 'arch' ? (ui.archN ? 'Number ' + ui.archN : 'Numerology 101') : ui.shortMode === 'week' ? 'Week of ' + xs.range : ui.shortMode === 'link' ? 'Stars \u00D7 Numbers' : 'Chinese zodiac' }; }
     if (ui.shortMode === 'num') { var ns = numShort(); return { parts: ns.parts, labels: ns.labels, scene: function (i) { return scene916num(i, ns); }, store: st.numEdits, key: mkey() + '|n' + ui.numWhich, name: ui.numWhich ? 'Personal Month ' + ui.numWhich : 'All numbers' }; }
     var sh = short(), S = signSky();
-    return { parts: sh.parts, labels: ['Hook', 'Focus', 'Key dates', 'Recharge', 'Half the story'], scene: function (i) { return scene916(i, sh, S); }, store: st.shortEdits, key: signKey() + '|' + ui.shortSign, name: SIGNS[ui.shortSign].name };
+    return { parts: sh.parts, labels: sh.quick ? ['Hook: the big date', 'What it means', 'Recharge + ruler', 'Half the story'] : ['Hook', 'Focus', 'Key dates', 'Recharge', 'Half the story'], scene: function (i) { return scene916(i, sh, S); }, store: st.shortEdits, key: signKey() + '|' + ui.shortSign + (ui.signFmt === 'quick' ? '|q' : ''), name: SIGNS[ui.shortSign].name };
   }
   function download(name, text) {
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' })); a.download = name; document.body.appendChild(a); a.click();
@@ -2003,11 +2045,18 @@ function postKit(mode, o, sky) {
   }
   // ---------- scenes (9:16, 1080x1920) ----------
   function scene916(i, sh, S) {
+    if (sh.quick) return scene916quick(i, sh, S);
     var r = sh.r, Sg = r.sign, Mon = S.win ? S.label : d(S.start, { month: 'long' }), hl = {}; r.top.forEach(function (t) { t.houses.forEach(function (h) { hl[h] = hl[h] || 1; }); }); hl[r.theme] = 2;
     if (i === 0) return '<div class="v v-tall"><div class="v-signglyph" style="font-size:420px">' + Sg.glyph + VS + '</div><div class="v-h1" style="font-size:150px;text-align:center">' + Sg.name + '</div><div class="a3 v-sub" style="font-size:64px;text-align:center">' + (S.win ? 'Your next ' + (S.days === 14 ? '2' : '4') + ' weeks<br>' + S.label : Mon + ' in under a minute') + '</div><div class="a4" style="margin-top:80px">' + wordmark(90) + '</div></div>';
     if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">Your focus</div><div class="a2 v-h1" style="text-align:center;font-size:92px">Your ' + ord(r.theme) + ' house</div><div class="a3 v-sub" style="font-size:60px;text-align:center">' + HOUSE_SHORT[r.theme] + '</div><div class="a4" style="margin-top:60px">' + ringSVG(r.si, hl, 820) + '</div></div>';
     if (i === 2) return '<div class="v v-tall" style="justify-content:flex-start;padding-top:260px"><div class="a1 v-kicker">Key dates</div>' + (sh.t2 || r.top.slice(0, 2)).map(function (t, k) { return '<div class="a' + (k + 2) + ' v-ev v-ev-tall"><div class="v-evd"><span>' + d(t.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(t.ms).getDate() + '</div><div><b>' + esc(t.title) + '</b><div>' + esc(t.read) + '</div></div></div>'; }).join('') + '</div>';
-    if (i === 3) return '<div class="v v-tall">' + (r.recharge.length ? '<div class="a1 v-kicker">Recharge days</div><div class="a2 v-h1" style="font-size:110px;text-align:center">' + r.recharge.join('<br>') + '</div>' : '') + '<div class="a3 v-sub" style="font-size:54px;text-align:center;margin-top:60px">The general version<br>for every ' + Sg.name + '</div></div>';
+    if (i === 3) {
+      var rows = NUM_RULE.map(function (row, k) { var on = row[2].indexOf(r.si) >= 0 && row[0] < 10; var P = PLANETS[row[1]];
+        return '<div class="ru-row' + (on ? ' on' : '') + (row[0] > 9 ? ' m' : '') + '"><b>' + row[0] + '</b><span class="pl"><i>' + P.glyph + VS + '</i>' + P.name + '</span><span class="sg">' + row[2].map(function (x) { return '<i' + (x === r.si ? ' class="me"' : '') + '>' + SIGNS[x].glyph + VS + '</i>'; }).join('') + '</span></div>'; }).join('');
+      return '<div class="v v-tall ru-scene">' + (r.recharge.length ? '<div class="a1 ru-top"><span class="v-kicker">Recharge days</span><b>' + r.recharge.join(' \u00B7 ') + '</b><em>The general version for every ' + Sg.name + '</em></div>' : '<div class="a1 ru-top"><em>The general version for every ' + Sg.name + '</em></div>') +
+        '<div class="a2 ru-head"><span>Number</span><span>Ruling planet</span><span>Signs</span></div><div class="a3 ru-table">' + rows + '</div>' +
+        '<div class="a4 ru-cap">Every number shares a ruling planet<br>with a star sign</div></div>';
+    }
     var nA = sh.nA, nB = sh.nB;
     return '<div class="v v-tall h-scene"><div class="a1 v-kicker">Only half the story</div>' +
       '<div class="a2 h-grid">' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return '<span class="' + (n === nA ? 'on a' : n === nB ? 'on b' : '') + '">' + n + '</span>'; }).join('') + '</div>' +
@@ -2101,6 +2150,28 @@ function postKit(mode, o, sky) {
       '<div class="a5 n-answer">Reduce it. Land on ' + n + '?<br>That\u2019s <b class="cb">' + n + ' energy</b></div></div>';
     return '<div class="v v-tall"><div class="a1 v-h1" style="font-size:112px;text-align:center">Got ' + an(n) + ' ' + n + '<br>in your life?</div><div class="a2 v-sub" style="font-size:56px;text-align:center">Comment where you found it</div>' + '<div class="a3 m-cta"><b>Mathing can be hard!</b>Click the link in bio and let the app do it for you</div><div class="a4" style="margin-top:30px">' + wordmark(130) + '</div></div>';
   }
+  function ruTable(si, hi) {
+    return '<div class="ru-table">' + NUM_RULE.map(function (row, k) { var on = (si != null && row[2].indexOf(si) >= 0 && row[0] < 10) || (hi && hi.indexOf(k) >= 0); var P = PLANETS[row[1]];
+      return '<div class="ru-row' + (on ? ' on' : '') + (row[0] > 9 ? ' m' : '') + (hi && hi.indexOf(k) < 0 ? ' dim' : '') + '"><b>' + row[0] + '</b><span class="pl"><i>' + P.glyph + VS + '</i>' + P.name + '</span><span class="sg">' + row[2].map(function (x) { return '<i' + (x === si ? ' class="me"' : '') + '>' + SIGNS[x].glyph + VS + '</i>'; }).join('') + '</span></div>'; }).join('') + '</div>';
+  }
+  function scene916quick(i, sh, S) {
+    var r = sh.r, Sg = r.sign, b1 = sh.b1, b2 = sh.b2, rng = S.win ? S.label : d(S.start, { month: 'long' });
+    if (i === 0) return '<div class="v v-tall q-hook"><div class="v-signglyph" style="font-size:300px">' + Sg.glyph + VS + '</div><div class="v-h1" style="font-size:120px;text-align:center">' + Sg.name + '</div>' +
+      (b1 ? '<div class="q-date"><span>' + d(b1.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(b1.ms).getDate() + '</div><div class="v-h1 q-title">' + esc(sh.t1) + '</div>' : '') + '<div class="v-sub" style="font-size:44px">' + rng + '</div></div>';
+    if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">What it means for ' + Sg.name + '</div>' + (b1 ? '<div class="a2 v-ev v-ev-tall"><div class="v-evd"><span>' + d(b1.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(b1.ms).getDate() + '</div><div><b>' + esc(sh.t1) + '</b><div>' + esc(b1.read) + '</div></div></div>' : '') +
+      (b2 ? '<div class="a3 q-also"><b>Also</b> ' + d(b2.ms, { day: 'numeric', month: 'short' }) + ' · ' + esc(b2.title) + '</div>' : '') + '</div>';
+    if (i === 2) { var P = PLANETS[sh.rp];
+      return '<div class="v v-tall">' + (r.recharge.length ? '<div class="a1 v-kicker">Recharge days</div><div class="a2 v-h1" style="font-size:100px;text-align:center">' + r.recharge.join(' · ') + '</div>' : '') +
+        '<div class="a3 q-rule"><span class="g">' + Sg.glyph + VS + '</span><span class="eq">→</span><span class="p">' + P.glyph + VS + '</span><span class="eq">→</span><b>' + sh.rn + '</b></div><div class="a4 v-sub" style="font-size:50px;text-align:center">' + Sg.name + ' is ruled by ' + P.name + ',<br>the planet of the number ' + sh.rn + '</div></div>'; }
+    return scene916(4, { r: r, nA: sh.nA, nB: sh.nB }, S);
+  }
+  function scene916link(i, o) {
+    var groups = [null, [0, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10, 11], null];
+    var head = '<div class="ru-head"><span>Number</span><span>Ruling planet</span><span>Signs</span></div>';
+    if (i === 0) return '<div class="v v-tall"><div class="a1 v-kicker">Stars × Numbers</div><div class="a2 v-h1" style="font-size:120px;text-align:center;line-height:1.05">One system,<br>not two</div><div class="a3 q-rule"><span class="g">♌' + VS + '</span><span class="eq">→</span><span class="p">☉' + VS + '</span><span class="eq">→</span><b>1</b></div><div class="a4 v-sub" style="font-size:54px;text-align:center">Numbers and signs share<br>the same ruling planets</div></div>';
+    if (i >= 5) return '<div class="v v-tall ru-scene" style="justify-content:center"><div class="a1 v-h1" style="font-size:84px;text-align:center">Find your sign.<br>Find your number.</div><div class="a2">' + head + ruTable(null, null) + '</div><div class="a3 m-cta" style="margin-top:20px"><b>Mathing can be hard!</b>Click the link in bio and let the app do it for you</div></div>';
+    return '<div class="v v-tall ru-scene" style="justify-content:center"><div class="a1 v-kicker">' + (i === 4 ? 'The master numbers' : 'Number → planet → sign') + '</div><div class="a2">' + head + ruTable(null, groups[i]) + '</div></div>';
+  }
   function scene916num(i, ns) {
     var c = ns.calc, Mon = c.Mon;
     function line(t, big) { return '<div class="v-calc' + (big ? ' big' : '') + '">' + t + '</div>'; }
@@ -2165,7 +2236,7 @@ function postKit(mode, o, sky) {
   }
   function curKit() {
     var m = ui.shortMode, o;
-    if (m === 'week' || m === 'arch' || m === 'bday' || m === 'cz' || m === 'tour') o = extraShort(m);
+    if (m === 'week' || m === 'arch' || m === 'bday' || m === 'cz' || m === 'tour' || m === 'link') o = extraShort(m);
     else if (m === 'num') o = numShort();
     else o = { si: ui.shortSign };
     return postKit(m, o, m === 'sign' ? signSky() : sky());
@@ -2222,18 +2293,18 @@ function postKit(mode, o, sky) {
   }
   function viewShorts() {
     var cs = curShort(), n = cs.parts.length, i = Math.min(ui.shortScene, n - 1), p = cs.parts[i], all = cs.parts.map(function (x) { return x.text; }).join(' ');
-    var picker = ui.shortMode === 'week' ? [0, 1, 2, 3].map(function (k) { var st0 = weekStartOf(Date.now() + k * 7 * DAY_MS); return '<button data-act="wkoff:' + k + '" aria-pressed="' + (ui.weekOff === k) + '">' + (k === 0 ? 'This week' : k === 1 ? 'Next week' : 'Week of') + ' \u00B7 ' + dShort(st0) + '</button>'; }).join('') + '<p class="s-hint" style="margin:6px 0 0;width:100%">Weeks run Monday to Sunday. Post it Monday morning. The events come from the real sky, and the signs that feel it most come from the week\u2019s biggest event.</p>' : ui.shortMode === 'arch' ? ARCH_ORDER.map(function (k) { return '<button data-act="anum:' + k + '" aria-pressed="' + (ui.archN === k) + '">' + (k ? k + ' \u00B7 ' + ARCH[k].name.replace('The ', '') : 'Numerology 101') + '</button>'; }).join('') + '<p class="s-hint" style="margin:6px 0 0;width:100%">An evergreen series: start with Numerology 101, then one number at a time. Money, love, happiness and the ruling planet, then how to find that number in your own life.</p>' : ui.shortMode === 'tour' ? '<p class="s-hint" style="margin:0">The landing page as a Reel: free features, Pro, family, pets and the passes. Evergreen, so pin it to your profile and re-post it whenever you like.</p>' : ui.shortMode === 'bday' ? '<p class="s-hint" style="margin:0">Evergreen: one Short covers every birthday. The example day changes with the month, so you can re-post it.</p>' : ui.shortMode === 'cz' ? '<p class="s-hint" style="margin:0">Evergreen, with the New Year dates worked out from the real Sun and Moon. Great to post in January, ahead of Chinese New Year.</p>' : ui.shortMode === 'sign'
-      ? '<div class="s-signs" style="width:100%;margin-bottom:6px">' + [['month', 'Monthly'], ['2w', 'Next 2 weeks'], ['4w', 'Next 4 weeks']].map(function (x) { return '<button data-act="sper:' + x[0] + '" aria-pressed="' + ((ui.signPer || 'month') === x[0]) + '">' + x[1] + '</button>'; }).join('') + ((ui.signPer || 'month') !== 'month' ? [0, 1].map(function (k) { return '<button data-act="soff:' + k + '" aria-pressed="' + ((ui.signOff || 0) === k) + '">From ' + (k ? 'next' : 'this') + ' Monday \u00B7 ' + dShort(weekStartOf(Date.now()) + k * 7 * DAY_MS) + '</button>'; }).join('') + '<span class="s-hint" style="margin:0 0 0 8px;align-self:center">' + signSky().label + '</span>' : '') + '</div>' + SIGNS.map(function (x, k) { return '<button data-act="ssign:' + k + '" aria-pressed="' + (ui.shortSign === k) + '">' + x.glyph + VS + ' ' + x.name + '</button>'; }).join('')
+    var picker = ui.shortMode === 'link' ? '<p class="s-hint" style="margin:0">Evergreen: why astrology and numerology are one system. Pin it to your profile.</p>' : ui.shortMode === 'week' ? [0, 1, 2, 3].map(function (k) { var st0 = weekStartOf(Date.now() + k * 7 * DAY_MS); return '<button data-act="wkoff:' + k + '" aria-pressed="' + (ui.weekOff === k) + '">' + (k === 0 ? 'This week' : k === 1 ? 'Next week' : 'Week of') + ' \u00B7 ' + dShort(st0) + '</button>'; }).join('') + '<p class="s-hint" style="margin:6px 0 0;width:100%">Weeks run Monday to Sunday. Post it Monday morning. The events come from the real sky, and the signs that feel it most come from the week\u2019s biggest event.</p>' : ui.shortMode === 'arch' ? ARCH_ORDER.map(function (k) { return '<button data-act="anum:' + k + '" aria-pressed="' + (ui.archN === k) + '">' + (k ? k + ' \u00B7 ' + ARCH[k].name.replace('The ', '') : 'Numerology 101') + '</button>'; }).join('') + '<p class="s-hint" style="margin:6px 0 0;width:100%">An evergreen series: start with Numerology 101, then one number at a time. Money, love, happiness and the ruling planet, then how to find that number in your own life.</p>' : ui.shortMode === 'tour' ? '<p class="s-hint" style="margin:0">The landing page as a Reel: free features, Pro, family, pets and the passes. Evergreen, so pin it to your profile and re-post it whenever you like.</p>' : ui.shortMode === 'bday' ? '<p class="s-hint" style="margin:0">Evergreen: one Short covers every birthday. The example day changes with the month, so you can re-post it.</p>' : ui.shortMode === 'cz' ? '<p class="s-hint" style="margin:0">Evergreen, with the New Year dates worked out from the real Sun and Moon. Great to post in January, ahead of Chinese New Year.</p>' : ui.shortMode === 'sign'
+      ? '<div class="s-signs" style="width:100%;margin-bottom:6px">' + [['full', 'Full (~60s)'], ['quick', 'Quick (~30s)']].map(function (x) { return '<button data-act="sfmt:' + x[0] + '" aria-pressed="' + ((ui.signFmt || 'full') === x[0]) + '">' + x[1] + '</button>'; }).join('') + '<span style="width:14px"></span>' + [['month', 'Monthly'], ['2w', 'Next 2 weeks'], ['4w', 'Next 4 weeks']].map(function (x) { return '<button data-act="sper:' + x[0] + '" aria-pressed="' + ((ui.signPer || 'month') === x[0]) + '">' + x[1] + '</button>'; }).join('') + ((ui.signPer || 'month') !== 'month' ? [0, 1].map(function (k) { return '<button data-act="soff:' + k + '" aria-pressed="' + ((ui.signOff || 0) === k) + '">From ' + (k ? 'next' : 'this') + ' Monday \u00B7 ' + dShort(weekStartOf(Date.now()) + k * 7 * DAY_MS) + '</button>'; }).join('') + '<span class="s-hint" style="margin:0 0 0 8px;align-self:center">' + signSky().label + '</span>' : '') + '</div>' + SIGNS.map(function (x, k) { return '<button data-act="ssign:' + k + '" aria-pressed="' + (ui.shortSign === k) + '">' + x.glyph + VS + ' ' + x.name + '</button>'; }).join('')
       : '<button data-act="nwhich:0" aria-pressed="' + (ui.numWhich === 0) + '">All 9 (work it out)</button>' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (k) { return '<button data-act="nwhich:' + k + '" aria-pressed="' + (ui.numWhich === k) + '">Month ' + k + '</button>'; }).join('');
     var secs = all.length ? wordCount(all) / st.wpm * 60 : 0;
-    return '<div class="s-pad"><div class="s-signs" style="margin-bottom:10px"><button data-act="smode:sign" aria-pressed="' + (ui.shortMode === 'sign') + '">Star sign Shorts</button><button data-act="smode:week" aria-pressed="' + (ui.shortMode === 'week') + '">Your week</button><button data-act="smode:num" aria-pressed="' + (ui.shortMode === 'num') + '">Numbers Shorts</button><button data-act="smode:bday" aria-pressed="' + (ui.shortMode === 'bday') + '">Birthday Number</button><button data-act="smode:cz" aria-pressed="' + (ui.shortMode === 'cz') + '">Chinese zodiac</button><button data-act="smode:tour" aria-pressed="' + (ui.shortMode === 'tour') + '">App tour</button><button data-act="smode:arch" aria-pressed="' + (ui.shortMode === 'arch') + '">Number archetypes</button></div>' +
+    return '<div class="s-pad"><div class="s-signs" style="margin-bottom:10px"><button data-act="smode:sign" aria-pressed="' + (ui.shortMode === 'sign') + '">Star sign Shorts</button><button data-act="smode:week" aria-pressed="' + (ui.shortMode === 'week') + '">Your week</button><button data-act="smode:num" aria-pressed="' + (ui.shortMode === 'num') + '">Numbers Shorts</button><button data-act="smode:bday" aria-pressed="' + (ui.shortMode === 'bday') + '">Birthday Number</button><button data-act="smode:cz" aria-pressed="' + (ui.shortMode === 'cz') + '">Chinese zodiac</button><button data-act="smode:tour" aria-pressed="' + (ui.shortMode === 'tour') + '">App tour</button><button data-act="smode:arch" aria-pressed="' + (ui.shortMode === 'arch') + '">Number archetypes</button><button data-act="smode:link" aria-pressed="' + (ui.shortMode === 'link') + '">Stars \u00D7 Numbers</button></div>' +
       '<div class="s-signs">' + picker + '</div>' +
       (ui.shortMode === 'num' ? '<p class="s-hint" style="margin-top:-6px">Start with the ‘All 9’ Short each month: viewers work out their own number and comment it. Only add the single-number ones if the analytics say they’re pulling views.</p>' : '') +
       '<div class="s-shortwrap"><div><div class="s-stage s-tall" id="stage" data-w="1080" data-h="1920"><div class="s-canvas" style="width:1080px;height:1920px">' + cs.scene(i) + '</div></div></div>' +
       '<div class="s-shortside">' + stageControls(n, i, cs.labels[i], Math.max(4, wordCount(p.text) / st.wpm * 60)) +
       voicePanel() + '<div class="s-dur ' + (secs <= 60 ? 'ok' : 'warn') + '">' + fmtDur(secs) + ' · ' + wordCount(all) + ' words (under 60s is the sweet spot)</div>' +
       cs.parts.map(function (x, k) { return '<section class="s-sec"><div class="s-sechead"><b>' + cs.labels[k] + '</b>' + (x.edited ? '<span class="s-edited">edited</span><button class="s-link" data-act="sreset:' + x.id + '">Reset</button>' : '') + '</div><textarea data-short="' + x.id + '" rows="' + Math.max(2, Math.ceil(x.text.length / 70)) + '">' + esc(x.text) + '</textarea></section>'; }).join('') +
-      '<div class="s-actions"><button class="s-cta" data-act="copy-short">Copy this Short\u2019s script</button><button class="s-btn2" data-act="dl-shorts">' + (ui.shortMode === 'bday' || ui.shortMode === 'cz' || ui.shortMode === 'tour' || ui.shortMode === 'arch' || ui.shortMode === 'week' ? 'Download this script (.txt)' : 'Download all ' + (ui.shortMode === 'num' ? 'Numbers' : '12 sign') + ' Shorts scripts') + '</button></div>' +
+      '<div class="s-actions"><button class="s-cta" data-act="copy-short">Copy this Short\u2019s script</button><button class="s-btn2" data-act="dl-shorts">' + (ui.shortMode === 'bday' || ui.shortMode === 'cz' || ui.shortMode === 'tour' || ui.shortMode === 'arch' || ui.shortMode === 'week' || ui.shortMode === 'link' ? 'Download this script (.txt)' : 'Download all ' + (ui.shortMode === 'num' ? 'Numbers' : '12 sign') + ' Shorts scripts') + '</button></div>' +
       thumbPanel() + kitPanel() + '<p class="s-hint">These are 9:16, so the same recordings work as Instagram Reels and TikToks.</p></div></div></div>';
   }
   function viewYouTube(secs) {
@@ -2298,6 +2369,7 @@ function postKit(mode, o, sky) {
       else if (arg === '169') saveThumb(ui.shortSign, 1280, 720); else saveThumb(ui.shortSign, 1080, 1920);
     }
     else if (act === 'kitcopy') { var kk2 = ui.kit || curKit(); copy(arg === 'title' ? kk2.yt.title : arg === 'desc' ? kk2.yt.desc : arg === 'tags' ? kk2.yt.tags.join(', ') : kk2.ig.caption, el); }
+    else if (act === 'sfmt') { stopRun(); ui.signFmt = arg; ui.shortScene = 0; render(); }
     else if (act === 'sper') { stopRun(); ui.signPer = arg; ui.shortScene = 0; render(); }
     else if (act === 'soff') { stopRun(); ui.signOff = +arg; ui.shortScene = 0; render(); }
     else if (act === 'wkoff') { stopRun(); ui.weekOff = +arg; ui.shortScene = 0; render(); }
@@ -2308,7 +2380,7 @@ function postKit(mode, o, sky) {
     else if (act === 'copy-short') copy(curShort().parts.map(function (p) { return p.text; }).join(' '), el);
     else if (act === 'dl-shorts') {
       var out = [], kk;
-      if (ui.shortMode === 'bday' || ui.shortMode === 'cz' || ui.shortMode === 'tour' || ui.shortMode === 'arch' || ui.shortMode === 'week') { var cx = curShort(), tc = cx.parts.map(function (p) { return p.text; }).join(' '); download(recName('txt'), '=== ' + cx.name.toUpperCase() + ' · ' + fmtDur(wordCount(tc) / st.wpm * 60) + ' ===\n' + cx.parts.map(function (p, k) { return '[' + cx.labels[k] + '] ' + p.text; }).join('\n\n') + '\n'); }
+      if (ui.shortMode === 'bday' || ui.shortMode === 'cz' || ui.shortMode === 'tour' || ui.shortMode === 'arch' || ui.shortMode === 'week' || ui.shortMode === 'link') { var cx = curShort(), tc = cx.parts.map(function (p) { return p.text; }).join(' '); download(recName('txt'), '=== ' + cx.name.toUpperCase() + ' · ' + fmtDur(wordCount(tc) / st.wpm * 60) + ' ===\n' + cx.parts.map(function (p, k) { return '[' + cx.labels[k] + '] ' + p.text; }).join('\n\n') + '\n'); }
       else if (ui.shortMode === 'num') {
         var keepN = ui.numWhich;
         for (kk = 0; kk <= 9; kk++) { ui.numWhich = kk; var ns = numShort(), tn = ns.parts.map(function (p) { return p.text; }).join(' '); out.push('=== ' + (kk ? 'PERSONAL MONTH ' + kk : 'ALL NUMBERS (WORK IT OUT)') + ' · ' + fmtDur(wordCount(tn) / st.wpm * 60) + ' ===\n' + tn + '\n'); }
