@@ -164,6 +164,40 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 @media (prefers-reduced-motion:reduce){.v-calc{font-family:var(--serif);font-size:84px;font-weight:600;text-align:center;font-variant-numeric:tabular-nums;color:var(--v-ink);line-height:1.15}.v-calc.big{font-size:104px;color:var(--v-accent)}
 .v-numrow{display:flex;align-items:center;gap:36px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:24px;padding:18px 36px}.v-numrow b{font-family:var(--serif);font-size:84px;color:var(--v-accent);min-width:60px;text-align:center;line-height:1}.v-numrow span{font-size:50px}
 .a1,.a2,.a3,.a4,.a5,.a6{animation:none;opacity:1}}
+
+/* ----- element backgrounds (sign Shorts, hook scene) ----- */
+.eb{position:absolute;inset:0;overflow:hidden;z-index:0;pointer-events:none}
+.has-eb>*:not(.eb){position:relative;z-index:1}
+.v.v-tall.has-eb-water,.v.v-tall.has-eb-earth{justify-content:flex-start;padding-top:170px}
+.eb-fire{background:linear-gradient(180deg,#14131A 0%,#1d1317 55%,#2a1512 100%)}
+.eb-glow{position:absolute;left:-10%;right:-10%;bottom:-8%;height:46%;background:radial-gradient(ellipse at 50% 100%,rgba(255,122,43,.55),rgba(255,70,20,.18) 45%,transparent 72%);animation:ebflick 2.6s ease-in-out infinite alternate}
+.eb-flame{position:absolute;bottom:-6%;border-radius:50% 50% 50% 50%/62% 62% 38% 38%;background:radial-gradient(ellipse at 50% 80%,rgba(255,190,80,.75),rgba(255,98,30,.45) 55%,transparent 72%);filter:blur(26px);transform-origin:50% 100%;animation:ebflame 1.9s ease-in-out infinite alternate}
+.eb-ember{position:absolute;top:100%;border-radius:50%;background:#FFB347;box-shadow:0 0 14px 4px rgba(255,140,40,.7);opacity:0;animation:ebrise linear infinite}
+@keyframes ebflick{from{opacity:.65;transform:scaleY(.94)}to{opacity:1;transform:scaleY(1.06)}}
+@keyframes ebflame{0%{transform:scale(.9,.8) skewX(-3deg)}100%{transform:scale(1.08,1.18) skewX(4deg)}}
+@keyframes ebrise{0%{transform:translate(0,0);opacity:0}8%{opacity:.95}70%{opacity:.5}100%{transform:translate(var(--dx),-1750px);opacity:0}}
+.eb-water{background:linear-gradient(180deg,#14131A 0%,#0d1a33 62%,#0a1428 100%)}
+.eb-sea{position:absolute;left:0;right:0;top:67%;bottom:0;background:linear-gradient(180deg,rgba(40,90,170,.35),rgba(10,20,45,.9))}
+.eb-wave{position:absolute;left:0;width:200%;height:220px;animation:ebwave linear infinite}
+.eb-wave svg{display:block;width:100%;height:100%}
+@keyframes ebwave{to{transform:translateX(-50%)}}
+.eb-refl{position:absolute;left:0;right:0;bottom:33%;text-align:center;font-size:420px;line-height:1;color:#A9B6FF;opacity:.42;transform:scaleY(-1);transform-origin:50% 100%;filter:blur(3px);animation:ebrefl 4.2s ease-in-out infinite alternate;-webkit-mask-image:linear-gradient(0deg,#000 8%,transparent 88%);mask-image:linear-gradient(0deg,#000 8%,transparent 88%)}
+@keyframes ebrefl{from{transform:scaleY(-1) translateX(-12px) skewX(-3deg)}to{transform:scaleY(-1) translateX(12px) skewX(3deg)}}
+.eb-ring{position:absolute;left:50%;top:67%;width:340px;height:70px;margin-left:-170px;border:3px solid rgba(169,182,255,.45);border-radius:50%;opacity:0;animation:ebring 6s ease-out infinite}
+@keyframes ebring{0%{transform:scale(.2);opacity:.7}100%{transform:scale(3.2);opacity:0}}
+.eb-air{background:linear-gradient(180deg,#14131A 0%,#1b1d33 60%,#252a47 100%)}
+.eb-cloud{position:absolute;border-radius:50%;background:rgba(200,210,255,.11);filter:blur(34px);animation:ebdrift linear infinite}
+@keyframes ebdrift{from{transform:translateX(-900px)}to{transform:translateX(1900px)}}
+.eb-wind{position:absolute;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(235,240,255,.4),transparent);animation:ebdrift linear infinite}
+.eb-tree{position:absolute;bottom:-2px;transform-origin:50% 100%;animation:ebsway ease-in-out infinite alternate}
+@keyframes ebsway{from{transform:rotate(-2.6deg)}to{transform:rotate(4deg)}}
+.eb-earth{background:linear-gradient(180deg,#14131A 0%,#211b25 60%,#2e2328 100%)}
+.eb-mtn{position:absolute;inset:0;transform-origin:50% 69%;animation:ebzoom 16s linear forwards}
+.eb-mtn svg{width:100%;height:100%;display:block}
+@keyframes ebzoom{from{transform:scale(1)}to{transform:scale(1.28)}}
+.eb-mist{position:absolute;left:-20%;width:140%;height:200px;border-radius:50%;background:rgba(220,215,230,.09);filter:blur(40px);animation:ebmist 14s ease-in-out infinite alternate}
+@keyframes ebmist{from{transform:translateX(-120px)}to{transform:translateX(120px)}}
+@media (prefers-reduced-motion:reduce){.eb *{animation:none}}
 </style>
 </head>
 <body>
@@ -1322,6 +1356,42 @@ function tzCity() {
 }
 function tzOffsetLabel() { var m = -new Date().getTimezoneOffset(), s = m < 0 ? '-' : '+'; m = Math.abs(m); return 'UTC' + s + Math.floor(m / 60) + (m % 60 ? ':' + String(m % 60).padStart(2, '0') : ''); }
 var EVERY = { jupiter: 'once a year or so', saturn: 'every two and a half years', uranus: 'every seven years', neptune: 'every fourteen years', pluto: 'once in a couple of decades' };
+
+function ebg(el) {
+  var rnd = seeded(el.length * 7919 + 13), h = [];
+  function R(a, b) { return a + rnd() * (b - a); }
+  function F(n, d) { return R(n, d).toFixed(1); }
+  if (el === 'fire') {
+    h.push('<div class="eb eb-fire"><div class="eb-glow"></div>');
+    for (var f = 0; f < 6; f++) h.push('<div class="eb-flame" style="left:' + (f * 17 - 6) + '%;width:' + F(300, 420) + 'px;height:' + F(380, 620) + 'px;animation-delay:-' + F(0, 2) + 's;animation-duration:' + F(1.4, 2.4) + 's"></div>');
+    for (var i = 0; i < 36; i++) { var z = R(6, 17).toFixed(0); h.push('<i class="eb-ember" style="left:' + F(2, 98) + '%;width:' + z + 'px;height:' + z + 'px;animation-duration:' + F(5, 11) + 's;animation-delay:-' + F(0, 11) + 's;--dx:' + R(-140, 140).toFixed(0) + 'px"></i>'); }
+    return h.join('') + '</div>';
+  }
+  if (el === 'water') {
+    var wave = function (amp, fill) { var p = 'M0 110'; for (var k = 0; k < 8; k++) p += (k ? ' t270 0' : ' q135 -' + amp + ' 270 0'); return '<svg viewBox="0 0 2160 220" preserveAspectRatio="none"><path d="' + p + ' L2160 220 L0 220Z" fill="' + fill + '"/></svg>'; };
+    h.push('<div class="eb eb-water"><div class="eb-sea"></div><div class="eb-refl">%GLYPH%</div>');
+    h.push('<div class="eb-ring"></div><div class="eb-ring" style="animation-delay:-2s"></div><div class="eb-ring" style="animation-delay:-4s"></div>');
+    h.push('<div class="eb-wave" style="top:62%;animation-duration:18s">' + wave(46, 'rgba(70,120,200,.22)') + '</div>');
+    h.push('<div class="eb-wave" style="top:68%;animation-duration:12s;animation-direction:reverse">' + wave(58, 'rgba(40,85,160,.38)') + '</div>');
+    h.push('<div class="eb-wave" style="top:76%;animation-duration:8s">' + wave(66, 'rgba(14,32,70,.8)') + '</div>');
+    return h.join('') + '</div>';
+  }
+  if (el === 'air') {
+    h.push('<div class="eb eb-air">');
+    for (var c = 0; c < 6; c++) h.push('<div class="eb-cloud" style="top:' + F(4, 62) + '%;width:' + F(520, 900) + 'px;height:' + F(110, 220) + 'px;animation-duration:' + F(26, 48) + 's;animation-delay:-' + F(0, 40) + 's"></div>');
+    for (var w = 0; w < 9; w++) h.push('<div class="eb-wind" style="top:' + F(8, 78) + '%;width:' + F(220, 460) + 'px;animation-duration:' + F(3.5, 7) + 's;animation-delay:-' + F(0, 7) + 's"></div>');
+    for (var t = 0; t < 13; t++) { var tw = R(120, 210), th = R(300, 520), tc = ['#0b0f1d', '#0e1324', '#10162a'][t % 3];
+      h.push('<svg class="eb-tree" viewBox="0 0 100 200" style="left:' + (t * 8.4 - 6).toFixed(1) + '%;width:' + tw.toFixed(0) + 'px;height:' + th.toFixed(0) + 'px;animation-duration:' + F(2.4, 4.2) + 's;animation-delay:-' + F(0, 4) + 's"><rect x="46" y="150" width="8" height="50" fill="' + tc + '"/><polygon points="50,0 82,70 18,70" fill="' + tc + '"/><polygon points="50,40 90,115 10,115" fill="' + tc + '"/><polygon points="50,85 96,160 4,160" fill="' + tc + '"/></svg>'); }
+    return h.join('') + '</div>';
+  }
+  h.push('<div class="eb eb-earth"><div class="eb-mtn"><svg viewBox="0 0 1080 1920" preserveAspectRatio="xMidYMid slice"><g transform="translate(0,330)">' +
+    '<polygon points="0,1330 150,1210 300,1290 470,1130 630,1270 800,1160 1080,1310 1080,1920 0,1920" fill="#2a2640"/>' +
+    '<polygon points="0,1510 220,1390 420,1260 540,1010 650,1240 790,1350 1080,1490 1080,1920 0,1920" fill="#1c1f33"/>' +
+    '<polygon points="540,1010 497,1105 525,1092 548,1120 574,1092 598,1110 585,1060" fill="rgba(238,234,242,.6)"/>' +
+    '<polygon points="0,1690 260,1600 520,1670 800,1580 1080,1660 1080,1920 0,1920" fill="#12131f"/></g></svg></div>' +
+    '<div class="eb-mist" style="top:74%"></div><div class="eb-mist" style="top:84%;animation-delay:-5s;animation-direction:alternate-reverse"></div></div>');
+  return h.join('');
+}
 function wordCount(t) { return (t.trim().match(/\S+/g) || []).length; }
 function lc1(t) { return /^(New|Full|Solar|Lunar|Numerology|A |An |The )/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t; }
 function spokenRange(r, ref) {
@@ -1789,6 +1859,9 @@ function buildLinkShort() {
   var audioSets = {}, audioCtx = null, run = null, recording = null;
   function audioKey() { return ui.tab === 'video' ? 'v|' + mkey() : (ui.shortMode === 'num' ? 'n|' + mkey() + '|' + ui.numWhich : ui.shortMode === 'bday' ? 'b|' + mkey() : ui.shortMode === 'cz' ? 'c|' + mkey() : ui.shortMode === 'tour' ? 't|' + mkey() : ui.shortMode === 'link' ? 'l|link' : ui.shortMode === 'chart' ? 'ch|chart' : ui.shortMode === 'arch' ? 'a|' + mkey() + '|' + ui.archN : ui.shortMode === 'week' ? 'w|' + weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS) : 's|' + signKey() + '|' + ui.shortSign + (ui.signFmt === 'quick' ? '|q' : '')); }
   function curAudio() { return audioSets[audioKey()] || []; }
+  function ebOn() { return st.elBg !== false; }
+  function ebHtml(Sg) { return ebOn() ? ebg(Sg.el).replace('%GLYPH%', Sg.glyph + VS) : ''; }
+  function ebCls(Sg) { return ebOn() ? ' has-eb has-eb-' + Sg.el : ''; }
   function sceneCount() { return ui.tab === 'video' ? secsCache.length : curShort().parts.length; }
   function curIndex() { return ui.tab === 'video' ? ui.scene : ui.shortScene; }
   function setIndex(i) { if (ui.tab === 'video') ui.scene = i; else ui.shortScene = i; }
@@ -2071,7 +2144,7 @@ function buildLinkShort() {
   function scene916(i, sh, S) {
     if (sh.quick) return scene916quick(i, sh, S);
     var r = sh.r, Sg = r.sign, Mon = S.win ? S.label : d(S.start, { month: 'long' }), hl = {}; r.top.forEach(function (t) { t.houses.forEach(function (h) { hl[h] = hl[h] || 1; }); }); hl[r.theme] = 2;
-    if (i === 0) return '<div class="v v-tall"><div class="v-signglyph" style="font-size:420px">' + Sg.glyph + VS + '</div><div class="v-h1" style="font-size:150px;text-align:center">' + Sg.name + '</div><div class="a3 v-sub" style="font-size:64px;text-align:center">' + (S.win ? 'Your next ' + (S.days === 14 ? '2' : '4') + ' weeks<br>' + S.label : Mon + ' in under a minute') + '</div><div class="a4" style="margin-top:80px">' + wordmark(90) + '</div></div>';
+    if (i === 0) return '<div class="v v-tall' + ebCls(Sg) + '">' + ebHtml(Sg) + '<div class="v-signglyph" style="font-size:420px">' + Sg.glyph + VS + '</div><div class="v-h1" style="font-size:150px;text-align:center">' + Sg.name + '</div><div class="a3 v-sub" style="font-size:64px;text-align:center">' + (S.win ? 'Your next ' + (S.days === 14 ? '2' : '4') + ' weeks<br>' + S.label : Mon + ' in under a minute') + '</div><div class="a4" style="margin-top:80px">' + wordmark(90) + '</div></div>';
     if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">Your focus</div><div class="a2 v-h1" style="text-align:center;font-size:92px">Your ' + ord(r.theme) + ' house</div><div class="a3 v-sub" style="font-size:60px;text-align:center">' + HOUSE_SHORT[r.theme] + '</div><div class="a4" style="margin-top:60px">' + ringSVG(r.si, hl, 820) + '</div></div>';
     if (i === 2) return '<div class="v v-tall" style="justify-content:flex-start;padding-top:260px"><div class="a1 v-kicker">Key dates</div>' + (sh.t2 || r.top.slice(0, 2)).map(function (t, k) { return '<div class="a' + (k + 2) + ' v-ev v-ev-tall"><div class="v-evd"><span>' + d(t.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(t.ms).getDate() + '</div><div><b>' + esc(t.title) + '</b><div>' + esc(t.read) + '</div></div></div>'; }).join('') + '</div>';
     if (i === 3) {
@@ -2180,7 +2253,7 @@ function buildLinkShort() {
   }
   function scene916quick(i, sh, S) {
     var r = sh.r, Sg = r.sign, b1 = sh.b1, b2 = sh.b2, rng = S.win ? S.label : d(S.start, { month: 'long' });
-    if (i === 0) return '<div class="v v-tall q-hook"><div class="v-signglyph" style="font-size:300px">' + Sg.glyph + VS + '</div><div class="v-h1" style="font-size:120px;text-align:center">' + Sg.name + '</div>' +
+    if (i === 0) return '<div class="v v-tall q-hook' + ebCls(Sg) + '">' + ebHtml(Sg) + '<div class="v-signglyph" style="font-size:300px">' + Sg.glyph + VS + '</div><div class="v-h1" style="font-size:120px;text-align:center">' + Sg.name + '</div>' +
       (b1 ? '<div class="q-date"><span>' + d(b1.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(b1.ms).getDate() + '</div><div class="v-h1 q-title">' + esc(sh.t1) + '</div>' : '') + '<div class="v-sub" style="font-size:44px">' + rng + '</div></div>';
     if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">What it means for ' + Sg.name + '</div>' + (b1 ? '<div class="a2 v-ev v-ev-tall"><div class="v-evd"><span>' + d(b1.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(b1.ms).getDate() + '</div><div><b>' + esc(sh.t1) + '</b><div>' + esc(b1.read) + '</div></div></div>' : '') +
       (b2 ? '<div class="a3 q-also"><b>Also</b> ' + d(b2.ms, { day: 'numeric', month: 'short' }) + ' · ' + esc(b2.title) + '</div>' : '') + '</div>';
@@ -2410,7 +2483,7 @@ function buildLinkShort() {
   function viewShorts() {
     var cs = curShort(), n = cs.parts.length, i = Math.min(ui.shortScene, n - 1), p = cs.parts[i], all = cs.parts.map(function (x) { return x.text; }).join(' ');
     var picker = ui.shortMode === 'chart' ? '<p class="s-hint" style="margin:0">Evergreen: how to read a birth chart (9 o\u2019clock, counter-clockwise). Pin it, and re-post it any time.</p>' : ui.shortMode === 'link' ? '<p class="s-hint" style="margin:0">Evergreen: why astrology and numerology are one system. Pin it to your profile.</p>' : ui.shortMode === 'week' ? [0, 1, 2, 3].map(function (k) { var st0 = weekStartOf(Date.now() + k * 7 * DAY_MS); return '<button data-act="wkoff:' + k + '" aria-pressed="' + (ui.weekOff === k) + '">' + (k === 0 ? 'This week' : k === 1 ? 'Next week' : 'Week of') + ' \u00B7 ' + dShort(st0) + '</button>'; }).join('') + '<p class="s-hint" style="margin:6px 0 0;width:100%">Weeks run Monday to Sunday. Post it Monday morning. The events come from the real sky, and the signs that feel it most come from the week\u2019s biggest event.</p>' : ui.shortMode === 'arch' ? ARCH_ORDER.map(function (k) { return '<button data-act="anum:' + k + '" aria-pressed="' + (ui.archN === k) + '">' + (k ? k + ' \u00B7 ' + ARCH[k].name.replace('The ', '') : 'Numerology 101') + '</button>'; }).join('') + '<p class="s-hint" style="margin:6px 0 0;width:100%">An evergreen series: start with Numerology 101, then one number at a time. Money, love, happiness and the ruling planet, then how to find that number in your own life.</p>' : ui.shortMode === 'tour' ? '<p class="s-hint" style="margin:0">The landing page as a Reel: free features, Pro, family, pets and the passes. Evergreen, so pin it to your profile and re-post it whenever you like.</p>' : ui.shortMode === 'bday' ? '<p class="s-hint" style="margin:0">Evergreen: one Short covers every birthday. The example day changes with the month, so you can re-post it.</p>' : ui.shortMode === 'cz' ? '<p class="s-hint" style="margin:0">Evergreen, with the New Year dates worked out from the real Sun and Moon. Great to post in January, ahead of Chinese New Year.</p>' : ui.shortMode === 'sign'
-      ? '<div class="s-signs" style="width:100%;margin-bottom:6px">' + [['full', 'Full (~60s)'], ['quick', 'Quick (~30s)']].map(function (x) { return '<button data-act="sfmt:' + x[0] + '" aria-pressed="' + ((ui.signFmt || 'full') === x[0]) + '">' + x[1] + '</button>'; }).join('') + '<span style="width:14px"></span>' + [['month', 'Monthly'], ['2w', 'Next 2 weeks'], ['4w', 'Next 4 weeks']].map(function (x) { return '<button data-act="sper:' + x[0] + '" aria-pressed="' + ((ui.signPer || 'month') === x[0]) + '">' + x[1] + '</button>'; }).join('') + ((ui.signPer || 'month') !== 'month' ? [0, 1].map(function (k) { return '<button data-act="soff:' + k + '" aria-pressed="' + ((ui.signOff || 0) === k) + '">From ' + (k ? 'next' : 'this') + ' Monday \u00B7 ' + dShort(weekStartOf(Date.now()) + k * 7 * DAY_MS) + '</button>'; }).join('') + '<span class="s-hint" style="margin:0 0 0 8px;align-self:center">' + signSky().label + '</span>' : '') + '</div>' + SIGNS.map(function (x, k) { return '<button data-act="ssign:' + k + '" aria-pressed="' + (ui.shortSign === k) + '">' + x.glyph + VS + ' ' + x.name + '</button>'; }).join('')
+      ? '<div class="s-signs" style="width:100%;margin-bottom:6px">' + [['full', 'Full (~60s)'], ['quick', 'Quick (~30s)']].map(function (x) { return '<button data-act="sfmt:' + x[0] + '" aria-pressed="' + ((ui.signFmt || 'full') === x[0]) + '">' + x[1] + '</button>'; }).join('') + '<span style="width:14px"></span><button data-act="elbg" aria-pressed="' + (st.elBg !== false) + '">Element backgrounds</button><span style="width:14px"></span>' + [['month', 'Monthly'], ['2w', 'Next 2 weeks'], ['4w', 'Next 4 weeks']].map(function (x) { return '<button data-act="sper:' + x[0] + '" aria-pressed="' + ((ui.signPer || 'month') === x[0]) + '">' + x[1] + '</button>'; }).join('') + ((ui.signPer || 'month') !== 'month' ? [0, 1].map(function (k) { return '<button data-act="soff:' + k + '" aria-pressed="' + ((ui.signOff || 0) === k) + '">From ' + (k ? 'next' : 'this') + ' Monday \u00B7 ' + dShort(weekStartOf(Date.now()) + k * 7 * DAY_MS) + '</button>'; }).join('') + '<span class="s-hint" style="margin:0 0 0 8px;align-self:center">' + signSky().label + '</span>' : '') + '</div>' + SIGNS.map(function (x, k) { return '<button data-act="ssign:' + k + '" aria-pressed="' + (ui.shortSign === k) + '">' + x.glyph + VS + ' ' + x.name + '</button>'; }).join('')
       : '<button data-act="nwhich:0" aria-pressed="' + (ui.numWhich === 0) + '">All 9 (work it out)</button>' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (k) { return '<button data-act="nwhich:' + k + '" aria-pressed="' + (ui.numWhich === k) + '">Month ' + k + '</button>'; }).join('');
     var secs = all.length ? wordCount(all) / st.wpm * 60 : 0;
     return '<div class="s-pad"><div class="s-signs" style="margin-bottom:10px"><button data-act="smode:sign" aria-pressed="' + (ui.shortMode === 'sign') + '">Star sign Shorts</button><button data-act="smode:week" aria-pressed="' + (ui.shortMode === 'week') + '">Your week</button><button data-act="smode:num" aria-pressed="' + (ui.shortMode === 'num') + '">Numbers Shorts</button><button data-act="smode:bday" aria-pressed="' + (ui.shortMode === 'bday') + '">Birthday Number</button><button data-act="smode:cz" aria-pressed="' + (ui.shortMode === 'cz') + '">Chinese zodiac</button><button data-act="smode:tour" aria-pressed="' + (ui.shortMode === 'tour') + '">App tour</button><button data-act="smode:arch" aria-pressed="' + (ui.shortMode === 'arch') + '">Number archetypes</button><button data-act="smode:link" aria-pressed="' + (ui.shortMode === 'link') + '">Stars \u00D7 Numbers</button><button data-act="smode:chart" aria-pressed="' + (ui.shortMode === 'chart') + '">Read a chart</button></div>' +
@@ -2486,6 +2559,7 @@ function buildLinkShort() {
       else if (arg === '169') saveThumb(ui.shortSign, 1280, 720); else saveThumb(ui.shortSign, 1080, 1920);
     }
     else if (act === 'kitcopy') { var kk2 = ui.kit || curKit(); copy(arg === 'title' ? kk2.yt.title : arg === 'desc' ? kk2.yt.desc : arg === 'tags' ? kk2.yt.tags.join(', ') : kk2.ig.caption, el); }
+    else if (act === 'elbg') { stopRun(); st.elBg = st.elBg === false; persist(); render(); }
     else if (act === 'sfmt') { stopRun(); ui.signFmt = arg; ui.shortScene = 0; render(); }
     else if (act === 'sper') { stopRun(); ui.signPer = arg; ui.shortScene = 0; render(); }
     else if (act === 'soff') { stopRun(); ui.signOff = +arg; ui.shortScene = 0; render(); }
