@@ -55,6 +55,19 @@ ol{padding-left:20px;color:var(--ink2)} li{margin-bottom:6px}
 a{color:var(--accent)}
 [hidden]{display:none!important}
 .spin{color:var(--muted)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0 0}
+.seg button{border:1.5px solid var(--line);background:var(--surface);color:var(--ink2);border-radius:12px;padding:11px 10px;font-weight:600;font-size:15px}
+.seg button[aria-pressed="true"]{border-color:var(--accent);color:var(--ink);background:#252a4a}
+.giftcard.xmas{padding-top:16px}
+.gc-art{margin:0 -12px 6px}
+.gc-art svg{display:block;width:100%;height:auto}
+.gc-sky{margin-top:24px;padding-top:18px;border-top:1px solid var(--line);text-align:left}
+.gc-sky h3{font-family:var(--serif);font-weight:600;font-size:19px;line-height:1.25;margin:0 0 12px;text-align:center}
+.pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 14px}
+.pill{font-size:12.5px;padding:4px 10px;border-radius:999px;border:1px solid #4A4657;color:var(--ink2);display:inline-flex;align-items:center;gap:6px}
+.pill i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.gc-sky p{font-size:14.5px;color:var(--ink2);margin:0 0 10px}
+.gc-sky p.gc-small{text-align:center;margin-top:14px}
 </style>
 </head>
 <body>
@@ -67,6 +80,7 @@ a{color:var(--accent)}
     <h1>Give the gift of <em>the stars</em></h1>
     <p>90 days of Duology Pro for someone you care about: their full chart, forecast and numbers, plus family and pet charts. You write the message, then send them the card yourself.</p>
 
+    <div class="seg" role="group" aria-label="Card style"><button type="button" id="st-xmas">Christmas card</button><button type="button" id="st-classic">Classic card</button></div>
     <div class="giftcard" id="preview" aria-label="Card preview"></div>
     <p class="fine" style="text-align:center;margin-top:8px">This is your card. It updates as you type.</p>
 
@@ -144,6 +158,153 @@ a{color:var(--accent)}
   var qs = new URLSearchParams(location.search);
   var view = null, giftRec = null;
 
+  // ===== Christmas card art =====
+  // Planet positions are the real ecliptic longitudes on Christmas Day (12:00 UTC), worked out with Duology's own astronomy engine.
+  // Order: Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto
+  var XM = (function () {
+    var POS = {
+    2026: [273.7, 114.2, 269.6, 227.2, 158.9, 146.8, 8.2, 62.5, 1.6, 304.2],
+    2027: [273.5, 246.5, 281.2, 307, 292.9, 177, 21.1, 66.9, 3.9, 305.8],
+    2028: [274.2, 21.6, 292.7, 252.9, 181.7, 204.2, 34.6, 71.3, 6.1, 307.4],
+    2029: [274, 147.3, 286.7, 292.5, 309.6, 229.4, 48.7, 75.8, 8.3, 309],
+    2030: [273.7, 284.6, 255.6, 289.9, 199.1, 254, 63.4, 80.3, 10.6, 310.6],
+    2031: [273.5, 57.3, 253.3, 235.3, 326.8, 278.8, 78.5, 84.9, 12.8, 312.1],
+    2032: [274.3, 191.2, 263.8, 320.9, 214.7, 305.2, 93.7, 89.4, 15.1, 313.6]
+  };
+    var NAMES = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+    var SIGNS = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+    var COL = [ // highlight, body, shadow
+      ['#FFF3B0', '#F2B84B', '#B8741A'], ['#FFFFFF', '#D9DEEC', '#8E97B5'], ['#CFF7E6', '#3FBF9A', '#1B6B57'], ['#FFD3E8', '#EE6FA8', '#9B2D62'],
+      ['#FFC8BE', '#E04F4F', '#8A1F25'], ['#EBD9FF', '#9B6BE0', '#533093'], ['#FFEBBD', '#C9953A', '#6B4A14'], ['#C9F2FF', '#4EB8E6', '#1D6A91'],
+      ['#CDD9FF', '#4F6FE0', '#25358F'], ['#F2C9C9', '#9B3B4A', '#4A1523']];
+    var SIZE = [25, 21, 16, 19, 18, 23, 21, 17, 17, 14];
+    var EL = ['#7A2430', '#1F5A43', '#8A6B2E', '#26427A']; // fire, earth, air, water
+    var CX = 300, CY = 268, RO = 250, RI = 205;
+    function rng(seed) { var a = seed >>> 0; return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+    function f(n) { return Math.round(n * 10) / 10; }
+    function pt(r, L) { var a = (180 + L) * Math.PI / 180; return [CX + r * Math.cos(a), CY - r * Math.sin(a)]; }
+    function tinsel(r, n, cols, outLen, inLen, seed, cordW) {
+      var R = rng(seed), o = ['<circle cx="' + CX + '" cy="' + CY + '" r="' + r + '" fill="none" stroke="' + cols[0] + '" stroke-width="' + cordW + '" opacity=".9"/>'];
+      for (var k = 0; k < n; k++) {
+        var th = 2 * Math.PI * k / n, wob = Math.sin(k * 1.7) * 1.8, tilt = (k % 2 ? 1 : -1) * (.32 + R() * .28);
+        for (var s = -1; s <= 1; s += 2) {
+          var l = (s > 0 ? outLen : inLen) * (.75 + R() * .5), a2 = th + s * tilt * (l / 40);
+          var x1 = CX + (r + wob) * Math.cos(th), y1 = CY + (r + wob) * Math.sin(th);
+          var x2 = CX + (r + wob + s * l) * Math.cos(a2), y2 = CY + (r + wob + s * l) * Math.sin(a2);
+          o.push('<line x1="' + f(x1) + '" y1="' + f(y1) + '" x2="' + f(x2) + '" y2="' + f(y2) + '" stroke="' + cols[(k + (s > 0 ? 1 : 0)) % cols.length] + '" stroke-width="' + f(1.2 + R() * .9) + '" stroke-linecap="round" opacity=".95"/>');
+        }
+      }
+      return o.join('');
+    }
+    function scallops(cols, seed) {
+      var R = rng(seed), o = [];
+      for (var i = 0; i < 12; i++) {
+        var L0 = i * 30 + .6, L1 = i * 30 + 29.4, a = pt(RI, L0), b = pt(RI, L1), c = pt(RI - 58, i * 30 + 15);
+        o.push('<path d="M' + f(a[0]) + ' ' + f(a[1]) + 'Q' + f(c[0]) + ' ' + f(c[1]) + ' ' + f(b[0]) + ' ' + f(b[1]) + '" fill="none" stroke="' + cols[i % 2] + '" stroke-width="4" stroke-linecap="round" opacity=".9"/>');
+        for (var k = 0; k <= 34; k++) {
+          var t = k / 34, x = (1 - t) * (1 - t) * a[0] + 2 * (1 - t) * t * c[0] + t * t * b[0], y = (1 - t) * (1 - t) * a[1] + 2 * (1 - t) * t * c[1] + t * t * b[1];
+          var tx = 2 * (1 - t) * (c[0] - a[0]) + 2 * t * (b[0] - c[0]), ty = 2 * (1 - t) * (c[1] - a[1]) + 2 * t * (b[1] - c[1]), tl = Math.hypot(tx, ty) || 1, nx = -ty / tl, ny = tx / tl;
+          for (var sd = -1; sd <= 1; sd += 2) {
+            var l = 7 + R() * 6, tw = (k % 2 ? 1 : -1) * .5;
+            o.push('<line x1="' + f(x) + '" y1="' + f(y) + '" x2="' + f(x + sd * nx * l + tx / tl * tw * l) + '" y2="' + f(y + sd * ny * l + ty / tl * tw * l) + '" stroke="' + cols[(k + (sd > 0 ? 1 : 0) + i) % cols.length] + '" stroke-width="' + f(1.2 + R() * .8) + '" stroke-linecap="round" opacity=".95"/>');
+          }
+        }
+      }
+      return o.join('');
+    }
+    function sparkle(x, y, s, c) { return '<path d="M' + x + ' ' + (y - s) + 'Q' + x + ' ' + y + ' ' + (x + s) + ' ' + y + 'Q' + x + ' ' + y + ' ' + x + ' ' + (y + s) + 'Q' + x + ' ' + y + ' ' + (x - s) + ' ' + y + 'Q' + x + ' ' + y + ' ' + x + ' ' + (y - s) + 'Z" fill="' + c + '"/>'; }
+    function gbox(x, y, w, h, body, rib, bow, id) {
+      var cx = x + w / 2, o = [];
+      o.push('<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="3" fill="' + body + '"/>');
+      o.push('<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="3" fill="url(#bsh)"/>');
+      o.push('<rect x="' + (x - 4) + '" y="' + (y - 4) + '" width="' + (w + 8) + '" height="15" rx="3" fill="' + body + '"/>');
+      o.push('<rect x="' + (x - 4) + '" y="' + (y - 4) + '" width="' + (w + 8) + '" height="15" rx="3" fill="url(#bsh)"/>');
+      o.push('<rect x="' + (cx - 6) + '" y="' + (y - 4) + '" width="12" height="' + (h + 4) + '" fill="' + rib + '"/>');
+      o.push('<rect x="' + x + '" y="' + (y + h * .45) + '" width="' + w + '" height="9" fill="' + rib + '" opacity=".95"/>');
+      o.push('<g transform="translate(' + cx + ' ' + (y - 5) + ')"><ellipse cx="-13" cy="-5" rx="13" ry="7" transform="rotate(-28 -13 -5)" fill="' + bow + '"/><ellipse cx="13" cy="-5" rx="13" ry="7" transform="rotate(28 13 -5)" fill="' + bow + '"/><ellipse cx="-13" cy="-5" rx="6" ry="3" transform="rotate(-28 -13 -5)" fill="#000" opacity=".18"/><ellipse cx="13" cy="-5" rx="6" ry="3" transform="rotate(28 13 -5)" fill="#000" opacity=".18"/><circle cx="0" cy="-1" r="5" fill="' + bow + '"/><circle cx="-1.5" cy="-2.5" r="1.8" fill="#fff" opacity=".5"/></g>');
+      return o.join('');
+    }
+    function art(year, pre) {
+      var P = POS[year]; if (!P) return '';
+      var R = rng(year * 7 + 3), o = [];
+      o.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 640" width="600" height="640" role="img" aria-label="Christmas Day ' + year + ' birth-chart style wheel, decorated with tinsel, with the planets hanging as baubles above wrapped gifts">');
+      o.push('<defs><radialGradient id="disc" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#262A52"/><stop offset="1" stop-color="#15141D"/></radialGradient>' +
+        '<linearGradient id="bsh" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient>' +
+        '<linearGradient id="snow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EAF0FF" stop-opacity=".85"/><stop offset="1" stop-color="#EAF0FF" stop-opacity=".25"/></linearGradient>' +
+        '<radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#F2C94C" stop-opacity=".55"/><stop offset="1" stop-color="#F2C94C" stop-opacity="0"/></radialGradient>');
+      COL.forEach(function (c, i) { o.push('<radialGradient id="b' + i + '" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="' + c[0] + '"/><stop offset=".5" stop-color="' + c[1] + '"/><stop offset="1" stop-color="' + c[2] + '"/></radialGradient>'); });
+      o.push('</defs>');
+      // snow and sparkles in the corners
+      for (var i = 0; i < 46; i++) { var sx = R() * 600, sy = R() * 600; if (Math.hypot(sx - CX, sy - CY) < RO + 8) continue; o.push('<circle cx="' + f(sx) + '" cy="' + f(sy) + '" r="' + f(.8 + R() * 1.6) + '" fill="#fff" opacity="' + f(.35 + R() * .5) + '"/>'); }
+      o.push(sparkle(46, 52, 12, '#F2C94C') + sparkle(556, 70, 9, '#fff') + sparkle(34, 300, 7, '#fff') + sparkle(566, 330, 11, '#F2C94C') + sparkle(70, 470, 8, '#F2C94C') + sparkle(540, 480, 7, '#fff'));
+      // chart disc, zodiac band
+      o.push('<circle cx="' + CX + '" cy="' + CY + '" r="' + RI + '" fill="url(#disc)" stroke="#fff" stroke-opacity=".18"/>');
+      for (var s = 0; s < 12; s++) {
+        var a = pt(RO, s * 30), b = pt(RO, s * 30 + 30), c = pt(RI, s * 30 + 30), d = pt(RI, s * 30);
+        o.push('<path d="M' + f(a[0]) + ' ' + f(a[1]) + 'A' + RO + ' ' + RO + ' 0 0 0 ' + f(b[0]) + ' ' + f(b[1]) + 'L' + f(c[0]) + ' ' + f(c[1]) + 'A' + RI + ' ' + RI + ' 0 0 1 ' + f(d[0]) + ' ' + f(d[1]) + 'Z" fill="' + EL[s % 4] + '" fill-opacity=".8" stroke="#fff" stroke-opacity=".28" stroke-width="1"/>');
+      }
+      o.push('<circle cx="' + CX + '" cy="' + CY + '" r="120" fill="none" stroke="#fff" stroke-opacity=".08"/><circle cx="' + CX + '" cy="' + CY + '" r="62" fill="none" stroke="#fff" stroke-opacity=".08"/>');
+      for (var h = 0; h < 6; h++) { var p1 = pt(RI, h * 30), p2 = pt(RI, h * 30 + 180); o.push('<line x1="' + f(p1[0]) + '" y1="' + f(p1[1]) + '" x2="' + f(p2[0]) + '" y2="' + f(p2[1]) + '" stroke="#fff" stroke-opacity=".07"/>'); }
+      // centre star
+      o.push('<circle cx="' + CX + '" cy="' + CY + '" r="46" fill="url(#glow)"/>' + sparkle(CX, CY, 30, '#F2C94C') + '<circle cx="' + CX + '" cy="' + CY + '" r="3.5" fill="#FFF3B0"/>');
+      o.push(scallops(['#E6EAF2', '#4FB783', '#F2C94C', '#B9C2D6'], year * 13 + 5));
+      // planets as hanging baubles
+      var items = P.map(function (L, i) { return { i: i, L: L }; }).sort(function (x, y) { return x.L - y.L; }), placed = [], cands = [158, 124, 140, 104, 170, 88];
+      items.forEach(function (it) {
+        var best = null, bestD = -1;
+        cands.forEach(function (r) { var p = pt(r, it.L), md = 999; placed.forEach(function (q) { md = Math.min(md, Math.hypot(p[0] - q.x, p[1] - q.y) - SIZE[it.i] - SIZE[q.i]); }); if (md > bestD + (best === null ? 0 : 6)) { bestD = md; best = r; } });
+        var p = pt(best, it.L); placed.push({ i: it.i, x: p[0], y: p[1], L: it.L, r: best });
+      });
+      placed.sort(function (x, y) { return y.r - x.r; }); // inner ones first so outer ones overlap them
+      placed.forEach(function (q) {
+        var rim = pt(RI + 2, q.L), dx = rim[0] - q.x, dy = rim[1] - q.y, dl = Math.hypot(dx, dy), ux = dx / dl, uy = dy / dl, br = SIZE[q.i];
+        var capx = q.x + ux * (br + 3), capy = q.y + uy * (br + 3), deg = Math.atan2(uy, ux) * 180 / Math.PI + 90;
+        o.push('<line x1="' + f(rim[0]) + '" y1="' + f(rim[1]) + '" x2="' + f(capx) + '" y2="' + f(capy) + '" stroke="#DADFEE" stroke-width="1.3" opacity=".85"/>');
+        o.push('<circle cx="' + f(q.x + 3) + '" cy="' + f(q.y + 5) + '" r="' + br + '" fill="#000" opacity=".25"/>');
+        o.push('<circle cx="' + f(q.x) + '" cy="' + f(q.y) + '" r="' + br + '" fill="url(#b' + q.i + ')"/>');
+        o.push('<ellipse cx="' + f(q.x) + '" cy="' + f(q.y) + '" rx="' + br + '" ry="' + f(br * .32) + '" transform="rotate(' + f(deg - 90) + ' ' + f(q.x) + ' ' + f(q.y) + ')" fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="1.6"/>');
+        o.push('<ellipse cx="' + f(q.x - br * .36) + '" cy="' + f(q.y - br * .4) + '" rx="' + f(br * .26) + '" ry="' + f(br * .16) + '" transform="rotate(-35 ' + f(q.x - br * .36) + ' ' + f(q.y - br * .4) + ')" fill="#fff" opacity=".7"/>');
+        o.push('<g transform="translate(' + f(capx) + ' ' + f(capy) + ') rotate(' + f(deg) + ')"><rect x="-4.5" y="-5" width="9" height="6" rx="1.5" fill="#E9C46A"/><circle cx="0" cy="-8" r="2.6" fill="none" stroke="#E9C46A" stroke-width="1.3"/></g>');
+      });
+      // tinsel: lots of it
+      o.push(tinsel(RO, 420, ['#F2C94C', '#E04F5F', '#FFF1B8', '#C8323F'], 16, 5, year * 3 + 1, 5));
+      o.push(tinsel(RI, 300, ['#E6EAF2', '#4FB783', '#B9C2D6', '#2E8F63'], 5, 6, year * 5 + 2, 4));
+      // snowy ground and gifts underneath
+      o.push('<ellipse cx="300" cy="636" rx="296" ry="14" fill="url(#snow)"/>');
+      o.push(gbox(40, 568, 90, 62, '#B3263A', '#F2C94C', '#F2C94C') + gbox(140, 548, 70, 82, '#1F6B4E', '#E6EAF2', '#E04F5F') + gbox(225, 560, 150, 70, '#3A4FA8', '#F2C94C', '#E04F5F') +
+        gbox(388, 552, 72, 78, '#D4A24C', '#B3263A', '#1F6B4E') + gbox(470, 574, 84, 56, '#7A3A9A', '#E6EAF2', '#F2C94C'));
+      o.push('</svg>');
+      pre = pre || '';
+      return o.join('').replace(/id="(disc|bsh|snow|glow|b\d)"/g, 'id="' + pre + '$1"').replace(/url\(#(disc|bsh|snow|glow|b\d)\)/g, 'url(#' + pre + '$1)');
+    }
+    function reduce(n) { while (n > 9 && n !== 11 && n !== 22 && n !== 33) n = String(n).split('').reduce(function (a, b) { return a + +b; }, 0); return n; }
+    var MEAN = { 1: 'a fresh start', 2: 'togetherness and balance', 3: 'joy and sharing', 4: 'steady foundations', 5: 'change and adventure', 6: 'home, family and care', 7: 'reflection and quiet wonder', 8: 'abundance and reward', 9: 'completion and giving', 11: 'inspiration and insight', 22: 'building something lasting', 33: 'loving generosity' };
+    function sky(year) {
+      var P = POS[year]; if (!P) return null;
+      var sign = function (i) { return SIGNS[Math.floor(P[i] / 30) % 12]; };
+      var dayN = reduce(25), full = reduce(dayN + reduce(12) + reduce(year));
+      return {
+        year: year,
+        pills: NAMES.map(function (n, i) { return { name: n, sign: sign(i), col: COL[i][1] }; }),
+        astro: 'The Sun has just stepped into ' + sign(0) + ', a few days after the December solstice, the turning point of the Sun\u2019s year. Jupiter, planet of generosity, is in ' + sign(5) + '. Venus, planet of love, is in ' + sign(3) + '. The Moon is in ' + sign(1) + '.',
+        num: 'Christmas Day is a ' + dayN + ' day (25 → 2 + 5 = ' + dayN + '), the number of ' + MEAN[dayN] + '. The whole date, 25/12/' + year + ', adds up to ' + full + ', the number of ' + MEAN[full] + '.',
+        sun: sign(0), moon: sign(1)
+      };
+    }
+    function pickYear(now) { var y = now.getFullYear(), m = now.getMonth(), d = now.getDate(); if (m === 0 && d <= 6) y -= 1; var ks = Object.keys(POS).map(Number); return Math.min(Math.max(y, ks[0]), ks[ks.length - 1]); }
+    function inSeason(now) { var m = now.getMonth(), d = now.getDate(); return m >= 9 || (m === 0 && d <= 6); }
+    return { art: art, sky: sky, pickYear: pickYear, inSeason: inSeason };
+  })();
+
+  // Card style: ?style= in the link wins, then the buyer's own choice on this device, then Christmas from 1 October to 6 January.
+  var style = (function () {
+    var q = qs.get('style'); if (q === 'xmas' || q === 'classic') return q;
+    try { var v = localStorage.getItem('duology.giftstyle'); if (v === 'xmas' || v === 'classic') return v; } catch (e) {}
+    return XM.inSeason(new Date()) ? 'xmas' : 'classic';
+  })();
+  var artN = 0;
+  function xmasYear() { return XM.pickYear(new Date()); }
+
   function api(path, body) {
     var opt = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {};
     return fetch(API + path, opt).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { status: r.status, d: d || {} }; }); });
@@ -155,18 +316,38 @@ a{color:var(--accent)}
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
   function fmtDate(iso) { try { return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } }
 
-  // Draws the card with textContent only, so nothing typed can inject markup.
+  // Draws the card with textContent only, so nothing typed can inject markup. (The artwork is generated here from numbers only.)
   function drawCard(node, g) {
     node.textContent = '';
-    node.appendChild(el('div', 'star', '✦'));
-    node.appendChild(el('div', 'kick', 'A gift of'));
+    var yr = xmasYear(), sky = style === 'xmas' ? XM.sky(yr) : null;
+    node.classList.toggle('xmas', !!sky);
+    if (sky) { var art = el('div', 'gc-art'); art.innerHTML = XM.art(yr, 'k' + (++artN) + '-'); node.appendChild(art); }
+    else node.appendChild(el('div', 'star', '✦'));
+    node.appendChild(el('div', 'kick', sky ? 'A Christmas gift of' : 'A gift of'));
     var h = el('h2'); h.appendChild(document.createTextNode((g.days || 90) + ' days of Duology ')); h.appendChild(el('em', '', 'Pro')); node.appendChild(h);
     if (g.to) node.appendChild(el('p', 'gc-to', 'For ' + g.to));
     if (g.message) node.appendChild(el('p', 'gc-msg', '“' + g.message + '”'));
     if (g.from) node.appendChild(el('p', 'gc-from', 'From ' + g.from));
     node.appendChild(el('div', 'gc-code', g.code || 'GIFT-XXXX-XXXX-XXXX'));
     node.appendChild(el('p', 'gc-small', 'Your ' + (g.days || 90) + ' days start when you unlock it' + (g.redeemBy ? '. Valid until ' + fmtDate(g.redeemBy) + '.' : '.')));
+    if (sky) {
+      var box = el('div', 'gc-sky');
+      box.appendChild(el('h3', '', 'The sky and the numbers on Christmas Day ' + sky.year));
+      var pl = el('div', 'pills');
+      sky.pills.forEach(function (p) { var sp = el('span', 'pill'), dot = el('i'); dot.style.background = p.col; sp.appendChild(dot); sp.appendChild(document.createTextNode(p.name + ' · ' + p.sign)); pl.appendChild(sp); });
+      box.appendChild(pl); box.appendChild(el('p', '', sky.astro)); box.appendChild(el('p', '', sky.num));
+      box.appendChild(el('p', 'gc-small', 'Planets are shown where they really sit at midday UTC on 25 December, worked out by Duology. For reflection and fun.'));
+      node.appendChild(box);
+    }
   }
+  function setStyle(v) {
+    style = v; try { localStorage.setItem('duology.giftstyle', v); } catch (e) {}
+    $('st-xmas').setAttribute('aria-pressed', String(v === 'xmas')); $('st-classic').setAttribute('aria-pressed', String(v === 'classic'));
+    preview();
+  }
+  $('st-xmas').addEventListener('click', function () { setStyle('xmas'); });
+  $('st-classic').addEventListener('click', function () { setStyle('classic'); });
+  $('st-xmas').setAttribute('aria-pressed', String(style === 'xmas')); $('st-classic').setAttribute('aria-pressed', String(style === 'classic'));
 
   // ----- buy -----
   function preview() {
@@ -209,7 +390,7 @@ a{color:var(--accent)}
       });
     })();
   }
-  function giftLink() { return PAGE + '?redeem=' + encodeURIComponent(giftRec.code); }
+  function giftLink() { return PAGE + '?redeem=' + encodeURIComponent(giftRec.code) + '&style=' + style; }
   function shareText() { return (giftRec.from ? giftRec.from + ' has given you' : 'A gift for you:') + ' 90 days of Duology Pro. Unlock it here: ' + giftLink(); }
   $('sharebtn').addEventListener('click', function () {
     if (navigator.share) navigator.share({ title: 'A gift of Duology Pro', text: shareText() }).catch(function () {});
@@ -229,31 +410,68 @@ a{color:var(--accent)}
     words.forEach(function (w) { var t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t; });
     if (line) lines.push(line); return lines;
   }
+  function download(c) { c.toBlob(function (b) { var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'Duology-gift-card.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }, 'image/png'); }
+  function boxText(x, g, y) { // to / message / from, returns the next y
+    if (g.to) { x.fillStyle = '#A9A3B5'; x.font = '400 38px Instrument Sans,Arial,sans-serif'; x.fillText('For ' + g.to, 540, y); y += 64; }
+    if (g.message) { x.fillStyle = '#EEEAF2'; x.font = 'italic 500 46px Fraunces,Georgia,serif'; wrap(x, '“' + g.message + '”', 820).slice(0, 4).forEach(function (l) { x.fillText(l, 540, y); y += 62; }); y += 8; }
+    if (g.from) { x.fillStyle = '#A9A3B5'; x.font = '400 38px Instrument Sans,Arial,sans-serif'; x.fillText('From ' + g.from, 540, y); y += 64; }
+    return y;
+  }
+  function codeBox(x, g, y) {
+    x.fillStyle = '#0f0e14'; x.fillRect(190, y - 62, 700, 100); x.setLineDash([12, 10]); x.strokeStyle = '#4A4657'; x.lineWidth = 3; x.strokeRect(190, y - 62, 700, 100); x.setLineDash([]);
+    x.fillStyle = '#EEEAF2'; x.font = '500 50px Consolas,monospace'; x.fillText(g.code, 540, y + 5);
+  }
   $('savepng').addEventListener('click', function () {
     var g = giftRec; if (!g) return;
-    var go = function () {
-      var c = document.createElement('canvas'); c.width = 1080; c.height = 1350; var x = c.getContext('2d');
-      x.fillStyle = '#14131A'; x.fillRect(0, 0, 1080, 1350);
-      var gr = x.createRadialGradient(540, 120, 40, 540, 120, 700); gr.addColorStop(0, '#2A2F5299'); gr.addColorStop(1, '#14131A00'); x.fillStyle = gr; x.fillRect(0, 0, 1080, 1350);
-      x.strokeStyle = '#E4A67366'; x.lineWidth = 3; x.strokeRect(60, 60, 960, 1230);
-      x.textAlign = 'center'; var y = 210;
-      x.fillStyle = '#E4A673'; x.font = '600 90px Georgia,serif'; x.fillText('✦', 540, y); y += 90;
-      x.font = '600 30px Instrument Sans,Arial,sans-serif'; x.fillText('A  G I F T  O F', 540, y); y += 100;
-      x.fillStyle = '#EEEAF2'; x.font = '600 84px Fraunces,Georgia,serif'; x.fillText((g.days || 90) + ' days of Duology', 540, y); y += 100;
-      x.fillStyle = '#A9B6FF'; x.font = 'italic 500 84px Fraunces,Georgia,serif'; x.fillText('Pro', 540, y); y += 90;
-      if (g.to) { x.fillStyle = '#A9A3B5'; x.font = '400 38px Instrument Sans,Arial,sans-serif'; x.fillText('For ' + g.to, 540, y); y += 70; }
-      if (g.message) { x.fillStyle = '#EEEAF2'; x.font = 'italic 500 48px Fraunces,Georgia,serif'; wrap(x, '“' + g.message + '”', 800).slice(0, 5).forEach(function (l) { x.fillText(l, 540, y); y += 66; }); y += 10; }
-      if (g.from) { x.fillStyle = '#A9A3B5'; x.font = '400 38px Instrument Sans,Arial,sans-serif'; x.fillText('From ' + g.from, 540, y); y += 70; }
-      y = Math.max(y + 30, 1010);
-      x.fillStyle = '#0f0e14'; x.fillRect(190, y - 62, 700, 100); x.setLineDash([12, 10]); x.strokeStyle = '#4A4657'; x.lineWidth = 3; x.strokeRect(190, y - 62, 700, 100); x.setLineDash([]);
-      x.fillStyle = '#EEEAF2'; x.font = '500 50px Consolas,monospace'; x.fillText(g.code, 540, y + 5);
-      x.fillStyle = '#A9A3B5'; x.font = '400 30px Instrument Sans,Arial,sans-serif';
-      x.fillText('Unlock it at scvd-app.github.io/duology/gift.html', 540, y + 100);
-      x.fillText('Your ' + (g.days || 90) + ' days start when you unlock it. Valid until ' + fmtDate(g.redeemBy) + '.', 540, y + 145);
-      x.fillStyle = '#EEEAF2'; x.font = '600 52px Fraunces,Georgia,serif'; x.fillText('Duology', 540, 1235);
-      c.toBlob(function (b) { var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'Duology-gift-card.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }, 'image/png');
+    var yr = xmasYear(), sky = style === 'xmas' ? XM.sky(yr) : null;
+    var go = function (img) {
+      var xmas = !!(sky && img), H = xmas ? 1920 : 1350;
+      var c = document.createElement('canvas'); c.width = 1080; c.height = H; var x = c.getContext('2d');
+      x.fillStyle = '#14131A'; x.fillRect(0, 0, 1080, H);
+      var gr = x.createRadialGradient(540, 120, 40, 540, 120, 800); gr.addColorStop(0, '#2A2F5299'); gr.addColorStop(1, '#14131A00'); x.fillStyle = gr; x.fillRect(0, 0, 1080, H);
+      x.strokeStyle = '#E4A67366'; x.lineWidth = 3; if (xmas) x.strokeRect(40, 40, 1000, H - 80); else x.strokeRect(60, 60, 960, 1230);
+      x.textAlign = 'center';
+      if (xmas) {
+        x.drawImage(img, 70, 70, 940, 1003);
+        var y = 1135;
+        x.fillStyle = '#E4A673'; x.font = '600 28px Instrument Sans,Arial,sans-serif'; x.fillText('A  C H R I S T M A S  G I F T  O F', 540, y); y += 78;
+        var t1 = (g.days || 90) + ' days of Duology ', t2 = 'Pro';
+        x.font = '600 70px Fraunces,Georgia,serif'; var w1 = x.measureText(t1).width; x.font = 'italic 500 70px Fraunces,Georgia,serif'; var w2 = x.measureText(t2).width;
+        x.textAlign = 'left'; var x0 = 540 - (w1 + w2) / 2;
+        x.fillStyle = '#EEEAF2'; x.font = '600 70px Fraunces,Georgia,serif'; x.fillText(t1, x0, y); x.fillStyle = '#A9B6FF'; x.font = 'italic 500 70px Fraunces,Georgia,serif'; x.fillText(t2, x0 + w1, y);
+        x.textAlign = 'center'; y += 72;
+        y = boxText(x, g, y);
+        y = Math.max(y + 30, 1578);
+        codeBox(x, g, y);
+        x.fillStyle = '#A9A3B5'; x.font = '400 29px Instrument Sans,Arial,sans-serif';
+        x.fillText('Unlock it at scvd-app.github.io/duology/gift.html', 540, y + 98);
+        x.fillText('Your ' + (g.days || 90) + ' days start when you unlock it. Valid until ' + fmtDate(g.redeemBy) + '.', 540, y + 140);
+        x.fillText('Christmas Day ' + sky.year + ': Sun in ' + sky.sun + ', Moon in ' + sky.moon, 540, y + 182);
+        x.fillStyle = '#EEEAF2'; x.font = '600 50px Fraunces,Georgia,serif'; x.fillText('Duology', 540, H - 62);
+      } else {
+        var y2 = 210;
+        x.fillStyle = '#E4A673'; x.font = '600 90px Georgia,serif'; x.fillText('✦', 540, y2); y2 += 90;
+        x.font = '600 30px Instrument Sans,Arial,sans-serif'; x.fillText('A  G I F T  O F', 540, y2); y2 += 100;
+        x.fillStyle = '#EEEAF2'; x.font = '600 84px Fraunces,Georgia,serif'; x.fillText((g.days || 90) + ' days of Duology', 540, y2); y2 += 100;
+        x.fillStyle = '#A9B6FF'; x.font = 'italic 500 84px Fraunces,Georgia,serif'; x.fillText('Pro', 540, y2); y2 += 90;
+        y2 = boxText(x, g, y2);
+        y2 = Math.max(y2 + 30, 1010);
+        codeBox(x, g, y2);
+        x.fillStyle = '#A9A3B5'; x.font = '400 30px Instrument Sans,Arial,sans-serif';
+        x.fillText('Unlock it at scvd-app.github.io/duology/gift.html', 540, y2 + 100);
+        x.fillText('Your ' + (g.days || 90) + ' days start when you unlock it. Valid until ' + fmtDate(g.redeemBy) + '.', 540, y2 + 145);
+        x.fillStyle = '#EEEAF2'; x.font = '600 52px Fraunces,Georgia,serif'; x.fillText('Duology', 540, 1235);
+      }
+      download(c);
     };
-    if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('600 40px Fraunces'), document.fonts.load('italic 500 40px Fraunces'), document.fonts.load('400 30px "Instrument Sans"')]).then(go, go); else go();
+    var fonts = function (next) {
+      if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('600 40px Fraunces'), document.fonts.load('italic 500 40px Fraunces'), document.fonts.load('400 30px "Instrument Sans"')]).then(next, next); else next();
+    };
+    fonts(function () {
+      if (!sky) { go(null); return; }
+      var im = new Image(); im.onload = function () { go(im); }; im.onerror = function () { go(null); };
+      im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(XM.art(yr));
+    });
   });
 
   // ----- redeem -----
