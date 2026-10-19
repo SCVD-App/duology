@@ -1808,7 +1808,7 @@ function buildPetReport(p, c, settings, family) {
   // Adds one to a running total, so we can see roughly how many people use Duology and which country
   // they are in. Nothing you type ever goes with it. Leave COUNT_API empty to switch counting off.
   var COUNT_API = 'https://duology-counter.emblen-scott.workers.dev';
-  var COUNT_EVENTS = ['open', 'new', 'chart', 'pro', 'gift'];
+  var COUNT_EVENTS = ['open', 'new', 'form', 'first', 'chart', 'read', 'wall', 'pro', 'gift'];
   function track(ev) {
     try {
       if (!COUNT_API || COUNT_API.indexOf('REPLACE-ME') >= 0) return;
@@ -1817,6 +1817,18 @@ function buildPetReport(p, c, settings, family) {
       var ref = (new URLSearchParams(location.search).get('ref') || '').toLowerCase();
       if (!/^[a-z]{2,10}$/.test(ref)) ref = '';
       fetch(COUNT_API + '/hit', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ e: ev, r: ref }), keepalive: true, credentials: 'omit' }).catch(function () {});
+    } catch (e) {}
+  }
+  // First-time steps (starting the form, a first chart, opening a card) are counted once per device, and the
+  // Pro screen once a day, so we can see where people get stuck. Kept on the device: a short list of step names. No ID.
+  function milestone(ev, daily) {
+    try {
+      var k = 'duology.m', cur = localStorage.getItem(k) || '', tag = daily ? ev + '@' + new Date().toISOString().slice(0, 10) : ev;
+      var have = cur ? cur.split(',') : [];
+      if (have.indexOf(tag) >= 0) return;
+      have = have.filter(function (x) { return !daily || x.split('@')[0] !== ev; });
+      have.push(tag); localStorage.setItem(k, have.join(','));
+      track(ev);
     } catch (e) {}
   }
   // Once a day per device: all that is kept on the device is today's date and a 'seen before' flag. No ID.
@@ -2211,7 +2223,7 @@ function buildPetReport(p, c, settings, family) {
     var P = function (h, t) { return '<div class="small" style="color:var(--ink2);line-height:1.55"><b style="color:var(--ink)">' + h + '</b><br>' + t + '</div>'; };
     return '<div class="stack-s">' +
       P('Your information stays on your device', 'Names, birth dates, times and places, your charts, readings and settings are all stored in this browser on this device, and nowhere else. Every calculation runs right here on your phone. We don\u2019t have accounts, a database of users or a copy of your charts, so there\u2019s nothing of yours on our side to lose, leak or sell.') +
-      P('The few things that do leave your device, and why', '<b>Place search:</b> when you type a birth place, just that text goes to Open-Meteo\u2019s free place lookup to find the coordinates and timezone. Nothing else goes with it.<br><b>Buying Pro:</b> payment is handled entirely by Stripe. We never see your card. Stripe passes us the email you paid with, and we keep it with your Pro code on our server so we can send the code again if you lose it. It\u2019s used for nothing else.<br><b>Gift cards:</b> if you buy one, Stripe handles the payment as above. We keep your email, the names and message you typed on the card, and the gift code, so the gift can be delivered and unlocked. The person you give it to can add their email when they unlock it, only so we can resend their code.<br><b>Loading the app:</b> like any website, the host (GitHub) and Google Fonts see your device\u2019s internet address when the page loads. Neither sees anything you\u2019ve typed in.<br><b>A simple head-count:</b> when you open the app we add one to a running total, along with the country your connection comes from and, if you arrived from a link, which one (like Facebook). We also add one when a chart is made or a Pro pass is tapped. There is no ID and no cookie, nothing you\u2019ve typed in goes with it, and we can\u2019t tell one person from another. Cloudflare, which runs the counter, sees your device\u2019s internet address like any host does, but we don\u2019t keep it. The only things stored on your device for this are the date it last counted you and a note that you\u2019ve opened the app before, so we can tell new from returning. If your browser\u2019s Do Not Track setting is on, we skip the count entirely.') +
+      P('The few things that do leave your device, and why', '<b>Place search:</b> when you type a birth place, just that text goes to Open-Meteo\u2019s free place lookup to find the coordinates and timezone. Nothing else goes with it.<br><b>Buying Pro:</b> payment is handled entirely by Stripe. We never see your card. Stripe passes us the email you paid with, and we keep it with your Pro code on our server so we can send the code again if you lose it. It\u2019s used for nothing else.<br><b>Gift cards:</b> if you buy one, Stripe handles the payment as above. We keep your email, the names and message you typed on the card, and the gift code, so the gift can be delivered and unlocked. The person you give it to can add their email when they unlock it, only so we can resend their code.<br><b>Loading the app:</b> like any website, the host (GitHub) and Google Fonts see your device\u2019s internet address when the page loads. Neither sees anything you\u2019ve typed in.<br><b>A simple head-count:</b> when you open the app we add one to a running total, along with the country your connection comes from and, if you arrived from a link, which one (like Facebook). We also add one when a chart is made or a Pro pass is tapped, and when you reach a few early steps for the first time (starting the form, making your first chart, opening an explanation card, seeing the Pro screen), so we can spot where people get stuck. When someone buys, our sales total goes up by one, with no name or email on it. There is no ID and no cookie, nothing you\u2019ve typed in goes with it, and we can\u2019t tell one person from another. Cloudflare, which runs the counter, sees your device\u2019s internet address like any host does, but we don\u2019t keep it. The only things stored on your device for this are the date it last counted you, a note that you\u2019ve opened the app before, and a short list of which of those first steps you\u2019ve done, so each is counted once. If your browser\u2019s Do Not Track setting is on, we skip the count entirely.') +
       P('What we don\u2019t do', 'No ads, no tracking, no accounts, no selling data, and no subscriptions. The head-count above is the only measuring we do.') +
       P('The catch, and how to cover it', 'Because your charts only live on this device, we can\u2019t recover them for you. If you clear your browser, lose your phone or switch devices, they\u2019re gone, unless you\u2019ve made a backup. A backup is a small file you keep yourself. Email it to yourself, or save it to Google Drive or iCloud, and load it back in any time. Your backup contains birth details and your Pro code, so treat it like any personal document.') +
       P('Deleting your information', '<b>Delete all my data</b> (below) wipes everything Duology has stored on this device. To have your email and Pro code removed from our server too, email ' + SUPPORT_EMAIL + '.') + '</div>';
@@ -2496,7 +2508,7 @@ function buildPetReport(p, c, settings, family) {
   function go(screen) { ui.screen = screen; ui.card = null; ui.paywall = null; ui.confirmDel = null; ui.confirmWipe = false; ui.confirmRemovePro = false; ui.codeMsg = ''; ui.restoreMsg = ''; ui.copied = false; render(); window.scrollTo(0, 0); }
 
   // ---------- Pro actions ----------
-  function openPaywall(reason) { ui.paywall = reason || 'settings'; ui.payMsg = ''; ui.codeMsg = ''; ui.card = null; render(); }
+  function openPaywall(reason) { milestone('wall', true); ui.paywall = reason || 'settings'; ui.payMsg = ''; ui.codeMsg = ''; ui.card = null; render(); }
   function buy(planId) {
     track('pro');
     if (!apiReady()) { ui.payMsg = 'Payments aren\u2019t switched on yet. Check back soon.'; render(); return; }
@@ -2622,7 +2634,7 @@ function buildPetReport(p, c, settings, family) {
     var rec = { name: f.name, date: f.date, time: f.noTime ? null : f.time, placeName: place.label, lat: place.lat, lon: place.lon, tz: place.tz, manual: !!place.manual, updated: Date.now() };
     if (ui.kind === 'pet') { rec.kind = 'pet'; rec.species = f.species || 'dog'; rec.sex = f.sex || 'girl'; }
     else if (f.nowName && f.nowName.trim().toLowerCase() !== f.name.toLowerCase()) rec.nowName = f.nowName.trim();
-    if (!ui.editId) track('chart');
+    if (!ui.editId) { if (!store.profiles.length) milestone('first'); track('chart'); }
     if (ui.editId) {
       store.profiles = store.profiles.map(function (x) { return x.id === ui.editId ? Object.assign({ id: x.id }, rec) : x; });
       store.activeId = ui.editId;
@@ -2635,6 +2647,9 @@ function buildPetReport(p, c, settings, family) {
   }
 
   // ---------- events ----------
+  root.addEventListener('focusin', function (e) {
+    var t = e.target; if (t && t.id && /^(f-(name|now|date|time|place|species|sex|notime)|m-(lat|lon|name))$/.test(t.id)) milestone('form');
+  });
   root.addEventListener('click', function (e) {
     var el = e.target.closest('[data-act]'); if (!el) return;
     if (el.classList.contains('scrim') && e.target !== el) return;
@@ -2656,8 +2671,8 @@ function buildPetReport(p, c, settings, family) {
         if (!ui.confirmRemovePro) { ui.confirmRemovePro = true; render(); break; }
         pro = null; savePro(); ui.confirmRemovePro = false; chartCache = {}; fcCache = {}; render(); break;
       case 'tab': ui.editId = null; ui.place = null; ui.formErr = ''; go(arg); break;
-      case 'card-place': if (!isPro() && !FREE_POINTS[arg]) { openPaywall('place'); break; } ui.card = { type: 'place', id: arg }; render(); break;
-      case 'card-asp': if (!isPro()) { openPaywall('aspects'); break; } ui.card = { type: 'asp', idx: +arg }; render(); break;
+      case 'card-place': if (!isPro() && !FREE_POINTS[arg]) { openPaywall('place'); break; } ui.card = { type: 'place', id: arg }; milestone('read'); render(); break;
+      case 'card-asp': if (!isPro()) { openPaywall('aspects'); break; } ui.card = { type: 'asp', idx: +arg }; milestone('read'); render(); break;
       case 'close-card': ui.card = null; render(); break;
       case 'range': ui.range = +arg; render(); break;
       case 'tag': ui.tag = arg; render(); break;
