@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Give the gift of the stars</title>
+<meta name="description" content="Give the gift of the stars: 90 days of Duology Pro, with a card and your own message. The 90 days only start when they unlock it.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#14131A;--surface:#1E1C26;--ink:#EEEAF2;--ink2:#D2CCDA;--muted:#A9A3B5;--line:#34313F;--accent:#A9B6FF;--gold:#E4A673;--danger:#FF8A80;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(900px 600px at 50% -10%,#2A2F5255,transparent 70%)}
+.wrap{max-width:560px;margin:0 auto;padding:22px 16px 64px}
+.brand{font-family:var(--serif);font-size:24px;font-weight:600;margin:6px 0 26px}
+.brand em{font-style:italic;font-weight:500;color:var(--accent)}
+h1{font-family:var(--serif);font-weight:600;font-size:34px;line-height:1.1;margin:0 0 10px}
+h1 em{font-style:italic;font-weight:500;color:var(--accent)}
+p{margin:0 0 14px;color:var(--ink2)}
+.kick{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px}
+label{display:block;font-size:14px;font-weight:600;margin:16px 0 6px}
+.opt{font-weight:400;color:var(--muted)}
+input,textarea{width:100%;font:inherit;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px}
+input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+textarea{resize:vertical;min-height:84px}
+.count{font-size:13px;color:var(--muted);text-align:right;margin-top:4px}
+button{font:inherit;cursor:pointer}
+.btn{display:block;width:100%;margin-top:22px;border:0;border-radius:14px;padding:15px 18px;font-weight:700;font-size:17px;background:var(--accent);color:#14131A}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);font-weight:600;font-size:15px;padding:12px 14px;margin-top:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.row .btn{flex:1 1 140px;margin-top:0}
+.fine{font-size:13px;color:var(--muted);margin-top:12px}
+.err{color:var(--danger);font-size:15px;margin-top:12px}
+.ok{color:var(--accent)}
+.sep{height:1px;background:var(--line);margin:34px 0 24px}
+/* the card */
+.giftcard{position:relative;margin:22px 0 6px;padding:34px 26px 28px;text-align:center;border-radius:26px;border:1.5px solid #4A4657;
+  background:radial-gradient(420px 260px at 50% 0%,#2A2F5288,transparent 75%),linear-gradient(180deg,#1E1C26,#17161E)}
+.giftcard::before{content:'';position:absolute;inset:8px;border-radius:19px;border:1px solid #E4A67355;pointer-events:none}
+.star{color:var(--gold);font-size:30px;line-height:1}
+.giftcard .kick{margin:10px 0 4px}
+.giftcard h2{font-family:var(--serif);font-weight:600;font-size:30px;line-height:1.1;margin:0 0 16px}
+.giftcard h2 em{font-style:italic;font-weight:500;color:var(--accent)}
+.gc-to{font-size:15px;color:var(--muted);margin:0 0 8px}
+.gc-msg{font-family:var(--serif);font-style:italic;font-size:19px;color:var(--ink);margin:0 0 8px;overflow-wrap:anywhere}
+.gc-from{font-size:15px;color:var(--muted);margin:0 0 18px}
+.gc-code{display:inline-block;font-family:Consolas,'SF Mono',monospace;font-size:18px;letter-spacing:.06em;border:1.5px dashed #4A4657;border-radius:12px;padding:10px 16px;background:#14131A;user-select:all}
+.gc-small{font-size:13px;color:var(--muted);margin:14px 0 0}
+.tokenbox{font-family:Consolas,'SF Mono',monospace;font-size:14px;background:#0f0e14;border:1.5px solid var(--line);border-radius:12px;padding:14px;word-break:break-all;user-select:all;margin:12px 0}
+ol{padding-left:20px;color:var(--ink2)} li{margin-bottom:6px}
+a{color:var(--accent)}
+[hidden]{display:none!important}
+.spin{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Du<em>ology</em></div>
+
+  <!-- BUY -->
+  <section id="view-buy">
+    <div class="kick">Gift card</div>
+    <h1>Give the gift of <em>the stars</em></h1>
+    <p>90 days of Duology Pro for someone you care about: their full chart, forecast and numbers, plus family and pet charts. You write the message, then send them the card yourself.</p>
+
+    <div class="giftcard" id="preview" aria-label="Card preview"></div>
+    <p class="fine" style="text-align:center;margin-top:8px">This is your card. It updates as you type.</p>
+
+    <label for="to">Their name <span class="opt">(optional)</span></label>
+    <input id="to" maxlength="40" autocomplete="off" placeholder="Sam">
+    <label for="from">Your name <span class="opt">(optional)</span></label>
+    <input id="from" maxlength="40" autocomplete="off" placeholder="Claire">
+    <label for="msg">Message <span class="opt">(optional)</span></label>
+    <textarea id="msg" maxlength="240" placeholder="Merry Christmas! Find out what the stars say about you."></textarea>
+    <div class="count"><span id="cnt">0</span> / 240</div>
+
+    <button class="btn" id="buy">Buy gift card · US$9.99</button>
+    <div class="err" id="buyerr" hidden></div>
+    <p class="fine">One-off payment, no subscription. The 90 days only start when they unlock it, and the gift stays valid for 3 years. Paid securely with Stripe.</p>
+    <div class="sep"></div>
+    <p><b>Got a gift code?</b></p>
+    <label for="code" class="opt" style="margin-top:0">Enter it here</label>
+    <input id="code" placeholder="GIFT-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <button class="btn ghost" id="gocode" style="width:100%;margin-top:12px">Open my gift</button>
+    <div class="err" id="codeerr" hidden></div>
+  </section>
+
+  <!-- AFTER PAYING -->
+  <section id="view-paid" hidden>
+    <div class="kick">Thank you</div>
+    <h1>Your gift card is <em>ready</em></h1>
+    <p id="paid-wait" class="spin" hidden>Finalising your card…</p>
+    <div id="paid-body" hidden>
+      <div class="giftcard" id="paidcard"></div>
+      <p class="fine" style="text-align:center">We've also emailed this to you.</p>
+      <div class="row">
+        <button class="btn" id="sharebtn">Share the gift</button>
+        <button class="btn ghost" id="copylink">Copy link</button>
+        <button class="btn ghost" id="savepng">Save card image</button>
+      </div>
+      <p class="fine">Send them the link or the card image, whichever you like. The 90 days only start when they unlock it, so there's no rush. Keep the code safe: anyone who has it can use it.</p>
+    </div>
+    <div class="err" id="paiderr" hidden></div>
+  </section>
+
+  <!-- REDEEM -->
+  <section id="view-redeem" hidden>
+    <div class="kick">A gift for you</div>
+    <h1>Someone's given you <em>the stars</em></h1>
+    <div class="giftcard" id="redeemcard"></div>
+    <div id="redeem-form">
+      <label for="email">Your email <span class="opt">(optional)</span></label>
+      <input id="email" type="email" autocomplete="email" placeholder="So we can resend your code if you lose it">
+      <button class="btn" id="unlock">Unlock my 90 days</button>
+      <p class="fine">Your 90 days start the moment you press this. No payment, no card, no subscription.</p>
+    </div>
+    <div id="redeem-done" hidden>
+      <h1 style="font-size:28px;margin-top:8px">It's <em>unlocked</em></h1>
+      <p id="done-note">Your 90 days of Pro start now. Here is your Pro code:</p>
+      <div class="tokenbox" id="tokenbox"></div>
+      <div class="row"><button class="btn ghost" id="copytoken">Copy code</button></div>
+      <p style="margin-top:18px"><b>To switch Pro on:</b></p>
+      <ol>
+        <li>Open <a href="https://scvd-app.github.io/duology/">Duology</a>.</li>
+        <li>Go to <b>Settings</b>, then <b>Have a code?</b></li>
+        <li>Paste your code in and tap apply.</li>
+      </ol>
+      <p class="fine">If you've no chart yet, you can build one first. It's free.</p>
+      <a class="btn" style="text-decoration:none;text-align:center" href="https://scvd-app.github.io/duology/">Open Duology</a>
+    </div>
+    <div class="err" id="redeemerr" hidden></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var API = 'https://duology.emblen-scott.workers.dev';
+  var PAGE = 'https://scvd-app.github.io/duology/gift.html';
+  var $ = function (id) { return document.getElementById(id); };
+  var qs = new URLSearchParams(location.search);
+  var view = null, giftRec = null;
+
+  function api(path, body) {
+    var opt = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {};
+    return fetch(API + path, opt).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { status: r.status, d: d || {} }; }); });
+  }
+  function show(name) {
+    ['buy', 'paid', 'redeem'].forEach(function (n) { $('view-' + n).hidden = n !== name; });
+    window.scrollTo(0, 0);
+  }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+  function fmtDate(iso) { try { return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } }
+
+  // Draws the card with textContent only, so nothing typed can inject markup.
+  function drawCard(node, g) {
+    node.textContent = '';
+    node.appendChild(el('div', 'star', '✦'));
+    node.appendChild(el('div', 'kick', 'A gift of'));
+    var h = el('h2'); h.appendChild(document.createTextNode((g.days || 90) + ' days of Duology ')); h.appendChild(el('em', '', 'Pro')); node.appendChild(h);
+    if (g.to) node.appendChild(el('p', 'gc-to', 'For ' + g.to));
+    if (g.message) node.appendChild(el('p', 'gc-msg', '“' + g.message + '”'));
+    if (g.from) node.appendChild(el('p', 'gc-from', 'From ' + g.from));
+    node.appendChild(el('div', 'gc-code', g.code || 'GIFT-XXXX-XXXX-XXXX'));
+    node.appendChild(el('p', 'gc-small', 'Your ' + (g.days || 90) + ' days start when you unlock it' + (g.redeemBy ? '. Valid until ' + fmtDate(g.redeemBy) + '.' : '.')));
+  }
+
+  // ----- buy -----
+  function preview() {
+    drawCard($('preview'), { days: 90, to: $('to').value.trim(), from: $('from').value.trim(), message: $('msg').value.trim() });
+    $('cnt').textContent = $('msg').value.length;
+  }
+  ['to', 'from', 'msg'].forEach(function (id) { $(id).addEventListener('input', preview); });
+  $('buy').addEventListener('click', function () {
+    var b = $('buy'); b.disabled = true; b.textContent = 'Taking you to checkout…'; $('buyerr').hidden = true;
+    api('/gift/create-checkout', { to: $('to').value, from: $('from').value, message: $('msg').value }).then(function (r) {
+      if (r.d.url) { location.href = r.d.url; return; }
+      throw new Error(r.d.error || 'Something went wrong');
+    }).catch(function () {
+      b.disabled = false; b.textContent = 'Buy gift card · US$9.99';
+      $('buyerr').textContent = 'We couldn’t start checkout. Please try again in a moment.'; $('buyerr').hidden = false;
+    });
+  });
+  function goCode(c, errNode) {
+    api('/gift/check', { code: c }).then(function (r) {
+      if (r.d.valid) { openRedeem(r.d); return; }
+      errNode.textContent = r.d.reason || 'That gift code isn’t valid.'; errNode.hidden = false;
+    }).catch(function () { errNode.textContent = 'Couldn’t check that just now. Please try again.'; errNode.hidden = false; });
+  }
+  $('gocode').addEventListener('click', function () { $('codeerr').hidden = true; if ($('code').value.trim()) goCode($('code').value, $('codeerr')); });
+  $('code').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('gocode').click(); });
+
+  // ----- paid -----
+  function paidFlow(sessionId) {
+    show('paid'); $('paid-wait').hidden = false;
+    var tries = 0;
+    (function poll() {
+      api('/gift/claim?session_id=' + encodeURIComponent(sessionId)).then(function (r) {
+        if (r.d.code) { giftRec = r.d; $('paid-wait').hidden = true; drawCard($('paidcard'), r.d); $('paid-body').hidden = false; return; }
+        if (r.status === 202 && tries++ < 12) { setTimeout(poll, 2000); return; }
+        throw new Error(r.d.error || 'pending');
+      }).catch(function () {
+        $('paid-wait').hidden = true;
+        $('paiderr').textContent = 'We couldn’t load your card just now. Your payment went through and your gift code is in your email. Questions? duologyexplained@gmail.com';
+        $('paiderr').hidden = false;
+      });
+    })();
+  }
+  function giftLink() { return PAGE + '?redeem=' + encodeURIComponent(giftRec.code); }
+  function shareText() { return (giftRec.from ? giftRec.from + ' has given you' : 'A gift for you:') + ' 90 days of Duology Pro. Unlock it here: ' + giftLink(); }
+  $('sharebtn').addEventListener('click', function () {
+    if (navigator.share) navigator.share({ title: 'A gift of Duology Pro', text: shareText() }).catch(function () {});
+    else copy(shareText(), $('sharebtn'));
+  });
+  $('copylink').addEventListener('click', function () { copy(giftLink(), $('copylink')); });
+  function copy(text, btn) {
+    var done = function () { var old = btn.textContent; btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = old; }, 1600); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); done(); });
+    else { fallbackCopy(text); done(); }
+  }
+  function fallbackCopy(text) { var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(t); }
+
+  // Card as a 1080x1350 picture to send in a message.
+  function wrap(ctx, text, maxW) {
+    var words = text.split(' '), lines = [], line = '';
+    words.forEach(function (w) { var t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t; });
+    if (line) lines.push(line); return lines;
+  }
+  $('savepng').addEventListener('click', function () {
+    var g = giftRec; if (!g) return;
+    var go = function () {
+      var c = document.createElement('canvas'); c.width = 1080; c.height = 1350; var x = c.getContext('2d');
+      x.fillStyle = '#14131A'; x.fillRect(0, 0, 1080, 1350);
+      var gr = x.createRadialGradient(540, 120, 40, 540, 120, 700); gr.addColorStop(0, '#2A2F5299'); gr.addColorStop(1, '#14131A00'); x.fillStyle = gr; x.fillRect(0, 0, 1080, 1350);
+      x.strokeStyle = '#E4A67366'; x.lineWidth = 3; x.strokeRect(60, 60, 960, 1230);
+      x.textAlign = 'center'; var y = 210;
+      x.fillStyle = '#E4A673'; x.font = '600 90px Georgia,serif'; x.fillText('✦', 540, y); y += 90;
+      x.font = '600 30px Instrument Sans,Arial,sans-serif'; x.fillText('A  G I F T  O F', 540, y); y += 100;
+      x.fillStyle = '#EEEAF2'; x.font = '600 84px Fraunces,Georgia,serif'; x.fillText((g.days || 90) + ' days of Duology', 540, y); y += 100;
+      x.fillStyle = '#A9B6FF'; x.font = 'italic 500 84px Fraunces,Georgia,serif'; x.fillText('Pro', 540, y); y += 90;
+      if (g.to) { x.fillStyle = '#A9A3B5'; x.font = '400 38px Instrument Sans,Arial,sans-serif'; x.fillText('For ' + g.to, 540, y); y += 70; }
+      if (g.message) { x.fillStyle = '#EEEAF2'; x.font = 'italic 500 48px Fraunces,Georgia,serif'; wrap(x, '“' + g.message + '”', 800).slice(0, 5).forEach(function (l) { x.fillText(l, 540, y); y += 66; }); y += 10; }
+      if (g.from) { x.fillStyle = '#A9A3B5'; x.font = '400 38px Instrument Sans,Arial,sans-serif'; x.fillText('From ' + g.from, 540, y); y += 70; }
+      y = Math.max(y + 30, 1010);
+      x.fillStyle = '#0f0e14'; x.fillRect(190, y - 62, 700, 100); x.setLineDash([12, 10]); x.strokeStyle = '#4A4657'; x.lineWidth = 3; x.strokeRect(190, y - 62, 700, 100); x.setLineDash([]);
+      x.fillStyle = '#EEEAF2'; x.font = '500 50px Consolas,monospace'; x.fillText(g.code, 540, y + 5);
+      x.fillStyle = '#A9A3B5'; x.font = '400 30px Instrument Sans,Arial,sans-serif';
+      x.fillText('Unlock it at scvd-app.github.io/duology/gift.html', 540, y + 100);
+      x.fillText('Your ' + (g.days || 90) + ' days start when you unlock it. Valid until ' + fmtDate(g.redeemBy) + '.', 540, y + 145);
+      x.fillStyle = '#EEEAF2'; x.font = '600 52px Fraunces,Georgia,serif'; x.fillText('Duology', 540, 1235);
+      c.toBlob(function (b) { var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'Duology-gift-card.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }, 'image/png');
+    };
+    if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('600 40px Fraunces'), document.fonts.load('italic 500 40px Fraunces'), document.fonts.load('400 30px "Instrument Sans"')]).then(go, go); else go();
+  });
+
+  // ----- redeem -----
+  function openRedeem(g) {
+    giftRec = g; show('redeem'); drawCard($('redeemcard'), g);
+    $('redeem-form').hidden = false; $('redeem-done').hidden = true; $('redeemerr').hidden = true;
+    if (g.status === 'redeemed') {
+      $('unlock').textContent = 'Show my code'; document.querySelector('#redeem-form .fine').textContent = 'This gift has already been unlocked. If that was you, press the button to see your code again.';
+    }
+  }
+  $('unlock').addEventListener('click', function () {
+    var b = $('unlock'); b.disabled = true; $('redeemerr').hidden = true;
+    api('/gift/redeem', { code: giftRec.code, email: $('email').value }).then(function (r) {
+      if (r.d.token) {
+        $('tokenbox').textContent = r.d.token;
+        $('done-note').textContent = r.d.again ? 'Here is your Pro code again. Your days started when it was first unlocked.' : 'Your ' + (r.d.days || 90) + ' days of Pro start now. Here is your Pro code:';
+        $('redeem-form').hidden = true; $('redeem-done').hidden = false; window.scrollTo(0, document.body.scrollHeight * 0.2);
+        return;
+      }
+      throw new Error(r.d.error || 'Something went wrong');
+    }).catch(function (e) { b.disabled = false; $('redeemerr').textContent = (e && e.message) || 'Something went wrong. Please try again.'; $('redeemerr').hidden = false; });
+  });
+  $('copytoken').addEventListener('click', function () { copy($('tokenbox').textContent, $('copytoken')); });
+
+  // ----- start -----
+  preview();
+  var paid = qs.get('paid'), redeem = qs.get('redeem');
+  if (paid) paidFlow(paid);
+  else if (redeem) {
+    api('/gift/check', { code: redeem }).then(function (r) {
+      if (r.d.valid) openRedeem(r.d);
+      else { show('buy'); $('codeerr').textContent = r.d.reason || 'That gift code isn’t valid.'; $('codeerr').hidden = false; $('code').value = redeem; }
+    }).catch(function () { show('buy'); });
+  } else if (qs.get('cancelled')) { $('buyerr').textContent = 'No payment was taken. You can pick up where you left off.'; $('buyerr').hidden = false; $('buyerr').className = 'fine'; }
+})();
+</script>
+</body>
+</html>

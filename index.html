@@ -1804,6 +1804,32 @@ function buildPetReport(p, c, settings, family) {
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
 
+  // ---------- anonymous head-count (no IDs, no cookies, no personal data) ----------
+  // Adds one to a running total, so we can see roughly how many people use Duology and which country
+  // they are in. Nothing you type ever goes with it. Leave COUNT_API empty to switch counting off.
+  var COUNT_API = 'https://duology-counter.emblen-scott.workers.dev';
+  var COUNT_EVENTS = ['open', 'new', 'chart', 'pro', 'gift'];
+  function track(ev) {
+    try {
+      if (!COUNT_API || COUNT_API.indexOf('REPLACE-ME') >= 0) return;
+      if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
+      if (COUNT_EVENTS.indexOf(ev) < 0) return;
+      var ref = (new URLSearchParams(location.search).get('ref') || '').toLowerCase();
+      if (!/^[a-z]{2,10}$/.test(ref)) ref = '';
+      fetch(COUNT_API + '/hit', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ e: ev, r: ref }), keepalive: true, credentials: 'omit' }).catch(function () {});
+    } catch (e) {}
+  }
+  // Once a day per device: all that is kept on the device is today's date and a 'seen before' flag. No ID.
+  function countToday() {
+    try {
+      var day = new Date().toISOString().slice(0, 10);
+      if (localStorage.getItem('duology.counted') === day) return;
+      localStorage.setItem('duology.counted', day);
+      if (!localStorage.getItem('duology.seen')) { localStorage.setItem('duology.seen', '1'); track('new'); }
+      track('open');
+    } catch (e) {}
+  }
+
   // ---------- Pro (Stripe one-off passes) ----------
   // Paste your Cloudflare Worker address here (no slash on the end).
   var DUOLOGY_API = 'https://duology.emblen-scott.workers.dev';
@@ -2185,8 +2211,8 @@ function buildPetReport(p, c, settings, family) {
     var P = function (h, t) { return '<div class="small" style="color:var(--ink2);line-height:1.55"><b style="color:var(--ink)">' + h + '</b><br>' + t + '</div>'; };
     return '<div class="stack-s">' +
       P('Your information stays on your device', 'Names, birth dates, times and places, your charts, readings and settings are all stored in this browser on this device, and nowhere else. Every calculation runs right here on your phone. We don\u2019t have accounts, a database of users or a copy of your charts, so there\u2019s nothing of yours on our side to lose, leak or sell.') +
-      P('The few things that do leave your device, and why', '<b>Place search:</b> when you type a birth place, just that text goes to Open-Meteo\u2019s free place lookup to find the coordinates and timezone. Nothing else goes with it.<br><b>Buying Pro:</b> payment is handled entirely by Stripe. We never see your card. Stripe passes us the email you paid with, and we keep it with your Pro code on our server so we can send the code again if you lose it. It\u2019s used for nothing else.<br><b>Loading the app:</b> like any website, the host (GitHub) and Google Fonts see your device\u2019s internet address when the page loads. Neither sees anything you\u2019ve typed in.') +
-      P('What we don\u2019t do', 'No ads, no tracking, no analytics, no selling data, and no subscriptions.') +
+      P('The few things that do leave your device, and why', '<b>Place search:</b> when you type a birth place, just that text goes to Open-Meteo\u2019s free place lookup to find the coordinates and timezone. Nothing else goes with it.<br><b>Buying Pro:</b> payment is handled entirely by Stripe. We never see your card. Stripe passes us the email you paid with, and we keep it with your Pro code on our server so we can send the code again if you lose it. It\u2019s used for nothing else.<br><b>Gift cards:</b> if you buy one, Stripe handles the payment as above. We keep your email, the names and message you typed on the card, and the gift code, so the gift can be delivered and unlocked. The person you give it to can add their email when they unlock it, only so we can resend their code.<br><b>Loading the app:</b> like any website, the host (GitHub) and Google Fonts see your device\u2019s internet address when the page loads. Neither sees anything you\u2019ve typed in.<br><b>A simple head-count:</b> when you open the app we add one to a running total, along with the country your connection comes from and, if you arrived from a link, which one (like Facebook). We also add one when a chart is made or a Pro pass is tapped. There is no ID and no cookie, nothing you\u2019ve typed in goes with it, and we can\u2019t tell one person from another. Cloudflare, which runs the counter, sees your device\u2019s internet address like any host does, but we don\u2019t keep it. The only things stored on your device for this are the date it last counted you and a note that you\u2019ve opened the app before, so we can tell new from returning. If your browser\u2019s Do Not Track setting is on, we skip the count entirely.') +
+      P('What we don\u2019t do', 'No ads, no tracking, no accounts, no selling data, and no subscriptions. The head-count above is the only measuring we do.') +
       P('The catch, and how to cover it', 'Because your charts only live on this device, we can\u2019t recover them for you. If you clear your browser, lose your phone or switch devices, they\u2019re gone, unless you\u2019ve made a backup. A backup is a small file you keep yourself. Email it to yourself, or save it to Google Drive or iCloud, and load it back in any time. Your backup contains birth details and your Pro code, so treat it like any personal document.') +
       P('Deleting your information', '<b>Delete all my data</b> (below) wipes everything Duology has stored on this device. To have your email and Pro code removed from our server too, email ' + SUPPORT_EMAIL + '.') + '</div>';
   }
@@ -2335,6 +2361,7 @@ function buildPetReport(p, c, settings, family) {
   function screenSettings() {
     var s = store.settings, p = active(), out = ['<div class="stack">'];
     out.push(proSection());
+    out.push(giftSection());
     out.push('<section class="stack-s"><h2>Saved charts</h2>' + store.profiles.map(function (x) {
       var isA = p && x.id === p.id;
       return '<div class="card prof"><div class="avatar">' + esc(initials(x.name)) + '</div><div style="flex:1;min-width:0"><b>' + esc(x.name) + '</b>' + (x.kind === 'pet' ? ' <span class="small">(' + ({ dog: 'dog', cat: 'cat', horse: 'horse', bird: 'bird', rabbit: 'rabbit' }[x.species] || 'pet') + ')</span>' : (x.nowName ? ' <span class="small">now ' + esc(x.nowName) + '</span>' : '')) + (isA ? ' <span class="small">(showing)</span>' : '') + '<div class="small">' + fmtDate(new Date(x.date + 'T00:00:00').getTime()) + ' · ' + (x.time ? fmtTime(x.time) : 'time unknown') + ' · ' + esc(x.placeName) + '</div>' +
@@ -2369,6 +2396,12 @@ function buildPetReport(p, c, settings, family) {
   function codeForm(where) {
     return '<div class="field"><label for="f-code-' + where + '">Have a code?</label><div class="inrow"><input class="input" id="f-code-' + where + '" placeholder="duology_..." autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(ui.codeVal || '') + '"><button type="button" class="btn-ghost" data-act="apply-code:' + where + '">Apply</button></div>' +
       (ui.codeMsg ? '<div class="' + (ui.codeOk ? 'ok' : 'err') + '" role="status">' + esc(ui.codeMsg) + '</div>' : '') + '</div>';
+  }
+  // A gift card for someone else. The page it opens is separate from the app, so nothing here touches your chart.
+  function giftSection() {
+    return '<section class="stack-s"><h2>Give the gift of the stars</h2><div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px">' +
+      '<div class="small" style="color:var(--ink2)">Give someone 90 days of Duology Pro, with a card and your own message. The 90 days only start when they unlock it. US$9.99, one-off.</div>' +
+      '<a class="btn-ghost" data-act="gift" href="gift.html" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:inherit">Send a gift card</a></div></section>';
   }
   function proSection() {
     var o = ['<section class="stack-s"><h2>Duology Pro</h2>'];
@@ -2465,6 +2498,7 @@ function buildPetReport(p, c, settings, family) {
   // ---------- Pro actions ----------
   function openPaywall(reason) { ui.paywall = reason || 'settings'; ui.payMsg = ''; ui.codeMsg = ''; ui.card = null; render(); }
   function buy(planId) {
+    track('pro');
     if (!apiReady()) { ui.payMsg = 'Payments aren\u2019t switched on yet. Check back soon.'; render(); return; }
     ui.payBusy = planId; ui.payMsg = ''; render();
     var back = location.href.split('#')[0].split('?')[0];
@@ -2588,6 +2622,7 @@ function buildPetReport(p, c, settings, family) {
     var rec = { name: f.name, date: f.date, time: f.noTime ? null : f.time, placeName: place.label, lat: place.lat, lon: place.lon, tz: place.tz, manual: !!place.manual, updated: Date.now() };
     if (ui.kind === 'pet') { rec.kind = 'pet'; rec.species = f.species || 'dog'; rec.sex = f.sex || 'girl'; }
     else if (f.nowName && f.nowName.trim().toLowerCase() !== f.name.toLowerCase()) rec.nowName = f.nowName.trim();
+    if (!ui.editId) track('chart');
     if (ui.editId) {
       store.profiles = store.profiles.map(function (x) { return x.id === ui.editId ? Object.assign({ id: x.id }, rec) : x; });
       store.activeId = ui.editId;
@@ -2609,6 +2644,7 @@ function buildPetReport(p, c, settings, family) {
       case 'paywall': openPaywall(arg); break;
       case 'close-paywall': if (!ui.payBusy) { ui.paywall = null; ui.payMsg = ''; ui.codeMsg = ''; render(); } break;
       case 'buy': buy(arg); break;
+      case 'gift': track('gift'); break;
       case 'print-report': printReport(); break;
       case 'backup': doBackup(arg); break;
       case 'apply-code': applyCode(arg); break;
@@ -2717,6 +2753,7 @@ function buildPetReport(p, c, settings, family) {
   })();
 
   render();
+  countToday();
 })();
 // ===== APP END =====
 
