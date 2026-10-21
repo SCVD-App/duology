@@ -153,6 +153,14 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 .v-czrow{display:flex;align-items:center;gap:24px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:20px;padding:10px 32px}.v-czrow .e{font-size:64px;line-height:1}.v-czrow b{font-family:var(--serif);font-size:52px;min-width:210px}.v-czrow .ys{display:grid;grid-template-columns:repeat(4,auto);gap:2px 26px;margin-left:auto;font-size:38px;line-height:1.15}.v-czrow .ys i{font-style:normal}.v-czrow span{font-size:38px;white-space:nowrap;color:var(--v-muted);font-variant-numeric:tabular-nums}
 .v-numrow{display:flex;align-items:center;gap:36px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:24px;padding:18px 36px}.v-numrow b{font-family:var(--serif);font-size:84px;color:var(--v-accent);min-width:60px;text-align:center;line-height:1}.v-numrow span{font-size:50px}
 .a1,.a2,.a3,.a4,.a5,.a6{opacity:0;animation:vin .8s cubic-bezier(.2,.7,.2,1) forwards}
+.tt-end.h-scene{justify-content:flex-start;gap:18px;padding:190px 160px 500px 80px}
+.tt-end .h-grid{grid-template-columns:repeat(3,92px);gap:10px}.tt-end .h-grid span{height:92px;font-size:62px;border-radius:20px}
+.tt-end .h-vs{gap:30px}.tt-end .h-vs .g{font-size:64px}.tt-end .h-vs b{font-size:72px}.tt-end .h-vs em{font-size:34px}.tt-end .h-vs .ne{font-size:80px}
+.tt-end .m-cta{max-width:720px;padding:18px 28px;font-size:38px;margin-top:6px}.tt-end .m-cta b{font-size:54px}.tt-end .v-kicker{font-size:40px}
+.tt-end .a4{animation-delay:3.2s}.tt-end .a5{animation-delay:5s}.tt-end .a6{animation-delay:6.8s;padding:14px 34px;border-radius:26px;border:3px solid var(--v-accent);background:var(--v-panel)}
+.tt-on .v.v-tall{justify-content:center;padding:170px 160px 480px 80px}
+.tt-guide{position:absolute;inset:0;pointer-events:none;z-index:40}
+.tt-guide i{position:absolute;display:block;background:rgba(255,60,90,.22);border:2px dashed rgba(255,90,110,.9);color:#fff;font:600 30px/1.2 system-ui,sans-serif;padding:10px 16px;box-sizing:border-box}
 .a1{animation-delay:.1s}.a2{animation-delay:.4s}.a3{animation-delay:.8s}.a4{animation-delay:1.2s}.a5{animation-delay:1.6s}.a6{animation-delay:2s}
 .c-scene{gap:26px;padding:120px 40px}.c-wheel{display:flex;justify-content:center}.c-wheel svg{height:auto;overflow:visible}.c-wheel text{font-family:var(--sans)}.c-wheel text[font-family]{font-family:var(--serif)}.c-scene .v-kicker{text-align:center}.c-sub{font-size:50px;text-align:center;line-height:1.3;max-width:960px}.c-sub b{color:#FFD25E}
 .c-n{opacity:0;animation:cfade .45s ease forwards}.c-x{opacity:0;animation:cfade .4s ease 1.1s forwards}.c-arr{stroke-dasharray:1400;stroke-dashoffset:1400;animation:cdraw 3.4s linear .5s forwards}
@@ -1480,7 +1488,14 @@ function buildScript(sky, depthKey, order) {
 // numbers anchored by their ruling planet, and the signs each planet rules
 var NUM_RULE = [[1, 'sun', [4]], [2, 'moon', [3]], [3, 'jupiter', [8, 11]], [4, 'uranus', [10]], [5, 'mercury', [2, 5]], [6, 'venus', [1, 6]], [7, 'neptune', [11]], [8, 'saturn', [9, 10]], [9, 'mars', [0, 7]], [11, 'moon', [3]], [22, 'uranus', [10]], [33, 'venus', [1, 6]]];
 function signNumber(si) { var pl = SIGN_RULER[si]; for (var k = 0; k < 9; k++) if (NUM_RULE[k][1] === pl) return NUM_RULE[k][0]; return 1; }
+// ---- TikTok mode globals (synced from the saved settings) ----
+var TT = { on: false, url: 'scvd.app/duology', say: 'Find it at S C V D dot app slash duology.' };
 function buildShort(sky, si, quick) {
+  var o = buildShort0(sky, si, quick);
+  if (TT.on) o.parts.forEach(function (x) { x.text = x.text.replace(/Link in bio\.|The link\u2019s in the bio\./, TT.say); });
+  return o;
+}
+function buildShort0(sky, si, quick) {
   var r = signReading(sky, si), S = r.sign, Mon = monthName(sky.start);
   var p = [];
   if (quick) {
@@ -1864,6 +1879,16 @@ function buildLinkShort() {
   function audioKey() { return ui.tab === 'video' ? 'v|' + mkey() : (ui.shortMode === 'num' ? 'n|' + mkey() + '|' + ui.numWhich : ui.shortMode === 'bday' ? 'b|' + mkey() : ui.shortMode === 'cz' ? 'c|' + mkey() : ui.shortMode === 'tour' ? 't|' + mkey() : ui.shortMode === 'link' ? 'l|link' : ui.shortMode === 'chart' ? 'ch|chart' : ui.shortMode === 'arch' ? 'a|' + mkey() + '|' + ui.archN : ui.shortMode === 'week' ? 'w|' + weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS) : 's|' + signKey() + '|' + ui.shortSign + (ui.signFmt === 'quick' ? '|q' : '')); }
   function curAudio() { return audioSets[audioKey()] || []; }
   function ebOn() { return st.elBg !== false; }
+  function ttSync() { TT.on = !!st.tt; TT.say = (st.ttSay && st.ttSay.trim()) || 'Find it at S C V D dot app slash duology.'; }
+  ttSync();
+  // Brisbane has no daylight saving: always UTC+10
+  function bneDate(ms) { return new Date(ms + 10 * 3600000); }
+  function ttStartISO() { if (st.ttStart) return st.ttStart; return bneDate(Date.now() + 86400000).toISOString().slice(0, 10); }
+  function ttSlot(k) {
+    var p = ttStartISO().split('-'), base = Date.UTC(+p[0], +p[1] - 1, +p[2]) , dayN = Math.floor(k / 2), am = k % 2 === 0;
+    var dt = new Date(base + dayN * 86400000);
+    return dt.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }) + ' · ' + (am ? '7:30 am' : '6:30 pm') + ' Brisbane time';
+  }
   function ebHtml(Sg) { return ebOn() ? ebg(Sg.el).replace('%GLYPH%', Sg.glyph + VS) : ''; }
   function ebCls(Sg) { return ebOn() ? ' has-eb has-eb-' + Sg.el : ''; }
   function sceneCount() { return ui.tab === 'video' ? secsCache.length : curShort().parts.length; }
@@ -1969,6 +1994,16 @@ function buildLinkShort() {
   function supported(t) { try { return window.MediaRecorder && MediaRecorder.isTypeSupported(t); } catch (e) { return false; } }
   function pickMime(mp4) { return (mp4 ? MP4_TYPES.concat(WEBM_TYPES) : WEBM_TYPES).filter(supported)[0] || ''; }
   function mp4Ok() { return MP4_TYPES.some(supported); }
+  // TikTok master chain: makeup gain -> gentle compressor -> brick-wall style limiter. Only on the recording feed, never on what you hear.
+  function ttMaster(ctx, out) {
+    var inp = ctx.createGain(); inp.gain.value = Math.pow(10, 5 / 20);
+    var comp = ctx.createDynamicsCompressor(); comp.threshold.value = -24; comp.knee.value = 12; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.25;
+    var post = ctx.createGain(); post.gain.value = Math.pow(10, -1 / 20);
+    var lim = ctx.createDynamicsCompressor(); lim.threshold.value = -5; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.001; lim.release.value = 0.08;
+    inp.connect(comp); comp.connect(post); post.connect(lim); lim.connect(out);
+    return inp;
+  }
+  window.__ttMaster = ttMaster;
   async function startRecording() {
     if (recording) return;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || !window.MediaRecorder) { ui.recMsg = 'Recording needs Chrome or Edge on a computer.'; render(); return; }
@@ -1987,13 +2022,16 @@ function buildLinkShort() {
     await sleep(900); fit();
     try { if (window.CropTarget && vt.cropTo) { var ct = await CropTarget.fromElement(document.querySelector('#stage .s-canvas')); await vt.cropTo(ct); } } catch (e) {}
     var tracks = [vt];
-    var dest = null;
+    var dest = null, recDest = null;
     if (set.length || music) {
       ensureCtx(); try { await audioCtx.resume(); } catch (e) {}
-      dest = audioCtx.createMediaStreamDestination();
-      if (music) musicGain.connect(dest);
-      set.forEach(function (a) { if (!a.node) { a.node = audioCtx.createMediaElementSource(a.el); a.node.connect(audioCtx.destination); } a.node.connect(dest); });
-      tracks = tracks.concat(dest.stream.getAudioTracks());
+      recDest = audioCtx.createMediaStreamDestination(); dest = recDest;
+      var bus = recDest;
+      if (TT.on) bus = ttMaster(audioCtx, recDest);
+      if (music) musicGain.connect(bus);
+      set.forEach(function (a) { if (!a.node) { a.node = audioCtx.createMediaElementSource(a.el); a.node.connect(audioCtx.destination); } a.node.connect(bus); });
+      dest = bus;
+      tracks = tracks.concat(recDest.stream.getAudioTracks());
     }
     var mixed = new MediaStream(tracks);
     var mime = pickMime(st.recFormat === 'mp4'), wantMp4 = st.recFormat === 'mp4';
@@ -2159,10 +2197,10 @@ function buildLinkShort() {
         '<div class="a4 ru-cap">Every number shares a ruling planet<br>with a star sign</div></div>';
     }
     var nA = sh.nA, nB = sh.nB;
-    return '<div class="v v-tall h-scene"><div class="a1 v-kicker">Only half the story</div>' +
+    return '<div class="v v-tall h-scene' + (TT.on ? ' tt-end' : '') + '"><div class="a1 v-kicker">Only half the story</div>' +
       '<div class="a2 h-grid">' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return '<span class="' + (n === nA ? 'on a' : n === nB ? 'on b' : '') + '">' + n + '</span>'; }).join('') + '</div>' +
       '<div class="a3 h-vs"><div><span class="g">' + Sg.glyph + VS + '</span><b class="cy">' + nA + '</b><em>' + NUM_SHORT[nA] + '</em></div><span class="ne">\u2260</span><div><span class="g">' + Sg.glyph + VS + '</span><b class="cb">' + nB + '</b><em>' + NUM_SHORT[nB] + '</em></div></div>' +
-      '<div class="a4 m-cta"><b>Your chart + your numbers</b>The full picture, built on your exact birthday</div><div class="a5" style="margin-top:20px">' + wordmark(120) + '</div><div class="a6 v-url" style="font-size:44px">Link in bio</div></div>';
+      '<div class="a4 m-cta"><b>Your chart + your numbers</b>The full picture, built on your exact birthday</div><div class="a5" style="margin-top:' + (TT.on ? 8 : 20) + 'px">' + wordmark(TT.on ? 76 : 120) + '</div><div class="a6 v-url" style="font-size:' + (TT.on ? 64 : 44) + 'px">' + (TT.on ? TT.url : 'Link in bio') + '</div></div>';
   }
 
   function C(cls, t) { return '<span class="' + cls + '">' + t + '</span>'; }
@@ -2475,25 +2513,46 @@ function buildLinkShort() {
     return '<section class="s-sec s-kitwrap"><div class="s-sechead"><b>Thumbnails</b><span class="s-hint" style="margin:0">Upload as a custom thumbnail on YouTube, or as the cover on Instagram, so it always shows the glyph.</span></div>' +
       '<div class="s-actions" style="margin-top:8px"><button class="s-cta" data-act="thumb:916">This sign \u00B7 9:16</button><button class="s-btn2" data-act="thumb:169">This sign \u00B7 16:9</button><button class="s-btn2" data-act="thumb:all">All 12 signs \u00B7 9:16</button></div></section>';
   }
+  function ttKit() {
+    if (!TT.on || ui.shortMode !== 'sign') return null;
+    var si = ui.shortSign, S = SIGNS[si], sh = short(), sn = S.name.toLowerCase();
+    var hook = (sh.parts[0] && sh.parts[0].text) || (S.name + ': your next fortnight.');
+    var cap = hook + ' Here\u2019s what it means for you ' + S.glyph + '\n\nComment your sign \uD83D\uDC47\n\n#' + sn + ' #astrology #horoscope #zodiac';
+    var com = 'Your own forecast, from your exact birth chart and your numbers. Free to start: ' + TT.url + ' (type it into your browser)';
+    return { cap: cap, com: com, slot: ttSlot(si) };
+  }
   function kitPanel() {
     var k = curKit(); ui.kit = k;
     var box = function (lab, id, txt, rows, meta) { return '<div class="s-kit"><div class="s-kit-h"><b>' + lab + '</b>' + (meta ? '<span class="s-meta">' + meta + '</span>' : '') + '<button class="s-btn2" data-act="kitcopy:' + id + '">Copy</button></div><textarea readonly rows="' + rows + '">' + esc(txt) + '</textarea></div>'; };
+    var tk = ttKit();
     return '<section class="s-sec s-kitwrap"><div class="s-sechead"><b>Post kit</b><span class="s-hint" style="margin:0">Ready to paste. Worked out from this Short, so it updates when you change month, week or number.</span></div>' +
+      (tk ? '<div class="s-kit-h" style="margin-top:6px"><b>TikTok</b><span class="s-meta">' + esc(tk.slot) + '</span></div>' + box('TikTok caption', 'ttcap', tk.cap, 4, tk.cap.length + '/2200 · ' + (tk.cap.match(/#/g) || []).length + ' hashtags') + box('TikTok pinned comment', 'ttcom', tk.com, 3) : '') +
       box('YouTube title', 'title', k.yt.title, 2, k.yt.title.length + '/100') +
       box('YouTube description', 'desc', k.yt.desc, 12) +
       box('YouTube tags', 'tags', k.yt.tags.join(', '), 3, k.yt.tags.join(', ').length + '/500') +
       box('Instagram caption', 'ig', k.ig.caption, 10, (k.ig.caption.match(/#/g) || []).length + ' hashtags (max 5)') + '</section>';
   }
+  function ttPanel() {
+    if (!st.tt || ui.shortMode !== 'sign') return '';
+    return '<section class="s-sec" style="margin:6px 0 10px"><div class="s-sechead"><b>TikTok mode is on</b><span class="s-hint" style="margin:0">End card shows the address (not \u201cLink in bio\u201d), moves above TikTok\u2019s caption area and reveals in steps. Recordings get a louder, limited master. Preview only: the red guide never records.</span></div>' +
+      '<label class="s-hint" style="display:block;margin:6px 0 2px">What the voice says instead of \u201cLink in bio\u201d</label><input id="ttsay" type="text" style="width:100%" value="' + esc(TT.say) + '">' +
+      '<label class="s-hint" style="display:block;margin:8px 0 2px">First post goes out on (Brisbane date)</label><input id="ttstart" type="date" value="' + ttStartISO() + '">' +
+      '<span class="s-hint" style="margin-left:8px">Two a day: 7:30 am and 6:30 pm. Order follows the sign buttons, Aries first.</span></section>';
+  }
+  function ttGuideHtml() {
+    if (!st.tt || !st.ttGuide || recording) return '';
+    return '<div class="tt-guide"><i style="left:0;right:0;top:0;height:150px">TikTok top bar</i><i style="left:0;right:0;bottom:0;height:480px">Caption, name and sound sit here. Keep text out.</i><i style="right:0;width:150px;top:1000px;height:440px">Buttons</i></div>';
+  }
   function viewShorts() {
     var cs = curShort(), n = cs.parts.length, i = Math.min(ui.shortScene, n - 1), p = cs.parts[i], all = cs.parts.map(function (x) { return x.text; }).join(' ');
     var picker = ui.shortMode === 'chart' ? '<p class="s-hint" style="margin:0">Evergreen: how to read a birth chart (9 o\u2019clock, counter-clockwise). Pin it, and re-post it any time.</p>' : ui.shortMode === 'link' ? '<p class="s-hint" style="margin:0">Evergreen: why astrology and numerology are one system. Pin it to your profile.</p>' : ui.shortMode === 'week' ? [0, 1, 2, 3].map(function (k) { var st0 = weekStartOf(Date.now() + k * 7 * DAY_MS); return '<button data-act="wkoff:' + k + '" aria-pressed="' + (ui.weekOff === k) + '">' + (k === 0 ? 'This week' : k === 1 ? 'Next week' : 'Week of') + ' \u00B7 ' + dShort(st0) + '</button>'; }).join('') + '<p class="s-hint" style="margin:6px 0 0;width:100%">Weeks run Monday to Sunday. Post it Monday morning. The events come from the real sky, and the signs that feel it most come from the week\u2019s biggest event.</p>' : ui.shortMode === 'arch' ? ARCH_ORDER.map(function (k) { return '<button data-act="anum:' + k + '" aria-pressed="' + (ui.archN === k) + '">' + (k ? k + ' \u00B7 ' + ARCH[k].name.replace('The ', '') : 'Numerology 101') + '</button>'; }).join('') + '<p class="s-hint" style="margin:6px 0 0;width:100%">An evergreen series: start with Numerology 101, then one number at a time. Money, love, happiness and the ruling planet, then how to find that number in your own life.</p>' : ui.shortMode === 'tour' ? '<p class="s-hint" style="margin:0">The landing page as a Reel: free features, Pro, family, pets and the passes. Evergreen, so pin it to your profile and re-post it whenever you like.</p>' : ui.shortMode === 'bday' ? '<p class="s-hint" style="margin:0">Evergreen: one Short covers every birthday. The example day changes with the month, so you can re-post it.</p>' : ui.shortMode === 'cz' ? '<p class="s-hint" style="margin:0">Evergreen, with the New Year dates worked out from the real Sun and Moon. Great to post in January, ahead of Chinese New Year.</p>' : ui.shortMode === 'sign'
-      ? '<div class="s-signs" style="width:100%;margin-bottom:6px">' + [['full', 'Full (~60s)'], ['quick', 'Quick (~30s)']].map(function (x) { return '<button data-act="sfmt:' + x[0] + '" aria-pressed="' + ((ui.signFmt || 'full') === x[0]) + '">' + x[1] + '</button>'; }).join('') + '<span style="width:14px"></span><button data-act="elbg" aria-pressed="' + (st.elBg !== false) + '">Element backgrounds</button><span style="width:14px"></span>' + [['month', 'Monthly'], ['2w', 'Next 2 weeks'], ['4w', 'Next 4 weeks']].map(function (x) { return '<button data-act="sper:' + x[0] + '" aria-pressed="' + ((ui.signPer || 'month') === x[0]) + '">' + x[1] + '</button>'; }).join('') + ((ui.signPer || 'month') !== 'month' ? [0, 1].map(function (k) { return '<button data-act="soff:' + k + '" aria-pressed="' + ((ui.signOff || 0) === k) + '">From ' + (k ? 'next' : 'this') + ' Monday \u00B7 ' + dShort(weekStartOf(Date.now()) + k * 7 * DAY_MS) + '</button>'; }).join('') + '<span class="s-hint" style="margin:0 0 0 8px;align-self:center">' + signSky().label + '</span>' : '') + '</div>' + SIGNS.map(function (x, k) { return '<button data-act="ssign:' + k + '" aria-pressed="' + (ui.shortSign === k) + '">' + x.glyph + VS + ' ' + x.name + '</button>'; }).join('')
+      ? '<div class="s-signs" style="width:100%;margin-bottom:6px">' + [['full', 'Full (~60s)'], ['quick', 'Quick (~30s)']].map(function (x) { return '<button data-act="sfmt:' + x[0] + '" aria-pressed="' + ((ui.signFmt || 'full') === x[0]) + '">' + x[1] + '</button>'; }).join('') + '<span style="width:14px"></span><button data-act="elbg" aria-pressed="' + (st.elBg !== false) + '">Element backgrounds</button><span style="width:14px"></span><button data-act="tt" aria-pressed="' + !!st.tt + '">TikTok mode</button>' + (st.tt ? '<button data-act="ttguide" aria-pressed="' + !!st.ttGuide + '">Safe-area guide</button>' : '') + '<span style="width:14px"></span>' + [['month', 'Monthly'], ['2w', 'Next 2 weeks'], ['4w', 'Next 4 weeks']].map(function (x) { return '<button data-act="sper:' + x[0] + '" aria-pressed="' + ((ui.signPer || 'month') === x[0]) + '">' + x[1] + '</button>'; }).join('') + ((ui.signPer || 'month') !== 'month' ? [0, 1].map(function (k) { return '<button data-act="soff:' + k + '" aria-pressed="' + ((ui.signOff || 0) === k) + '">From ' + (k ? 'next' : 'this') + ' Monday \u00B7 ' + dShort(weekStartOf(Date.now()) + k * 7 * DAY_MS) + '</button>'; }).join('') + '<span class="s-hint" style="margin:0 0 0 8px;align-self:center">' + signSky().label + '</span>' : '') + '</div>' + SIGNS.map(function (x, k) { return '<button data-act="ssign:' + k + '" aria-pressed="' + (ui.shortSign === k) + '">' + x.glyph + VS + ' ' + x.name + '</button>'; }).join('')
       : '<button data-act="nwhich:0" aria-pressed="' + (ui.numWhich === 0) + '">All 9 (work it out)</button>' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (k) { return '<button data-act="nwhich:' + k + '" aria-pressed="' + (ui.numWhich === k) + '">Month ' + k + '</button>'; }).join('');
     var secs = all.length ? wordCount(all) / st.wpm * 60 : 0;
     return '<div class="s-pad"><div class="s-signs" style="margin-bottom:10px"><button data-act="smode:sign" aria-pressed="' + (ui.shortMode === 'sign') + '">Star sign Shorts</button><button data-act="smode:week" aria-pressed="' + (ui.shortMode === 'week') + '">Your week</button><button data-act="smode:num" aria-pressed="' + (ui.shortMode === 'num') + '">Numbers Shorts</button><button data-act="smode:bday" aria-pressed="' + (ui.shortMode === 'bday') + '">Birthday Number</button><button data-act="smode:cz" aria-pressed="' + (ui.shortMode === 'cz') + '">Chinese zodiac</button><button data-act="smode:tour" aria-pressed="' + (ui.shortMode === 'tour') + '">App tour</button><button data-act="smode:arch" aria-pressed="' + (ui.shortMode === 'arch') + '">Number archetypes</button><button data-act="smode:link" aria-pressed="' + (ui.shortMode === 'link') + '">Stars \u00D7 Numbers</button><button data-act="smode:chart" aria-pressed="' + (ui.shortMode === 'chart') + '">Read a chart</button></div>' +
-      '<div class="s-signs">' + picker + '</div>' +
+      '<div class="s-signs">' + picker + '</div>' + ttPanel() +
       (ui.shortMode === 'num' ? '<p class="s-hint" style="margin-top:-6px">Start with the ‘All 9’ Short each month: viewers work out their own number and comment it. Only add the single-number ones if the analytics say they’re pulling views.</p>' : '') +
-      '<div class="s-shortwrap"><div><div class="s-stage s-tall" id="stage" data-w="1080" data-h="1920"><div class="s-canvas" style="width:1080px;height:1920px">' + cs.scene(i) + '</div></div></div>' +
+      '<div class="s-shortwrap"><div><div class="s-stage s-tall" id="stage" data-w="1080" data-h="1920"><div class="s-canvas' + (TT.on && ui.shortMode === 'sign' ? ' tt-on' : '') + '" style="width:1080px;height:1920px">' + cs.scene(i) + ttGuideHtml() + '</div></div></div>' +
       '<div class="s-shortside">' + stageControls(n, i, cs.labels[i], Math.max(4, wordCount(p.text) / st.wpm * 60)) +
       voicePanel() + '<div class="s-dur ' + (secs <= 60 ? 'ok' : 'warn') + '">' + fmtDur(secs) + ' · ' + wordCount(all) + ' words (under 60s is the sweet spot)</div>' +
       cs.parts.map(function (x, k) { return '<section class="s-sec"><div class="s-sechead"><b>' + cs.labels[k] + '</b>' + (x.edited ? '<span class="s-edited">edited</span><button class="s-link" data-act="sreset:' + x.id + '">Reset</button>' : '') + '</div><textarea data-short="' + x.id + '" rows="' + Math.max(2, Math.ceil(x.text.length / 70)) + '">' + esc(x.text) + '</textarea></section>'; }).join('') +
@@ -2562,7 +2621,9 @@ function buildLinkShort() {
       else if (arg === 'c916' || arg === 'c169') saveChartThumb(arg === 'c169' ? 1280 : 1080, arg === 'c169' ? 720 : 1920);
       else if (arg === '169') saveThumb(ui.shortSign, 1280, 720); else saveThumb(ui.shortSign, 1080, 1920);
     }
-    else if (act === 'kitcopy') { var kk2 = ui.kit || curKit(); copy(arg === 'title' ? kk2.yt.title : arg === 'desc' ? kk2.yt.desc : arg === 'tags' ? kk2.yt.tags.join(', ') : kk2.ig.caption, el); }
+    else if (act === 'kitcopy') { var kk2 = ui.kit || curKit(); copy(arg === 'ttcap' ? ttKit().cap : arg === 'ttcom' ? ttKit().com : arg === 'title' ? kk2.yt.title : arg === 'desc' ? kk2.yt.desc : arg === 'tags' ? kk2.yt.tags.join(', ') : kk2.ig.caption, el); }
+    else if (act === 'tt') { stopRun(); st.tt = !st.tt; if (st.tt) ui.signFmt = 'quick'; ttSync(); persist(); render(); }
+    else if (act === 'ttguide') { st.ttGuide = !st.ttGuide; persist(); render(); }
     else if (act === 'elbg') { stopRun(); st.elBg = st.elBg === false; persist(); render(); }
     else if (act === 'sfmt') { stopRun(); ui.signFmt = arg; ui.shortScene = 0; render(); }
     else if (act === 'sper') { stopRun(); ui.signPer = arg; ui.shortScene = 0; render(); }
@@ -2608,6 +2669,8 @@ function buildLinkShort() {
   root.addEventListener('change', function (e) {
     if (e.target.id === 'voicefiles' && e.target.files && e.target.files.length) { loadVoiceFiles(e.target.files); return; }
     if (e.target.id === 'musicfile' && e.target.files && e.target.files[0]) { loadMusic(e.target.files[0]); return; }
+    if (e.target.id === 'ttsay') { st.ttSay = e.target.value; ttSync(); persist(); render(); return; }
+    if (e.target.id === 'ttstart') { st.ttStart = e.target.value; persist(); render(); return; }
     if (e.target.id === 'sting') { st.sting = e.target.checked; persist(); render(); return; }
     if (e.target.id === 'recformat') { st.recFormat = e.target.value; persist(); render(); return; }
     if (e.target.id === 'musicvol') { st.musicVol = +e.target.value; persist(); if (ui.playing) musicRamp(musicLevel(), 0.2); render(); return; }
