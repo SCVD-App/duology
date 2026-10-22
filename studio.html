@@ -153,12 +153,12 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 .v-czrow{display:flex;align-items:center;gap:24px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:20px;padding:10px 32px}.v-czrow .e{font-size:64px;line-height:1}.v-czrow b{font-family:var(--serif);font-size:52px;min-width:210px}.v-czrow .ys{display:grid;grid-template-columns:repeat(4,auto);gap:2px 26px;margin-left:auto;font-size:38px;line-height:1.15}.v-czrow .ys i{font-style:normal}.v-czrow span{font-size:38px;white-space:nowrap;color:var(--v-muted);font-variant-numeric:tabular-nums}
 .v-numrow{display:flex;align-items:center;gap:36px;width:100%;background:var(--v-panel);border:2px solid var(--v-line);border-radius:24px;padding:18px 36px}.v-numrow b{font-family:var(--serif);font-size:84px;color:var(--v-accent);min-width:60px;text-align:center;line-height:1}.v-numrow span{font-size:50px}
 .a1,.a2,.a3,.a4,.a5,.a6{opacity:0;animation:vin .8s cubic-bezier(.2,.7,.2,1) forwards}
-.tt-end.h-scene{justify-content:flex-start;gap:18px;padding:190px 160px 500px 80px}
+.tt-end.h-scene{justify-content:flex-start;gap:18px;padding:190px 120px 500px 120px}
 .tt-end .h-grid{grid-template-columns:repeat(3,92px);gap:10px}.tt-end .h-grid span{height:92px;font-size:62px;border-radius:20px}
 .tt-end .h-vs{gap:30px}.tt-end .h-vs .g{font-size:64px}.tt-end .h-vs b{font-size:72px}.tt-end .h-vs em{font-size:34px}.tt-end .h-vs .ne{font-size:80px}
 .tt-end .m-cta{max-width:720px;padding:18px 28px;font-size:38px;margin-top:6px}.tt-end .m-cta b{font-size:54px}.tt-end .v-kicker{font-size:40px}
 .tt-end .a4{animation-delay:3.2s}.tt-end .a5{animation-delay:5s}.tt-end .a6{animation-delay:6.8s;padding:14px 34px;border-radius:26px;border:3px solid var(--v-accent);background:var(--v-panel)}
-.tt-on .v.v-tall{justify-content:center;padding:170px 160px 480px 80px}
+.tt-on .v.v-tall{justify-content:center;padding:170px 120px 480px 120px}
 .tt-guide{position:absolute;inset:0;pointer-events:none;z-index:40}
 .tt-guide i{position:absolute;display:block;background:rgba(255,60,90,.22);border:2px dashed rgba(255,90,110,.9);color:#fff;font:600 30px/1.2 system-ui,sans-serif;padding:10px 16px;box-sizing:border-box}
 .a1{animation-delay:.1s}.a2{animation-delay:.4s}.a3{animation-delay:.8s}.a4{animation-delay:1.2s}.a5{animation-delay:1.6s}.a6{animation-delay:2s}
@@ -1492,6 +1492,7 @@ function signNumber(si) { var pl = SIGN_RULER[si]; for (var k = 0; k < 9; k++) i
 var TT = { on: false, url: 'scvd.app/duology', say: 'Find it at S C V D dot app slash duology.' };
 function buildShort(sky, si, quick) {
   var o = buildShort0(sky, si, quick);
+  if (TT.on && quick && o.parts[0] && o.parts[0].id === 'qhook' && !/what it means/i.test(o.parts[0].text)) o.parts[0].text += ' Here\u2019s what it means for you.';
   if (TT.on) o.parts.forEach(function (x) { x.text = x.text.replace(/Link in bio\.|The link\u2019s in the bio\./, TT.say); });
   return o;
 }
@@ -2296,7 +2297,7 @@ function buildLinkShort() {
   function scene916quick(i, sh, S) {
     var r = sh.r, Sg = r.sign, b1 = sh.b1, b2 = sh.b2, rng = S.win ? S.label : d(S.start, { month: 'long' });
     if (i === 0) return '<div class="v v-tall q-hook' + ebCls(Sg) + '">' + ebHtml(Sg) + '<div class="v-signglyph" style="font-size:300px">' + Sg.glyph + VS + '</div><div class="v-h1" style="font-size:120px;text-align:center">' + Sg.name + '</div>' +
-      (b1 ? '<div class="q-date"><span>' + d(b1.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(b1.ms).getDate() + '</div><div class="v-h1 q-title">' + esc(sh.t1) + '</div>' : '') + '<div class="v-sub" style="font-size:44px">' + rng + '</div></div>';
+      (b1 ? '<div class="q-date"><span>' + d(b1.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(b1.ms).getDate() + '</div><div class="v-h1 q-title">' + esc(sh.t1) + '</div>' : '') + '<div class="v-sub" style="font-size:44px">' + rng + '</div>' + (TT.on ? '<div class="v-sub" style="font-size:50px;color:var(--v-accent);font-weight:700;text-align:center">Here\u2019s what it means for you</div>' : '') + '</div>';
     if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">What it means for ' + Sg.name + '</div>' + (b1 ? '<div class="a2 v-ev v-ev-tall"><div class="v-evd"><span>' + d(b1.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(b1.ms).getDate() + '</div><div><b>' + esc(sh.t1) + '</b><div>' + esc(b1.read) + '</div></div></div>' : '') +
       (b2 ? '<div class="a3 q-also"><b>Also</b> ' + d(b2.ms, { day: 'numeric', month: 'short' }) + ' · ' + esc(b2.title) + '</div>' : '') + '</div>';
     if (i === 2) { var P = PLANETS[sh.rp];
@@ -2517,7 +2518,7 @@ function buildLinkShort() {
     if (!TT.on || ui.shortMode !== 'sign') return null;
     var si = ui.shortSign, S = SIGNS[si], sh = short(), sn = S.name.toLowerCase();
     var hook = (sh.parts[0] && sh.parts[0].text) || (S.name + ': your next fortnight.');
-    var cap = hook + ' Here\u2019s what it means for you ' + S.glyph + '\n\nComment your sign \uD83D\uDC47\n\n#' + sn + ' #astrology #horoscope #zodiac';
+    var cap = hook.replace(/\s*Here\u2019s what it means for you\.?$/, '') + ' Here\u2019s what it means for you ' + S.glyph + '\n\nComment your sign \uD83D\uDC47\n\n#' + sn + ' #astrology #horoscope #zodiac';
     var com = 'Your own forecast, from your exact birth chart and your numbers. Free to start: ' + TT.url + ' (type it into your browser)';
     return { cap: cap, com: com, slot: ttSlot(si) };
   }
