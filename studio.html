@@ -206,6 +206,8 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 @keyframes ebzoomF{from{transform:scale(1)}to{transform:scale(1.28)}}
 @keyframes ebzoomA{from{transform:scale(1)}to{transform:scale(1.7)}}
 @keyframes ebzoomN{from{transform:scale(1)}to{transform:scale(2.3)}}
+.eb-snow{position:absolute;top:-30px;border-radius:50%;background:#F4F2FA;box-shadow:0 0 8px 2px rgba(220,225,255,.5);opacity:0;animation:ebsnow linear infinite}
+@keyframes ebsnow{0%{transform:translate(0,0);opacity:0}8%{opacity:.9}80%{opacity:.75}100%{transform:translate(var(--dx),var(--dy));opacity:0}}
 .eb-mist{position:absolute;left:-20%;width:140%;height:200px;border-radius:50%;background:rgba(220,215,230,.09);filter:blur(40px);animation:ebmist 14s ease-in-out infinite alternate}
 @keyframes ebmist{from{transform:translateX(-120px)}to{transform:translateX(120px)}}
 @media (prefers-reduced-motion:reduce){.eb *{animation:none}}
@@ -1399,9 +1401,9 @@ function ebg(el) {
   h.push('<div class="eb eb-earth">' +
     L('far', '0,1440 90,1380 180,1420 290,1340 400,1400 520,1300 640,1380 760,1320 880,1390 990,1330 1080,1380 1080,1920 0,1920', '#2a2640') +
     L('mid', '0,1560 120,1460 230,1385 330,1300 410,1385 480,1345 600,1180 700,1300 790,1250 880,1345 980,1280 1080,1400 1080,1920 0,1920', '#1c1f33',
-      '<polygon points="600,1180 566,1232 588,1224 606,1246 626,1224 642,1238" fill="rgba(238,234,242,.5)"/><polygon points="330,1300 306,1338 324,1332 336,1348 352,1332 362,1340" fill="rgba(238,234,242,.4)"/><polygon points="790,1250 772,1276 786,1272 796,1284 806,1272 816,1278" fill="rgba(238,234,242,.35)"/>') +
+      '<polygon points="600,1180 566,1232 588,1224 606,1246 626,1224 642,1238" fill="rgba(245,243,250,.85)"/><polygon points="330,1300 306,1338 324,1332 336,1348 352,1332 362,1340" fill="rgba(245,243,250,.75)"/><polygon points="790,1250 772,1276 786,1272 796,1284 806,1272 816,1278" fill="rgba(245,243,250,.7)"/>') +
     L('near', '0,1700 200,1620 420,1680 640,1600 860,1670 1080,1610 1080,1920 0,1920', '#12131f') +
-    '<div class="eb-mist" style="top:74%"></div><div class="eb-mist" style="top:84%;animation-delay:-5s;animation-direction:alternate-reverse"></div></div>');
+    '<div class="eb-mist" style="top:74%"></div><div class="eb-mist" style="top:84%;animation-delay:-5s;animation-direction:alternate-reverse"></div>' + (function () { var q = []; for (var n = 0; n < 46; n++) { var z = R(5, 12).toFixed(0); q.push('<i class="eb-snow" style="left:' + F(0, 100) + '%;width:' + z + 'px;height:' + z + 'px;animation-duration:' + F(6, 13) + 's;animation-delay:-' + F(0, 13) + 's;--dx:' + R(-120, 120).toFixed(0) + 'px;--dy:' + R(1250, 1650).toFixed(0) + 'px"></i>'); } return q.join(''); })() + '</div>');
   return h.join('');
 }
 function wordCount(t) { return (t.trim().match(/\S+/g) || []).length; }
@@ -2198,7 +2200,7 @@ function buildLinkShort() {
         '<div class="a4 ru-cap">Every number shares a ruling planet<br>with a star sign</div></div>';
     }
     var nA = sh.nA, nB = sh.nB;
-    return '<div class="v v-tall h-scene' + (TT.on ? ' tt-end' : '') + '"><div class="a1 v-kicker">Only half the story</div>' +
+    return '<div class="v v-tall h-scene' + (TT.on ? ' tt-end' + ebCls(Sg) : '') + '">' + (TT.on ? ebHtml(Sg) : '') + '<div class="a1 v-kicker">Only half the story</div>' +
       '<div class="a2 h-grid">' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return '<span class="' + (n === nA ? 'on a' : n === nB ? 'on b' : '') + '">' + n + '</span>'; }).join('') + '</div>' +
       '<div class="a3 h-vs"><div><span class="g">' + Sg.glyph + VS + '</span><b class="cy">' + nA + '</b><em>' + NUM_SHORT[nA] + '</em></div><span class="ne">\u2260</span><div><span class="g">' + Sg.glyph + VS + '</span><b class="cb">' + nB + '</b><em>' + NUM_SHORT[nB] + '</em></div></div>' +
       '<div class="a4 m-cta"><b>Your chart + your numbers</b>The full picture, built on your exact birthday</div><div class="a5" style="margin-top:' + (TT.on ? 8 : 20) + 'px">' + wordmark(TT.on ? 76 : 120) + '</div><div class="a6 v-url" style="font-size:' + (TT.on ? 64 : 44) + 'px">' + (TT.on ? TT.url : 'Link in bio') + '</div></div>';
@@ -2298,10 +2300,10 @@ function buildLinkShort() {
     var r = sh.r, Sg = r.sign, b1 = sh.b1, b2 = sh.b2, rng = S.win ? S.label : d(S.start, { month: 'long' });
     if (i === 0) return '<div class="v v-tall q-hook' + ebCls(Sg) + '">' + ebHtml(Sg) + '<div class="v-signglyph" style="font-size:300px">' + Sg.glyph + VS + '</div><div class="v-h1" style="font-size:120px;text-align:center">' + Sg.name + '</div>' +
       (b1 ? '<div class="q-date"><span>' + d(b1.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(b1.ms).getDate() + '</div><div class="v-h1 q-title">' + esc(sh.t1) + '</div>' : '') + '<div class="v-sub" style="font-size:44px">' + rng + '</div>' + (TT.on ? '<div class="v-sub" style="font-size:50px;color:var(--v-accent);font-weight:700;text-align:center">Here\u2019s what it means for you</div>' : '') + '</div>';
-    if (i === 1) return '<div class="v v-tall"><div class="a1 v-kicker">What it means for ' + Sg.name + '</div>' + (b1 ? '<div class="a2 v-ev v-ev-tall"><div class="v-evd"><span>' + d(b1.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(b1.ms).getDate() + '</div><div><b>' + esc(sh.t1) + '</b><div>' + esc(b1.read) + '</div></div></div>' : '') +
+    if (i === 1) return '<div class="v v-tall' + (TT.on ? ebCls(Sg) : '') + '">' + (TT.on ? ebHtml(Sg) : '') + '<div class="a1 v-kicker">What it means for ' + Sg.name + '</div>' + (b1 ? '<div class="a2 v-ev v-ev-tall"><div class="v-evd"><span>' + d(b1.ms, { month: 'short' }).toUpperCase() + '</span>' + new Date(b1.ms).getDate() + '</div><div><b>' + esc(sh.t1) + '</b><div>' + esc(b1.read) + '</div></div></div>' : '') +
       (b2 ? '<div class="a3 q-also"><b>Also</b> ' + d(b2.ms, { day: 'numeric', month: 'short' }) + ' · ' + esc(b2.title) + '</div>' : '') + '</div>';
     if (i === 2) { var P = PLANETS[sh.rp];
-      return '<div class="v v-tall">' + (r.recharge.length ? '<div class="a1 v-kicker">Recharge days</div><div class="a2 v-h1" style="font-size:100px;text-align:center">' + r.recharge.join(' · ') + '</div>' : '') +
+      return '<div class="v v-tall' + (TT.on ? ebCls(Sg) : '') + '">' + (TT.on ? ebHtml(Sg) : '') + (r.recharge.length ? '<div class="a1 v-kicker">Recharge days</div><div class="a2 v-h1" style="font-size:100px;text-align:center">' + r.recharge.join(' · ') + '</div>' : '') +
         '<div class="a3 q-rule"><span class="g">' + Sg.glyph + VS + '</span><span class="eq">→</span><span class="p">' + P.glyph + VS + '</span><span class="eq">→</span><b>' + sh.rn + '</b></div><div class="a4 v-sub" style="font-size:50px;text-align:center">' + Sg.name + ' is ruled by ' + P.name + ',<br>the planet of the number ' + sh.rn + '</div></div>'; }
     return scene916(4, { r: r, nA: sh.nA, nB: sh.nB }, S);
   }
