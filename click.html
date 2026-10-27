@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Click check · Duology</title>
+<meta name="description" content="Do you two click? Check how your stars and numbers line up, with a friend, partner, family member or workmate.">
+<meta name="theme-color" content="#F4F1EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14131A" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F1EA;--surface:#FFFDF8;--ink:#1D1B26;--ink2:#3E3947;--muted:#5E5869;--line:#DDD6C8;--line2:#BDB4A3;--soft:#EAE4D7;
+  --accent:#2E3A8C;--accent-soft:#E6E8F4;--on-accent:#FFFFFF;--rust:#A0521A;--flow:#2E6BC4;--tension:#C2561B;--danger:#B3261E;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#14131A;--surface:#1E1C26;--ink:#EEEAF2;--ink2:#D2CCDA;--muted:#A9A3B5;--line:#34313F;--line2:#4A4657;--soft:#282533;
+  --accent:#A9B6FF;--accent-soft:#2A2F52;--on-accent:#14131A;--rust:#E4A673;--flow:#6EA8FF;--tension:#F08A4B;--danger:#FF8A80;color-scheme:dark}
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
+@media (min-width:520px){.app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+header.top{height:56px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.brand{font-family:var(--serif);font-size:21px;font-weight:600;letter-spacing:-.2px;color:var(--ink);text-decoration:none}
+.brand em{font-style:italic;font-weight:500;color:var(--accent)}
+.screen-name{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+main{flex:1;padding:20px 20px 60px}
+h1{margin:0;font-family:var(--serif);font-size:32px;line-height:1.08;font-weight:600}
+h1 em{font-style:italic;font-weight:500;color:var(--accent)}
+h2{margin:0;font-family:var(--serif);font-size:21px;font-weight:600}
+h3{margin:0;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--rust)}
+.lede{margin:8px 0 0;color:var(--muted);font-size:15px}
+.stack{display:flex;flex-direction:column;gap:18px}
+.stack-s{display:flex;flex-direction:column;gap:10px}
+.small{font-size:12.5px;color:var(--muted)}
+.note{font-size:13px;line-height:1.5;background:var(--soft);padding:12px 14px;border-radius:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.btn{height:52px;border:none;border-radius:12px;background:var(--accent);color:var(--on-accent);font-size:16px;font-weight:700;padding:0 18px;width:100%}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn-ghost{min-height:46px;padding:0 14px;border:1px solid var(--line2);border-radius:10px;background:none;font-size:14px;font-weight:600;width:100%}
+.link{background:none;border:none;padding:0;min-height:44px;color:var(--accent);font-weight:700;text-decoration:underline;font-size:14px;text-align:left}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:13px;font-weight:600;color:var(--ink2)}
+.input{height:48px;border:1px solid var(--line2);border-radius:10px;background:var(--surface);padding:0 12px;font-size:16px;width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pills{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pill{min-height:44px;border:1px solid var(--line2);border-radius:22px;background:none;font-size:14px;font-weight:600;padding:0 6px}
+.pill[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.err{color:var(--danger);font-size:13px;font-weight:600}
+.who{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:10px}
+.who h2{font-size:18px}
+.badge{display:inline-block;align-self:flex-start;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 10px;border-radius:14px;background:var(--accent-soft);color:var(--accent)}
+.hero{text-align:left;border:1px solid var(--line);border-radius:14px;padding:18px;background:var(--surface);display:flex;flex-direction:column;gap:10px}
+.hero .names{font-family:var(--serif);font-size:32px;line-height:1.1;font-weight:600}
+.hero .names em{font-style:italic;font-weight:500;color:var(--accent)}
+.hero .hl{font-family:var(--serif);font-style:italic;font-size:24px;line-height:1.2;color:var(--accent)}
+.chips{display:flex;flex-direction:column;gap:6px}
+.chip{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:13.5px;border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--bg)}
+.chip b{font-weight:700}
+.item{border-left:4px solid var(--line2);padding:4px 0 4px 12px}
+.item.click{border-color:var(--flow)}
+.item.spark{border-color:var(--tension)}
+.item b{display:block;font-size:14px}
+.item p{margin:2px 0 0;font-size:14px;color:var(--ink2)}
+.cv{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block;background:#14131A}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.copybox{width:100%;font-size:12px;word-break:break-all;background:var(--soft);border-radius:8px;padding:10px;border:none;color:var(--ink2);min-height:70px;resize:none}
+.sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top"><a class="brand" href="./?ref=cc">Du<em>ology</em></a><span class="screen-name">Click check</span></header>
+  <main id="main"></main>
+</div>
+<script>
+// ===== ENGINE START =====
+// Astronomy engine: no dependencies. Accuracy is roughly 1-2 arcminutes for the
+// planets (JPL approximate Keplerian elements, valid 1800-2050) and a few
+// arcminutes for the Moon (truncated Meeus series). Plenty for sign/house/aspect work.
+var Astro = (function () {
+  var D2R = Math.PI / 180, R2D = 180 / Math.PI;
+  function norm(x) { x = x % 360; return x < 0 ? x + 360 : x; }
+  function sind(x) { return Math.sin(x * D2R); }
+  function cosd(x) { return Math.cos(x * D2R); }
+  function tand(x) { return Math.tan(x * D2R); }
+  function atan2d(y, x) { return Math.atan2(y, x) * R2D; }
+  function asind(x) { return Math.asin(Math.max(-1, Math.min(1, x))) * R2D; }
+
+  function jdFromMs(ms) { return ms / 86400000 + 2440587.5; }
+  function msFromJd(jd) { return (jd - 2440587.5) * 86400000; }
+
+  // [a, e, I, L, longPeri, longNode] and their rates per Julian century
+  var EL = {
+    mercury: [0.38709927, 0.20563593, 7.00497902, 252.25032350, 77.45779628, 48.33076593, 0.00000037, 0.00001906, -0.00594749, 149472.67411175, 0.16047689, -0.12534081],
+    venus: [0.72333566, 0.00677672, 3.39467605, 181.97909950, 131.60246718, 76.67984255, 0.00000390, -0.00004107, -0.00078890, 58517.81538729, 0.00268329, -0.27769418],
+    earth: [1.00000261, 0.01671123, -0.00001531, 100.46457166, 102.93768193, 0.0, 0.00000562, -0.00004392, -0.01294668, 35999.37244981, 0.32327364, 0.0],
+    mars: [1.52371034, 0.09339410, 1.84969142, -4.55343205, -23.94362959, 49.55953891, 0.00001847, 0.00007882, -0.00813131, 19140.30268499, 0.44441088, -0.29257343],
+    jupiter: [5.20288700, 0.04838624, 1.30439695, 34.39644051, 14.72847983, 100.47390909, -0.00011607, -0.00013253, -0.00183714, 3034.74612775, 0.21252668, 0.20469106],
+    saturn: [9.53667594, 0.05386179, 2.48599187, 49.95424423, 92.59887831, 113.66242448, -0.00125060, -0.00050991, 0.00193609, 1222.49362201, -0.41897216, -0.28867794],
+    uranus: [19.18916464, 0.04725744, 0.77263783, 313.23810451, 170.95427630, 74.01692503, -0.00196176, -0.00004397, -0.00242939, 428.48202785, 0.40805281, 0.04240589],
+    neptune: [30.06992276, 0.00859048, 1.77004347, -55.12002969, 44.96476227, 131.78422574, 0.00026291, 0.00005105, 0.00035372, 218.45945325, -0.32241464, -0.00508664],
+    pluto: [39.48211675, 0.24882730, 17.14001206, 238.92903833, 224.06891629, 110.30393684, -0.00031596, 0.00005170, 0.00004818, 145.20780515, -0.04062942, -0.01183482]
+  };
+
+  function helio(name, T) {
+    var p = EL[name];
+    var a = p[0] + p[6] * T, e = p[1] + p[7] * T, I = p[2] + p[8] * T;
+    var L = p[3] + p[9] * T, wbar = p[4] + p[10] * T, O = p[5] + p[11] * T;
+    var M = norm(L - wbar), w = wbar - O;
+    var Mr = M * D2R, E = Mr + e * Math.sin(Mr);
+    for (var i = 0; i < 12; i++) E = E - (E - e * Math.sin(E) - Mr) / (1 - e * Math.cos(E));
+    var xp = a * (Math.cos(E) - e), yp = a * Math.sqrt(1 - e * e) * Math.sin(E);
+    var cw = cosd(w), sw = sind(w), cO = cosd(O), sO = sind(O), cI = cosd(I), sI = sind(I);
+    return {
+      x: (cw * cO - sw * sO * cI) * xp + (-sw * cO - cw * sO * cI) * yp,
+      y: (cw * sO + sw * cO * cI) * xp + (-sw * sO + cw * cO * cI) * yp,
+      z: (sw * sI) * xp + (cw * sI) * yp
+    };
+  }
+
+  function precession(T) { return (5028.796195 * T + 1.1054348 * T * T) / 3600; }
+
+  function moonLon(T) {
+    var Lp = 218.3164477 + 481267.88123421 * T - 0.0015786 * T * T;
+    var D = 297.8501921 + 445267.1114034 * T - 0.0018819 * T * T;
+    var M = 357.5291092 + 35999.0502909 * T - 0.0001536 * T * T;
+    var Mp = 134.9633964 + 477198.8675055 * T + 0.0087414 * T * T;
+    var F = 93.2720950 + 483202.0175233 * T - 0.0036539 * T * T;
+    var E = 1 - 0.002516 * T;
+    var terms = [
+      [0, 0, 1, 0, 6288774], [2, 0, -1, 0, 1274027], [2, 0, 0, 0, 658314], [0, 0, 2, 0, 213618],
+      [0, 1, 0, 0, -185116], [0, 0, 0, 2, -114332], [2, 0, -2, 0, 58793], [2, -1, -1, 0, 57066],
+      [2, 0, 1, 0, 53322], [2, -1, 0, 0, 45758], [0, 1, -1, 0, -40923], [1, 0, 0, 0, -34720],
+      [0, 1, 1, 0, -30383], [2, 0, 0, -2, 15327], [0, 0, 1, 2, -12528], [0, 0, 1, -2, 10980],
+      [4, 0, -1, 0, 10675], [0, 0, 3, 0, 10034], [4, 0, -2, 0, 8548], [2, 1, -1, 0, -7888],
+      [2, 1, 0, 0, -6766], [1, 0, -1, 0, -5163], [1, 1, 0, 0, 4987], [2, -1, 1, 0, 4036],
+      [2, 0, 2, 0, 3994], [4, 0, 0, 0, 3861], [2, 0, -3, 0, 3665], [0, 1, -2, 0, -2689],
+      [2, 0, -1, 2, -2602], [2, -1, -2, 0, 2390], [1, 0, 1, 0, -2348], [2, -2, 0, 0, 2236],
+      [0, 1, 2, 0, -2120], [0, 2, 0, 0, -2069], [2, -2, -1, 0, 2048], [2, 0, 1, -2, -1773],
+      [2, 0, 0, 2, -1595], [4, -1, -1, 0, 1215], [0, 0, 2, 2, -1110], [3, 0, -1, 0, -892],
+      [2, 1, 1, 0, -810], [4, -1, -2, 0, 759], [0, 2, -1, 0, -713], [2, 2, -1, 0, -700],
+      [2, 1, -2, 0, 691], [2, -1, 0, -2, 596], [4, 0, 1, 0, 549], [0, 0, 4, 0, 537],
+      [4, -1, 0, 0, 520], [1, 0, -2, 0, -487]
+    ];
+    var s = 0;
+    for (var i = 0; i < terms.length; i++) {
+      var t = terms[i], arg = t[0] * D + t[1] * M + t[2] * Mp + t[3] * F;
+      var c = t[4];
+      if (Math.abs(t[1]) === 1) c *= E; else if (Math.abs(t[1]) === 2) c *= E * E;
+      s += c * sind(arg);
+    }
+    var A1 = 119.75 + 131.849 * T, A2 = 53.09 + 479264.290 * T;
+    s += 3958 * sind(A1) + 1962 * sind(Lp - F) + 318 * sind(A2);
+    return norm(Lp + s / 1e6);
+  }
+
+  function meanNode(T) { return norm(125.04452 - 1934.136261 * T + 0.0020708 * T * T); }
+  function obliquity(T) { return 23.439291 - 0.0130042 * T; }
+
+  var BODIES = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+
+  // Tropical ecliptic longitudes (mean equinox of date) for all bodies at a Julian Day (UT).
+  function positions(jd) {
+    var T = (jd - 2451545.0) / 36525;
+    var pr = precession(T);
+    var ea = helio('earth', T);
+    var out = { sun: norm(atan2d(-ea.y, -ea.x) + pr), moon: moonLon(T) };
+    ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'].forEach(function (n) {
+      var h = helio(n, T);
+      out[n] = norm(atan2d(h.y - ea.y, h.x - ea.x) + pr);
+    });
+    out.node = meanNode(T);
+    return out;
+  }
+
+  function angles(jd, lat, lon) {
+    var T = (jd - 2451545.0) / 36525;
+    var gmst = norm(280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T);
+    var ramc = norm(gmst + lon);
+    var eps = obliquity(T);
+    var mc = norm(atan2d(sind(ramc), cosd(ramc) * cosd(eps)));
+    var asc = norm(atan2d(cosd(ramc), -(sind(ramc) * cosd(eps) + tand(lat) * sind(eps))));
+    return { asc: asc, mc: mc, ramc: ramc, eps: eps };
+  }
+
+  function raToLon(ra, eps) { return norm(atan2d(sind(ra), cosd(ra) * cosd(eps))); }
+
+  // Returns 12 cusps (index 0 = 1st house). Placidus falls back to null near the poles.
+  function placidus(ang, lat) {
+    if (Math.abs(lat) >= 66) return null;
+    var eps = ang.eps, ramc = ang.ramc;
+    function cusp(frac, above) {
+      var lon = above ? norm(ang.mc + 30 * frac * 3) : norm(ang.mc + 180 - 30 * frac * 3);
+      for (var i = 0; i < 30; i++) {
+        var dec = asind(sind(eps) * sind(lon));
+        var x = tand(lat) * tand(dec);
+        if (Math.abs(x) > 1) return null;
+        var ad = asind(x);
+        var ra = above ? ramc + frac * (90 + ad) : ramc + 180 - frac * (90 - ad);
+        var nl = raToLon(norm(ra), eps);
+        if (Math.abs(((nl - lon + 540) % 360) - 180) < 1e-7) { lon = nl; break; }
+        lon = nl;
+      }
+      return lon;
+    }
+    var c11 = cusp(1 / 3, true), c12 = cusp(2 / 3, true), c2 = cusp(2 / 3, false), c3 = cusp(1 / 3, false);
+    if ([c11, c12, c2, c3].some(function (v) { return v === null || isNaN(v); })) return null;
+    var c = [];
+    c[0] = ang.asc; c[1] = c2; c[2] = c3; c[3] = norm(ang.mc + 180);
+    c[4] = norm(c11 + 180); c[5] = norm(c12 + 180); c[6] = norm(ang.asc + 180);
+    c[7] = norm(c2 + 180); c[8] = norm(c3 + 180); c[9] = ang.mc; c[10] = c11; c[11] = c12;
+    return c;
+  }
+
+  function cusps(system, ang, lat) {
+    var c = [], i;
+    if (system === 'placidus') {
+      var p = placidus(ang, lat);
+      if (p) return { cusps: p, system: 'placidus' };
+      system = 'equal';
+    }
+    if (system === 'whole') {
+      var start = Math.floor(ang.asc / 30) * 30;
+      for (i = 0; i < 12; i++) c.push(norm(start + 30 * i));
+      return { cusps: c, system: 'whole' };
+    }
+    for (i = 0; i < 12; i++) c.push(norm(ang.asc + 30 * i));
+    return { cusps: c, system: 'equal' };
+  }
+
+  function houseOf(lon, cs) {
+    for (var i = 0; i < 12; i++) {
+      var a = cs[i], b = cs[(i + 1) % 12];
+      var span = norm(b - a), d = norm(lon - a);
+      if (d < span) return i + 1;
+    }
+    return 1;
+  }
+
+  // Timezone: convert a wall-clock time in an IANA zone to a UTC timestamp (handles historical DST).
+  function tzOffsetMin(ms, tz) {
+    var f = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    var p = {}; f.formatToParts(new Date(ms)).forEach(function (x) { p[x.type] = x.value; });
+    var asUtc = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
+    return Math.round((asUtc - ms) / 60000);
+  }
+  function zonedToUtc(y, mo, d, h, mi, tz) {
+    var wall = Date.UTC(y, mo - 1, d, h, mi);
+    var guess = wall;
+    for (var i = 0; i < 4; i++) guess = wall - tzOffsetMin(guess, tz) * 60000;
+    return { ms: guess, offsetMin: tzOffsetMin(guess, tz) };
+  }
+
+  return { norm: norm, jdFromMs: jdFromMs, msFromJd: msFromJd, positions: positions, angles: angles, cusps: cusps, houseOf: houseOf, zonedToUtc: zonedToUtc, tzOffsetMin: tzOffsetMin, BODIES: BODIES };
+})();
+// ===== ENGINE END =====
+function ord(n) { var s = { 1: 'st', 2: 'nd', 3: 'rd' }; return n + ((n % 100 > 10 && n % 100 < 14) ? 'th' : (s[n % 10] || 'th')); }
+function signOf(lon) { return Math.floor(Astro.norm(lon) / 30); }
+function sepDeg(a, b) { var d = Math.abs(Astro.norm(a - b)); return d > 180 ? 360 - d : d; }
+var PYTH = {}; 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function (c, i) { PYTH[c] = (i % 9) + 1; });
+var CHAL = { A: 1, B: 2, C: 3, D: 4, E: 5, F: 8, G: 3, H: 5, I: 1, J: 1, K: 2, L: 3, M: 4, N: 5, O: 7, P: 8, Q: 1, R: 2, S: 3, T: 4, U: 6, V: 6, W: 6, X: 5, Y: 1, Z: 7 };
+function reduceNum(n, masters) {
+  var txt = '';
+  while (n > 9 && !(masters && (n === 11 || n === 22 || n === 33))) {
+    var digits = String(n).split('').map(Number), s = digits.reduce(function (a, b) { return a + b; }, 0);
+    txt += ' → ' + digits.join(' + ') + ' = ' + s; n = s;
+  }
+  if (masters && (n === 11 || n === 22 || n === 33)) txt += ' (master number, kept)';
+  return { n: n, txt: txt };
+}
+function lifePath(dateStr, masters) {
+  var p = dateStr.split('-').map(Number);
+  var d = reduceNum(p[2], masters), m = reduceNum(p[1], masters), y = reduceNum(p[0], masters);
+  var sum = d.n + m.n + y.n, t = reduceNum(sum, masters);
+  return { n: t.n, working: 'Day ' + p[2] + d.txt + ' · Month ' + p[1] + m.txt + ' · Year ' + p[0] + y.txt + '\n' + d.n + ' + ' + m.n + ' + ' + y.n + ' = ' + sum + t.txt };
+}
+function nameNumber(name, sys, masters, filter) {
+  var T = sys === 'chaldean' ? CHAL : PYTH;
+  var words = name.toUpperCase().replace(/[^A-Z\s]/g, '').split(/\s+/).filter(Boolean);
+  var parts = [], total = 0;
+  words.forEach(function (w) {
+    var letters = w.split('').filter(function (c) { return filter === 'all' || (filter === 'vowels' ? 'AEIOU'.indexOf(c) >= 0 : 'AEIOU'.indexOf(c) < 0); });
+    if (!letters.length) return;
+    var vals = letters.map(function (c) { return T[c]; }), s = vals.reduce(function (a, b) { return a + b; }, 0);
+    total += s; parts.push({ w: w, letters: letters.join(''), vals: vals, s: s });
+  });
+  if (!parts.length) return null;
+  var r = reduceNum(total, masters);
+  var lines = parts.map(function (p) { return (filter === 'all' ? p.w : p.letters) + ' ' + p.vals.join('+') + ' = ' + p.s; }).join(' · ');
+  return { n: r.n, working: lines + '\n' + (parts.length > 1 ? parts.map(function (p) { return p.s; }).join(' + ') + ' = ' : '') + total + r.txt };
+}
+
+function birthdayNumber(dateStr, masters) {
+  var d = +dateStr.split('-')[2], r = reduceNum(d, masters);
+  return { n: r.n, day: d, working: d > 9 ? 'Born on the ' + ord(d) + ': ' + String(d).split('').join(' + ') + ' = ' + (r.n === d ? d : String(d).split('').reduce(function (a, b) { return a + +b; }, 0)) + (r.n !== String(d).split('').reduce(function (a, b) { return a + +b; }, 0) && r.n !== d ? ' → ' + r.n : '') : 'Born on the ' + ord(d) + ', already a single digit' };
+}
+var BDAY_GIFT = {
+  1: 'self-starter energy: you’re quick to take the lead and back your own ideas',
+  2: 'a gift for people: you read the room, smooth things over and make others feel heard',
+  3: 'a spark: humour, creativity and a way with words that lifts the people around you',
+  4: 'a builder’s streak: steady, reliable and the one who actually gets it finished',
+  5: 'restless curiosity: you adapt fast, learn by doing and get bored with the same old thing',
+  6: 'a caring core: you look after people, and home and family matter more than most',
+  7: 'a deep thinker: you need to understand how things work, and you need your own space',
+  8: 'drive: you’re ambitious, good with the practical side of money, and you like results',
+  9: 'a big heart: generous, idealistic and drawn to the bigger picture',
+  11: 'a master-number birthday: intuitive and inspiring, with a nervous energy to manage',
+  22: 'a master-number birthday: big plans and the patience to build them for real'
+};
+var BDAY_WHY = 'Your Birthday Number is just the day of the month you were born, reduced to one digit. Numerology reads it as a talent you came in with: the energy you lead with day to day, a sidekick to your Life Path, which is the bigger road you’re on.';
+
+
+var CZ_ANIMALS = ['Rat', 'Ox', 'Tiger', 'Rabbit', 'Dragon', 'Snake', 'Horse', 'Goat', 'Monkey', 'Rooster', 'Dog', 'Pig'];
+var CZ_EMOJI = ['🐀', '🐂', '🐅', '🐇', '🐉', '🐍', '🐎', '🐐', '🐒', '🐓', '🐕', '🐖'];
+var CZ_TRAITS = [
+  'quick-witted, resourceful and good at spotting an opportunity before anyone else',
+  'patient, dependable and strong: slow to start, impossible to stop',
+  'brave, competitive and magnetic, with a taste for a challenge',
+  'gentle, tactful and quietly clever, with a love of peace and comfort',
+  'confident, ambitious and larger than life, a natural leader',
+  'wise, private and elegant, trusting your gut over the crowd',
+  'energetic, free-spirited and warm, happiest on the move',
+  'kind, creative and easy-going, with an eye for beauty',
+  'clever, playful and inventive, a problem-solver who gets bored easily',
+  'sharp, hard-working and honest, with an eye for detail',
+  'loyal, fair and protective, a friend for life',
+  'generous, good-natured and easy to love, with a soft spot for life’s pleasures'
+];
+var CZ_ELEMENTS = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'];
+var CZ_EL_TXT = { Wood: 'growth and generosity', Fire: 'passion and energy', Earth: 'stability and common sense', Metal: 'determination and focus', Water: 'intuition and flexibility' };
+var CZ_EL_WEST = { Fire: 'fire', Earth: 'earth', Water: 'water' };
+function czIndex(y) { return ((y - 4) % 12 + 12) % 12; }
+function czElement(y) { return CZ_ELEMENTS[Math.floor((((y - 4) % 10) + 10) % 10 / 2)]; }
+function czYang(y) { return (((y - 4) % 2) + 2) % 2 === 0; }
+var _cnyCache = {};
+function _elong(jd) { var p = Astro.positions(jd); return Astro.norm(p.moon - p.sun); }
+function _sunLon(jd) { return Astro.positions(jd).sun; }
+function chineseNewYearMs(y) {
+  if (_cnyCache[y]) return _cnyCache[y];
+  // winter solstice of the previous year (Sun at 270°)
+  var jd = Astro.jdFromMs(Date.UTC(y - 1, 11, 18)), a, b;
+  while (Astro.norm(_sunLon(jd) - 270) > 180) jd += 0.5;
+  a = jd - 0.5; b = jd;
+  for (var i = 0; i < 40; i++) { var m = (a + b) / 2; if (Astro.norm(_sunLon(m) - 270) > 180) a = m; else b = m; }
+  // A new moon on the same China-time calendar day as the solstice starts month 11 itself, so count
+  // only new moons from the following China day onwards.
+  var sd = new Date(Astro.msFromJd(b) + 8 * 3600000), dayEnd = Date.UTC(sd.getUTCFullYear(), sd.getUTCMonth(), sd.getUTCDate() + 1) - 8 * 3600000;
+  var solstice = Astro.jdFromMs(dayEnd), found = [], t = solstice, prev = _elong(t);
+  while (found.length < 3 && t < solstice + 100) {
+    var t2 = t + 0.5, e2 = _elong(t2);
+    if (e2 < prev) { // elongation wrapped through 0 = new moon
+      var lo = t, hi = t2;
+      for (var k = 0; k < 40; k++) { var mid = (lo + hi) / 2; if (_elong(mid) > 180) lo = mid; else hi = mid; }
+      found.push(hi);
+    }
+    t = t2; prev = e2;
+  }
+  // the calendar day of that new moon in China time, starting at midnight China time
+  // Chinese New Year always lands between 21 Jan and 20 Feb. The rare leap-month years (like the
+  // famous 2033 problem, which moves 2034's New Year to 19 Feb) push it one lunation later.
+  var pick = found[1], dd = new Date(Astro.msFromJd(pick) + 8 * 3600000);
+  if (dd.getUTCMonth() === 0 && dd.getUTCDate() < 21 && found[2]) pick = found[2];
+  var nm = Astro.msFromJd(pick) + 8 * 3600000, d = new Date(nm);
+  var ms = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - 8 * 3600000;
+  _cnyCache[y] = ms; return ms;
+}
+function chineseZodiac(utcMs) {
+  var y = new Date(utcMs + 8 * 3600000).getUTCFullYear();
+  var cny = chineseNewYearMs(y), cy = utcMs >= cny ? y : y - 1, cnyUsed = utcMs >= cny ? cny : chineseNewYearMs(y);
+  var i = czIndex(cy), el = czElement(cy);
+  return { year: cy, animal: CZ_ANIMALS[i], emoji: CZ_EMOJI[i], idx: i, element: el, yang: czYang(cy), traits: CZ_TRAITS[i],
+    beforeNY: utcMs < cny, cnyMs: cny, cnyYear: y,
+    friends: [(i + 4) % 12, (i + 8) % 12].map(function (k) { return CZ_ANIMALS[k]; }), clash: CZ_ANIMALS[(i + 6) % 12] };
+}
+
+var NUM_SHORT = { 1: 'leader', 2: 'peacemaker', 3: 'communicator', 4: 'builder', 5: 'free spirit', 6: 'carer', 7: 'thinker', 8: 'achiever', 9: 'humanitarian', 11: 'intuitive', 22: 'master builder', 33: 'master teacher' };
+var FAMILY = { 1: 'a', 5: 'a', 7: 'a', 2: 'b', 4: 'b', 8: 'b', 3: 'c', 6: 'c', 9: 'c' };
+var FAMILY_NAME = { a: 'independent, head-first numbers (1, 5, 7)', b: 'practical, steady numbers (2, 4, 8)', c: 'creative, people-focused numbers (3, 6, 9)' };
+function rootNum(n) { return n === 11 ? 2 : n === 22 ? 4 : n === 33 ? 6 : n; }
+</script>
+<script>
+(function () {
+'use strict';
+
+/* ---------- anonymous head-count (same idea as the app: no IDs, no cookies, no personal data) ----------
+   Only counts that a comparison was made and that someone tapped share. Nothing typed ever goes with it.
+   The counter Worker has to know these two event names, otherwise it simply ignores them. */
+var COUNT_API = 'https://duology-counter.emblen-scott.workers.dev';
+var COUNT_EVENTS = ['pair', 'pshare'];
+function track(ev) {
+  try {
+    if (!COUNT_API || COUNT_EVENTS.indexOf(ev) < 0) return;
+    if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
+    var ref = (new URLSearchParams(location.search).get('ref') || '').toLowerCase();
+    if (!/^[a-z]{2,10}$/.test(ref)) ref = '';
+    fetch(COUNT_API + '/hit', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ e: ev, r: ref }), keepalive: true, credentials: 'omit' }).catch(function () {});
+  } catch (e) {}
+}
+
+/* ---------- the little bits of data we need ---------- */
+var SIGN = [['Aries', 'fire', 'cardinal'], ['Taurus', 'earth', 'fixed'], ['Gemini', 'air', 'mutable'], ['Cancer', 'water', 'cardinal'], ['Leo', 'fire', 'fixed'], ['Virgo', 'earth', 'mutable'],
+  ['Libra', 'air', 'cardinal'], ['Scorpio', 'water', 'fixed'], ['Sagittarius', 'fire', 'mutable'], ['Capricorn', 'earth', 'cardinal'], ['Aquarius', 'air', 'fixed'], ['Pisces', 'water', 'mutable']];
+var PL = { sun: 'Sun', moon: 'Moon', mercury: 'Mercury', venus: 'Venus', mars: 'Mars', jupiter: 'Jupiter', saturn: 'Saturn' };
+var EL_WORD = { fire: 'fire (drive and enthusiasm)', earth: 'earth (practical and grounded)', air: 'air (ideas and people)', water: 'water (feelings and intuition)' };
+var TYPES = {
+  friend:  { label: 'Friend',   plural: 'friends',    other: 'friend',          asks: 'as friends' },
+  partner: { label: 'Partner',  plural: 'partners',   other: 'partner',         asks: 'as a couple' },
+  family:  { label: 'Family',   plural: 'family',     other: 'family member',   asks: 'as family' },
+  work:    { label: 'Workmate', plural: 'workmates',  other: 'workmate',        asks: 'as workmates' }
+};
+var ASP = [
+  { k: 'conj', a: 0,   orb: 6, q: 'merge', v: 'sits right on' },
+  { k: 'sext', a: 60,  orb: 4, q: 'flow',  v: 'gets a nudge from' },
+  { k: 'sq',   a: 90,  orb: 6, q: 'spark', v: 'squares' },
+  { k: 'tri',  a: 120, orb: 6, q: 'flow',  v: 'flows with' },
+  { k: 'opp',  a: 180, orb: 6, q: 'spark', v: 'faces off with' }
+];
+/* which planet pairs matter for which kind of relationship, and what each pair is "about" */
+var PAIRS = {
+  friend: [['sun', 'sun', 'Your core selves', 1.0], ['mercury', 'mercury', 'How you talk and think together', 1.0], ['venus', 'venus', 'What you enjoy together', 0.9], ['mars', 'mars', 'Energy and drive', 0.8], ['jupiter', 'sun', 'What you bring out in each other', 0.7]],
+  partner: [['venus', 'mars', 'Attraction and chemistry', 1.3], ['sun', 'sun', 'Core compatibility', 1.0], ['venus', 'venus', 'What you love, and how', 1.0], ['mars', 'mars', 'Drive, and how you handle disagreements', 0.9], ['mercury', 'mercury', 'How you communicate', 0.9], ['saturn', 'venus', 'Staying power and commitment', 0.8], ['jupiter', 'venus', 'Warmth and generosity', 0.7]],
+  family: [['sun', 'sun', 'Core personalities', 0.9], ['mercury', 'mercury', 'Conversations', 1.0], ['mars', 'mars', 'Arguments and energy', 1.0], ['saturn', 'sun', 'Expectations and who calls the shots', 1.0], ['jupiter', 'sun', 'Encouragement', 0.8], ['venus', 'venus', 'Affection and shared tastes', 0.8]],
+  work: [['mercury', 'mercury', 'How you communicate', 1.2], ['mars', 'mars', 'Working pace and disagreements', 1.1], ['sun', 'sun', 'Ego, and who leads', 0.9], ['saturn', 'mars', 'Discipline versus drive', 0.8], ['saturn', 'mercury', 'Detail versus ideas', 0.8], ['jupiter', 'sun', 'Support and opportunity', 0.8]]
+};
+var ASPQ = {
+  friend:  { flow: 'That comes easily, so there’s little effort needed.', merge: 'These two run together, so you feel each other strongly.', spark: 'There’s friction here, which can mean banter, debate, or a nudge to grow.' },
+  partner: { flow: 'A natural ease that’s read as feeling comfortable together.', merge: 'A strong pull: the two energies blend and amplify each other.', spark: 'Chemistry with friction: exciting, and it asks for honest conversation.' },
+  family:  { flow: 'Understanding that comes without much explaining.', merge: 'You tend to feel this one strongly and quickly.', spark: 'A friction point that usually eases once it’s been named.' },
+  work:    { flow: 'A style that meshes without much effort.', merge: 'You’ll notice this one: you tend to amplify each other.', spark: 'Different approaches here. Good if roles are clear, bumpy if they aren’t.' }
+};
+var OUT = {
+  friend:  { flow: ['Easy company', 'The kind of friends who just fit. A lot of this comes without effort.'], spark: ['Sparks and good banter', 'You rub each other in useful ways. Never boring, occasionally spicy.'], mix: ['A well-rounded pair', 'Some things come easy and some take a little work. That mix is what keeps a friendship interesting.'], quiet: ['A quiet match', 'No big fireworks in the usual tests, which often means a steady, low-drama click.'] },
+  partner: { flow: ['A natural fit', 'A lot of this looks easy, the kind of ease traditionally read as feeling at home together.'], spark: ['Chemistry with friction', 'Plenty of pull and a little push. Exciting, and it rewards honest talking.'], mix: ['Spark and flow', 'Some real ease and some real heat. Astrologers would call it a match with something to enjoy and something to work on.'], quiet: ['A slow burn', 'No loud signals in the usual tests, which is traditionally read as a connection that builds quietly.'] },
+  family:  { flow: ['Easy to be around', 'Much of this comes naturally: the kind of family fit where you just get each other.'], spark: ['Strong personalities', 'Plenty of friction points, which is also where the energy, and the growth, are read to be.'], mix: ['A real mix', 'Some easy understanding and a few bumps. Pretty normal for family.'], quiet: ['Calm waters', 'No big flags in the usual tests: a steady fit.'] },
+  work:    { flow: ['Smooth operators', 'Your styles mesh well. You’re likely to get things done without much friction.'], spark: ['Productive tension', 'Different approaches that can sharpen each other, if the roles are clear.'], mix: ['Complementary', 'Some shared style and some different angles: a good team if you play to each other’s strengths.'], quiet: ['Steady colleagues', 'No strong signals either way. It comes down to the people, not the planets.'] }
+};
+var EL_SAME = {
+  friend: 'Astrologers read a shared element as speaking the same language, so you tend to get each other without explaining.',
+  partner: 'It’s the oldest “same wavelength” test in astrology: easy understanding, though you may share the same blind spots.',
+  family: 'It’s read as seeing the world in a similar way, which can smooth things over (and share the same stubborn streaks).',
+  work: 'It’s read as a similar working style, so you rarely need to translate for each other.'
+};
+var EL_EASY = { 'air-fire': 'Air feeds fire: one brings the ideas, the other brings the drive to act on them.', 'earth-water': 'Water nourishes earth: one brings the feeling, the other brings the steadiness.' };
+var EL_MIXED = 'Different elements are read as different ways of seeing things. That’s the friction that keeps it interesting, and what you can learn from each other.';
+
+/* ---------- helpers ---------- */
+function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function $(s) { return document.querySelector(s); }
+function cleanName(s) { return String(s || '').replace(/[^\p{L}\p{M}\s'’\-.]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 30); }
+function firstOf(s) { return cleanName(s).split(' ')[0] || ''; }
+function validDate(d) { if (!/^\d{4}-\d{2}-\d{2}$/.test(d || '')) return false; var y = +d.slice(0, 4); if (y < 1800 || y > 2050) return false; var t = new Date(d + 'T00:00:00Z'); return !isNaN(t) && t.toISOString().slice(0, 10) === d; }
+function b64e(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function b64d(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return JSON.parse(decodeURIComponent(escape(atob(s)))); }
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+/* ---------- the maths (same engine the app uses) ---------- */
+function person(name, date, full) {
+  var p = date.split('-').map(Number), noon = Date.UTC(p[0], p[1] - 1, p[2], 12, 0);
+  var pos = Astro.positions(Astro.jdFromMs(noon));
+  var o = { name: name, date: date, pos: pos };
+  o.sun = signOf(pos.sun); o.moon = signOf(pos.moon);
+  var ds = Astro.norm(pos.sun) % 30, dm = Astro.norm(pos.moon) % 30;
+  o.sunEdge = ds < 0.6 || ds > 29.4;                 // we only know the date, so a sign-change birthday could be either side
+  o.moonSure = dm > 6.7 && dm < 23.3;                // the Moon moves ~13 degrees a day, so without a time it can be a sign either side near an edge
+  o.lp = lifePath(date, true).n; o.bd = birthdayNumber(date, true).n;
+  o.ex = full ? (nameNumber(full, 'pyth', true, 'all') || {}).n || null : null;
+  o.cz = chineseZodiac(Date.UTC(p[0], p[1] - 1, p[2], 4, 0));
+  return o;
+}
+function elRel(a, b) { if (a === b) return 'same'; var k = [a, b].sort().join('-'); return EL_EASY[k] ? 'easy' : 'mixed'; }
+function nameOfSign(i) { return SIGN[i][0]; }
+
+function analyse(A, B, type) {
+  var items = [], notes = [];
+  /* Sun signs: the headline element test */
+  var ea = SIGN[A.sun][1], eb = SIGN[B.sun][1], rel = elRel(ea, eb), what = A.name + '’s ' + nameOfSign(A.sun) + ' Sun and ' + B.name + '’s ' + nameOfSign(B.sun) + ' Sun';
+  if (rel === 'same') items.push({ kind: 'click', w: 1.2, t: 'Same element', x: what + ' are both ' + EL_WORD[ea] + '. ' + EL_SAME[type] });
+  else if (rel === 'easy') items.push({ kind: 'click', w: 1.1, t: 'Friendly elements', x: what + ' are ' + ea + ' and ' + eb + '. ' + EL_EASY[[ea, eb].sort().join('-')] });
+  else items.push({ kind: 'spark', w: 1.0, t: 'Different elements', x: what + ' are ' + ea + ' and ' + eb + '. ' + EL_MIXED });
+  /* Sun and Moon crossing over, only where the Moon sign is safe to call without a birth time */
+  var cross = [[A, B], [B, A]];
+  cross.forEach(function (c) {
+    var s = c[0], m = c[1]; if (!m.moonSure) return;
+    var r = elRel(SIGN[s.sun][1], SIGN[m.moon][1]), t = s.name + '’s Sun (' + nameOfSign(s.sun) + ') and ' + m.name + '’s Moon (' + nameOfSign(m.moon) + ')';
+    if (r === 'same') items.push({ kind: 'click', w: 0.9, t: 'Feels like home', x: t + ' share an element. In astrology that’s the classic “I feel at home with you” link.' });
+    else if (r === 'easy') items.push({ kind: 'click', w: 0.8, t: 'Soothing mix', x: t + ' are friendly elements. Read as ' + m.name + ' feeling understood by ' + s.name + '.' });
+    else items.push({ kind: 'spark', w: 0.6, t: 'Feelings in translation', x: t + ' are different elements, so you may sometimes need to translate each other’s moods.' });
+  });
+  if (!A.moonSure || !B.moonSure) notes.push('Moon signs need a birth time to be sure, so we’ve left them out for ' + (!A.moonSure && !B.moonSure ? 'both of you' : (!A.moonSure ? A.name : B.name)) + '.');
+  if (A.sunEdge || B.sunEdge) notes.push((A.sunEdge ? A.name : B.name) + ' was born right on the edge between two Sun signs, so the sign could be the one next door. The full Duology app (with birth time and place) settles it.');
+  /* planet to planet, across the two charts */
+  var found = [];
+  PAIRS[type].forEach(function (pr) {
+    var dirs = [[pr[0], pr[1]]]; if (pr[0] !== pr[1]) dirs.push([pr[1], pr[0]]);
+    var best = null;
+    dirs.forEach(function (d) {
+      var sep = sepDeg(A.pos[d[0]], B.pos[d[1]]);
+      ASP.forEach(function (as) { var off = Math.abs(sep - as.a); if (off <= as.orb) { var sc = pr[3] * (1 - off / as.orb * 0.6); if (!best || sc > best.sc) best = { sc: sc, as: as, a: d[0], b: d[1], off: off }; } });
+    });
+    if (best) found.push({ pr: pr, b: best });
+  });
+  found.forEach(function (f) {
+    var b = f.b, k = b.as.q === 'spark' ? 'spark' : 'click';
+    items.push({ kind: k, w: f.b.sc, t: f.pr[2], x: A.name + '’s ' + nameOfSign(signOf(A.pos[b.a])) + ' ' + PL[b.a] + ' ' + b.as.v + ' ' + B.name + '’s ' + nameOfSign(signOf(B.pos[b.b])) + ' ' + PL[b.b] + '. ' + ASPQ[type][b.as.q] });
+  });
+  /* numerology */
+  var ra = rootNum(A.lp), rb = rootNum(B.lp), fa = FAMILY[ra], fb = FAMILY[rb];
+  if (A.lp === B.lp) items.push({ kind: 'click', w: 0.9, t: 'Same Life Path', x: 'You both walk Life Path ' + A.lp + ' (the ' + NUM_SHORT[A.lp] + '). Numerologists read that as the same road: you understand each other’s motives, and share each other’s blind spots.' });
+  else if (fa === fb) items.push({ kind: 'click', w: 0.8, t: 'Life Paths in the same family', x: 'Life Paths ' + A.lp + ' and ' + B.lp + ' are both ' + FAMILY_NAME[fa] + '. Numerologists read those as working together easily.' });
+  else items.push({ kind: 'spark', w: 0.7, t: 'Different Life Path families', x: 'Life Path ' + A.lp + ' (' + NUM_SHORT[A.lp] + ') and ' + B.lp + ' (' + NUM_SHORT[B.lp] + ') come from different families, so you approach life differently. Traditionally that’s read as complementary: each has something the other lacks.' });
+  if (A.ex && B.ex) {
+    var xa = FAMILY[rootNum(A.ex)], xb = FAMILY[rootNum(B.ex)];
+    items.push(A.ex === B.ex || xa === xb
+      ? { kind: 'click', w: 0.6, t: 'Matching talents', x: 'Your Expression numbers (' + A.ex + ' and ' + B.ex + ', worked out from your full names) are in the same family, which numerologists read as similar natural talents.' }
+      : { kind: 'spark', w: 0.5, t: 'Different talents', x: 'Your Expression numbers (' + A.ex + ' and ' + B.ex + ', from your full names) are in different families: different natural talents that can fill each other’s gaps.' });
+  }
+  /* Chinese zodiac */
+  var ca = A.cz, cb = B.cz;
+  if (ca.animal === cb.animal) items.push({ kind: 'click', w: 0.7, t: 'Same Chinese animal', x: 'You’re both the ' + ca.animal + '. Traditionally that’s read as an instant understanding of each other’s habits.' });
+  else if (ca.friends.indexOf(cb.animal) >= 0) items.push({ kind: 'click', w: 0.8, t: 'Chinese zodiac allies', x: A.name + ' the ' + ca.animal + ' and ' + B.name + ' the ' + cb.animal + ' are traditionally natural allies.' });
+  else if (ca.clash === cb.animal) items.push({ kind: 'spark', w: 0.8, t: 'Chinese zodiac opposites', x: A.name + ' the ' + ca.animal + ' and ' + B.name + ' the ' + cb.animal + ' are traditionally the classic opposites: the pair that challenges each other most.' });
+  /* verdict */
+  items.sort(function (x, y) { return y.w - x.w; });
+  var clicks = items.filter(function (i) { return i.kind === 'click'; }), sparks = items.filter(function (i) { return i.kind === 'spark'; });
+  var cw = clicks.reduce(function (s, i) { return s + i.w; }, 0), sw = sparks.reduce(function (s, i) { return s + i.w; }, 0), key;
+  if (items.length <= 2) key = 'quiet'; else if (cw - sw >= 1.5) key = 'flow'; else if (sw - cw >= 1.5) key = 'spark'; else key = 'mix';
+  return { type: type, a: A, b: B, clicks: clicks.slice(0, 5), sparks: sparks.slice(0, 4), headline: OUT[type][key][0], summary: OUT[type][key][1], notes: notes };
+}
+
+/* ---------- state + screens ---------- */
+var st = { screen: 'make', type: 'friend', you: { name: '', date: '', full: '' }, them: { name: '', date: '', full: '' }, from: null, err: '', res: null, fmt: '4x5', link: '' };
+try { var h = location.hash || ''; if (h.indexOf('#c=') === 0) { var o = b64d(h.slice(3)); if (o && validDate(o.d) && TYPES[o.t]) { st.from = { name: firstOf(o.n) || 'Someone', date: o.d, type: o.t }; st.type = o.t; st.screen = 'recv'; } } } catch (e) {}
+// If this page sits beside the app, borrow your own name and date from your active chart. Nothing is sent anywhere.
+try {
+  var raw = localStorage.getItem('chartExplained.v1'), s = raw && JSON.parse(raw);
+  if (s && s.profiles && s.profiles.length) {
+    var me = s.profiles.filter(function (p) { return p.id === s.activeId && p.kind !== 'pet'; })[0] || s.profiles.filter(function (p) { return p.kind !== 'pet'; })[0];
+    if (me && validDate(me.date)) { st.you = { name: firstOf(me.nowName || me.name), date: me.date, full: '' }; st.prefilled = true; }
+  }
+} catch (e) {}
+
+function typePills() {
+  return '<div class="pills" role="group" aria-label="Who is it with?">' + Object.keys(TYPES).map(function (k) { return '<button type="button" class="pill" data-act="type:' + k + '" aria-pressed="' + (st.type === k) + '">' + TYPES[k].label + '</button>'; }).join('') + '</div>';
+}
+function field(id, label, val, type, extra) { return '<div class="field"><label for="' + id + '">' + label + '</label><input class="input" id="' + id + '" type="' + (type || 'text') + '" value="' + esc(val) + '" ' + (extra || '') + '></div>'; }
+
+function screenMake() {
+  var T = TYPES[st.type];
+  return '<div class="stack">' +
+    '<div><h1>Do you two <em>click</em>?</h1><p class="lede">Check how your stars and numbers line up. Enter two birth dates and see where you flow, where you spark, and what the traditions say.</p></div>' +
+    '<div class="stack-s"><h3>Who is it with?</h3>' + typePills() + '</div>' +
+    '<div class="who"><h2>You</h2>' + (st.prefilled ? '<div class="small">Filled in from your Duology chart.</div>' : '') +
+      field('y-name', 'First name', st.you.name, 'text', 'autocomplete="given-name" maxlength="30"') +
+      field('y-date', 'Birth date', st.you.date, 'date', 'min="1800-01-01" max="2050-12-31"') +
+      field('y-full', 'Full birth name <span class="small">(optional, adds name numbers)</span>', st.you.full, 'text', 'maxlength="60"') + '</div>' +
+    '<div class="who"><h2>Your ' + T.other + '</h2>' +
+      field('t-name', 'First name', st.them.name, 'text', 'maxlength="30"') +
+      field('t-date', 'Birth date', st.them.date, 'date', 'min="1800-01-01" max="2050-12-31"') +
+      field('t-full', 'Full birth name <span class="small">(optional)</span>', st.them.full, 'text', 'maxlength="60"') + '</div>' +
+    (st.err ? '<div class="err" role="alert">' + esc(st.err) + '</div>' : '') +
+    '<button type="button" class="btn" data-act="go">Check if we click</button>' +
+    '<p class="small">Nothing you type here is saved or sent anywhere. For reflection and fun.</p></div>';
+}
+function screenRecv() {
+  var f = st.from, T = TYPES[f.type];
+  return '<div class="stack">' +
+    '<div><span class="badge">' + esc(T.label) + ' check</span><h1 style="margin-top:10px">' + esc(f.name) + ' wants to see if you two <em>click</em></h1><p class="lede">' + esc(f.name) + ' has shared their details for a check ' + T.asks + '. Add yours and see how you line up. Yours stay on your device.</p></div>' +
+    '<div class="who"><h2>You</h2>' + field('y-name', 'First name', st.you.name, 'text', 'autocomplete="given-name" maxlength="30"') +
+      field('y-date', 'Birth date', st.you.date, 'date', 'min="1800-01-01" max="2050-12-31"') + '</div>' +
+    (st.err ? '<div class="err" role="alert">' + esc(st.err) + '</div>' : '') +
+    '<button type="button" class="btn" data-act="gorecv">Check if we click</button>' +
+    '<button type="button" class="link" data-act="notme">This isn’t for me. Start my own check</button>' +
+    '<p class="small">For reflection and fun.</p></div>';
+}
+function listOf(items, kind) {
+  return items.map(function (i) { return '<div class="item ' + kind + '"><b>' + esc(i.t) + '</b><p>' + esc(i.x) + '</p></div>'; }).join('');
+}
+function chip(p) { return '<div class="chip"><b>' + esc(p.name) + '</b><span>' + nameOfSign(p.sun) + ' Sun</span><span>Life Path ' + p.lp + '</span><span>' + p.cz.animal + '</span></div>'; }
+function screenResult() {
+  var r = st.res, T = TYPES[r.type];
+  return '<div class="stack">' +
+    '<div class="hero"><span class="badge">' + T.label + ' check</span><div class="names">' + esc(r.a.name) + ' <em>&amp;</em> ' + esc(r.b.name) + '</div><div class="hl">' + esc(r.headline) + '</div><p style="margin:0;color:var(--ink2)">' + esc(r.summary) + '</p><div class="chips">' + chip(r.a) + chip(r.b) + '</div></div>' +
+    '<div class="stack-s"><h3>Where you click</h3>' + (r.clicks.length ? listOf(r.clicks, 'click') : '<p class="small">No big matches by the usual tests, which just means you click in quieter ways.</p>') + '</div>' +
+    '<div class="stack-s"><h3>Where you spark</h3>' + (r.sparks.length ? listOf(r.sparks, 'spark') : '<p class="small">Nothing obviously prickly in the usual tests.</p>') + '</div>' +
+    (r.notes.length ? '<div class="note">' + r.notes.map(esc).join('<br><br>') + '</div>' : '') +
+    '<div class="stack-s"><h3>Share it</h3><canvas class="cv" id="cv" width="540" height="675" aria-label="Share card preview"></canvas>' +
+      '<div class="seg"><button type="button" class="pill" data-act="fmt:4x5" aria-pressed="' + (st.fmt === '4x5') + '">Post (4:5)</button><button type="button" class="pill" data-act="fmt:9x16" aria-pressed="' + (st.fmt === '9x16') + '">Story (9:16)</button></div>' +
+      '<button type="button" class="btn" data-act="shareimg">Share the picture</button>' +
+      '<button type="button" class="btn-ghost" data-act="link">Make a link so ' + esc(r.b.name) + ' can check too</button>' +
+      (st.link ? '<div class="note"><b>Heads up:</b> this link carries your first name and birth date inside it, so anyone who has it can see them. Only send it to people you’re happy to share that with.</div><textarea class="copybox" id="lk" readonly>' + esc(st.link) + '</textarea><button type="button" class="btn-ghost" data-act="copy">Copy the link</button>' : '') + '</div>' +
+    '<div class="card stack-s"><h2>Want the full picture?</h2><p style="margin:0;color:var(--ink2)">This is the quick version, from birth dates only. In Duology Pro you can save ' + esc(r.b.name) + ' as a chart and read every placement, house and aspect, with the why behind each.</p><a class="btn-ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="./?ref=cc">Open Duology</a></div>' +
+    '<button type="button" class="link" data-act="again">Check another ' + esc(T.other) + '</button>' +
+    '<p class="small">Built on traditional astrology, numerology and Chinese zodiac rules, with no birth times or places. For reflection and fun, not advice.</p></div>';
+}
+
+/* ---------- share card (drawn on a canvas, so no server is involved) ---------- */
+function wrapLines(g, text, maxW) { var w = text.split(/\s+/), lines = [], cur = ''; w.forEach(function (x) { var t = cur ? cur + ' ' + x : x; if (g.measureText(t).width > maxW && cur) { lines.push(cur); cur = x; } else cur = t; }); if (cur) lines.push(cur); return lines; }
+function drawCard(g, W, H, r) {
+  var u = W / 1080, T = TYPES[r.type], tall = H > 1500, top = tall ? 250 : 120, bottom = tall ? 340 : 70;
+  var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#14131A'); bg.addColorStop(1, '#1B1A25'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  var rg = g.createRadialGradient(W * 0.85, H * 0.12, 10, W * 0.85, H * 0.12, W * 0.8); rg.addColorStop(0, 'rgba(169,182,255,.16)'); rg.addColorStop(1, 'rgba(169,182,255,0)'); g.fillStyle = rg; g.fillRect(0, 0, W, H);
+  var rg2 = g.createRadialGradient(W * 0.1, H * 0.95, 10, W * 0.1, H * 0.95, W * 0.9); rg2.addColorStop(0, 'rgba(228,166,115,.12)'); rg2.addColorStop(1, 'rgba(228,166,115,0)'); g.fillStyle = rg2; g.fillRect(0, 0, W, H);
+  var x = 90 * u, maxW = W - 180 * u, y = top * u;
+  g.textBaseline = 'alphabetic';
+  /* kicker */
+  g.font = '700 ' + 26 * u + 'px "Instrument Sans",system-ui,sans-serif'; g.fillStyle = '#E4A673';
+  var k = ('CLICK CHECK · ' + T.plural).toUpperCase(), kx = x; for (var i = 0; i < k.length; i++) { g.fillText(k[i], kx, y); kx += g.measureText(k[i]).width + 5 * u; }
+  y += 40 * u;
+  /* names, shrunk to fit */
+  var na = r.a.name, nb = r.b.name, size = 120 * u, line;
+  do { g.font = '600 ' + size + 'px Fraunces,Georgia,serif'; var wA = g.measureText(na).width, wAmp = g.measureText(' & ').width; line = wA + wAmp + g.measureText(nb).width; size -= 4 * u; } while (line > maxW && size > 44 * u);
+  size += 4 * u; g.font = '600 ' + size + 'px Fraunces,Georgia,serif';
+  y += size * 0.9; g.fillStyle = '#EEEAF2'; g.fillText(na, x, y); var cx = x + g.measureText(na).width;
+  g.font = 'italic 500 ' + size + 'px Fraunces,Georgia,serif'; g.fillStyle = '#A9B6FF'; g.fillText(' & ', cx, y); cx += g.measureText(' & ').width;
+  g.font = '600 ' + size + 'px Fraunces,Georgia,serif'; g.fillStyle = '#EEEAF2'; g.fillText(nb, cx, y);
+  y += 70 * u;
+  /* headline */
+  g.font = 'italic 500 ' + 66 * u + 'px Fraunces,Georgia,serif'; g.fillStyle = '#A9B6FF';
+  wrapLines(g, r.headline, maxW).forEach(function (l) { g.fillText(l, x, y); y += 78 * u; });
+  y += 6 * u;
+  /* summary */
+  g.font = '400 ' + 34 * u + 'px "Instrument Sans",system-ui,sans-serif'; g.fillStyle = '#B3ADBF';
+  wrapLines(g, r.summary, maxW).slice(0, 4).forEach(function (l) { g.fillText(l, x, y); y += 48 * u; });
+  y += 34 * u;
+  /* two chips, one per person */
+  [r.a, r.b].forEach(function (p) {
+    var label = p.name, rest = nameOfSign(p.sun) + ' Sun  ·  Life Path ' + p.lp + '  ·  ' + p.cz.animal;
+    g.font = '700 ' + 30 * u + 'px "Instrument Sans",system-ui,sans-serif'; var w1 = g.measureText(label).width;
+    g.font = '500 ' + 30 * u + 'px "Instrument Sans",system-ui,sans-serif'; var w2 = g.measureText('   ' + rest).width, bw = Math.min(maxW, w1 + w2 + 56 * u), bh = 70 * u;
+    g.fillStyle = 'rgba(255,255,255,.04)'; rr(g, x, y - 46 * u, bw, bh, bh / 2); g.fill(); g.strokeStyle = 'rgba(255,255,255,.16)'; g.lineWidth = 2 * u; rr(g, x, y - 46 * u, bw, bh, bh / 2); g.stroke();
+    g.font = '700 ' + 30 * u + 'px "Instrument Sans",system-ui,sans-serif'; g.fillStyle = '#A9B6FF'; g.fillText(label, x + 28 * u, y);
+    g.font = '500 ' + 30 * u + 'px "Instrument Sans",system-ui,sans-serif'; g.fillStyle = '#EEEAF2'; g.fillText('   ' + rest, x + 28 * u + w1, y);
+    y += 88 * u;
+  });
+  /* top clicks and sparks, titles only */
+  [['WHERE YOU CLICK', r.clicks, '#6EA8FF'], ['WHERE YOU SPARK', r.sparks, '#F08A4B']].forEach(function (sec) {
+    if (!sec[1].length) return; y += 10 * u;
+    g.font = '700 ' + 24 * u + 'px "Instrument Sans",system-ui,sans-serif'; g.fillStyle = sec[2]; g.fillText(sec[0], x, y); y += 46 * u;
+    sec[1].slice(0, tall ? 4 : 2).forEach(function (it) { g.font = '600 ' + 36 * u + 'px "Instrument Sans",system-ui,sans-serif'; g.fillStyle = '#EEEAF2'; g.fillText('•  ' + it.t, x, y); y += 52 * u; });
+    y += 14 * u;
+  });
+  /* footer */
+  var fy = H - bottom * u;
+  g.font = '600 ' + 54 * u + 'px Fraunces,Georgia,serif'; g.fillStyle = '#EEEAF2'; g.fillText('Du', x, fy); var dw = g.measureText('Du').width;
+  g.font = 'italic 500 ' + 54 * u + 'px Fraunces,Georgia,serif'; g.fillStyle = '#A9B6FF'; g.fillText('ology', x + dw, fy);
+  g.font = '400 ' + 26 * u + 'px "Instrument Sans",system-ui,sans-serif'; g.fillStyle = '#B3ADBF'; g.fillText('Do you two click? scvd.app/duology', x, fy + 38 * u);
+  g.textAlign = 'right'; g.fillText('For reflection and fun', W - 90 * u, fy + 38 * u); g.textAlign = 'left';
+}
+function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+function paintPreview() {
+  var cv = $('#cv'); if (!cv || !st.res) return;
+  var W = 1080, H = st.fmt === '9x16' ? 1920 : 1350, pw = 540; cv.width = pw; cv.height = Math.round(pw * H / W);
+  var g = cv.getContext('2d'); g.setTransform(pw / W, 0, 0, pw / W, 0, 0); drawCard(g, W, H, st.res);
+}
+function cardBlob(cb) {
+  var W = 1080, H = st.fmt === '9x16' ? 1920 : 1350, c = document.createElement('canvas'); c.width = W; c.height = H; drawCard(c.getContext('2d'), W, H, st.res); c.toBlob(cb, 'image/png');
+}
+function fontsThen(fn) { if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('600 40px Fraunces'), document.fonts.load('italic 500 40px Fraunces'), document.fonts.load('400 20px "Instrument Sans"'), document.fonts.load('700 20px "Instrument Sans"')]).then(fn, fn); else fn(); }
+
+/* ---------- wiring ---------- */
+function render() {
+  var m = $('#main');
+  m.innerHTML = st.screen === 'result' ? screenResult() : (st.screen === 'recv' ? screenRecv() : screenMake());
+  if (st.screen === 'result') fontsThen(paintPreview);
+}
+function readFields() {
+  var v = function (id) { var e = document.getElementById(id); return e ? e.value : ''; };
+  if (document.getElementById('y-name')) { st.you.name = v('y-name'); st.you.date = v('y-date'); if (document.getElementById('y-full')) st.you.full = v('y-full'); }
+  if (document.getElementById('t-name')) { st.them.name = v('t-name'); st.them.date = v('t-date'); st.them.full = v('t-full'); }
+}
+function finish(Aname, Adate, Afull, Bname, Bdate, Bfull, type) {
+  st.res = analyse(person(Aname, Adate, Afull), person(Bname, Bdate, Bfull), type); st.screen = 'result'; st.link = ''; st.err = ''; track('pair'); render(); window.scrollTo(0, 0);
+}
+$('#main').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-act]'); if (!b) return; var a = b.getAttribute('data-act'), arg = a.split(':')[1]; a = a.split(':')[0];
+  readFields();
+  if (a === 'type') { st.type = arg; render(); }
+  else if (a === 'go') {
+    var yn = cleanName(st.you.name), tn = cleanName(st.them.name);
+    if (!firstOf(yn) || !firstOf(tn)) { st.err = 'Add a first name for each of you.'; render(); return; }
+    if (!validDate(st.you.date) || !validDate(st.them.date)) { st.err = 'Add both birth dates (the calculations cover 1800 to 2050).'; render(); return; }
+    finish(firstOf(yn), st.you.date, cleanName(st.you.full), firstOf(tn), st.them.date, cleanName(st.them.full), st.type);
+  }
+  else if (a === 'gorecv') {
+    var n = firstOf(cleanName(st.you.name)); if (!n) { st.err = 'Add your first name.'; render(); return; } if (!validDate(st.you.date)) { st.err = 'Add your birth date (the calculations cover 1800 to 2050).'; render(); return; }
+    finish(st.from.name, st.from.date, '', n, st.you.date, '', st.from.type);
+  }
+  else if (a === 'notme') { st.from = null; st.screen = 'make'; try { history.replaceState(null, '', location.pathname + location.search); } catch (x) {} render(); }
+  else if (a === 'fmt') { st.fmt = arg; render(); }
+  else if (a === 'again') { st.them = { name: '', date: '', full: '' }; st.from = null; st.screen = 'make'; try { history.replaceState(null, '', location.pathname + location.search); } catch (x) {} render(); window.scrollTo(0, 0); }
+  else if (a === 'link') {
+    var base = location.href.split('#')[0].split('?')[0];
+    st.link = base + '?ref=cc#c=' + b64e({ v: 1, n: st.res.a.name, d: st.res.a.date, t: st.res.type }); track('pshare'); render();
+    var lk = document.getElementById('lk'); if (lk) lk.scrollIntoView({ block: 'center' });
+  }
+  else if (a === 'copy') {
+    var done = function () { b.textContent = 'Copied'; }; var t = st.link;
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function () { var l = document.getElementById('lk'); l.select(); try { document.execCommand('copy'); done(); } catch (x) {} });
+    else { var l = document.getElementById('lk'); l.select(); try { document.execCommand('copy'); done(); } catch (x) {} }
+  }
+  else if (a === 'shareimg') {
+    track('pshare');
+    cardBlob(function (blob) {
+      var name = 'click-check-' + st.res.a.name.toLowerCase().replace(/[^a-z0-9]+/g, '') + '-' + st.res.b.name.toLowerCase().replace(/[^a-z0-9]+/g, '') + '.png', file = new File([blob], name, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: 'Click check', text: 'Do we click? scvd.app/duology' }).catch(function () {});
+      else { var u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = name; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 4000); }
+    });
+  }
+});
+render();
+})();
+</script>
+</body>
+</html>
