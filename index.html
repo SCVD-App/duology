@@ -163,7 +163,7 @@ details.lesson .body{padding:0 16px 16px 48px;font-size:14px;line-height:1.6;col
 .switch[aria-checked="true"]{background:var(--accent);justify-content:flex-end}
 .switch i{width:26px;height:26px;border-radius:13px;background:#fff;display:block}
 /* tabs */
-nav.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:6;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid var(--line);background:var(--surface);padding:6px 0 max(8px,env(safe-area-inset-bottom))}
+nav.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:6;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-top:1px solid var(--line);background:var(--surface);padding:6px 0 max(8px,env(safe-area-inset-bottom))}
 nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;min-height:52px;color:var(--muted);font-size:11px;font-weight:500}
 nav.tabs button[aria-current="page"]{color:var(--accent);font-weight:700}
 nav.tabs svg{width:24px;height:24px}
@@ -257,6 +257,24 @@ footer.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
 .inrow .input{flex:1;min-width:0}
 .inrow .btn-ghost{flex-shrink:0;min-height:48px}
 .ok{color:var(--flow);font-size:13px;font-weight:600}
+
+/* Clicks */
+.ck-pills{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ck-pill{min-height:44px;border:1px solid var(--line2);border-radius:22px;background:none;font-size:13.5px;font-weight:600;padding:0 4px;color:var(--ink)}
+.ck-pill[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.ck-row{display:flex;align-items:center;gap:12px;padding:12px 14px;width:100%;text-align:left;cursor:pointer;color:var(--ink);font:inherit}
+.ck-row .nm{font-family:var(--serif);font-size:18px;font-weight:600;display:block}
+.ck-row .go{margin-left:auto;color:var(--muted);font-size:20px}
+.ck-hero{border:1px solid var(--line);border-radius:14px;padding:18px;background:var(--surface);display:flex;flex-direction:column;gap:10px}
+.ck-names{font-family:var(--serif);font-size:30px;line-height:1.1;font-weight:600}
+.ck-names em{font-style:italic;font-weight:500;color:var(--accent)}
+.ck-hl{font-family:var(--serif);font-style:italic;font-size:22px;line-height:1.2;color:var(--accent)}
+.ck-badge{display:inline-block;align-self:flex-start;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 10px;border-radius:14px;background:var(--accent-soft);color:var(--accent)}
+.ck-chip{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:13.5px;border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--bg)}
+.ck-item{border-left:4px solid var(--line2);padding:4px 0 4px 12px}
+.ck-item.click{border-color:var(--flow)}.ck-item.spark{border-color:var(--tension)}
+.ck-item b{display:block;font-size:14px}.ck-item p{margin:2px 0 0;font-size:14px;color:var(--ink2)}
+.ck-h{font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--rust);margin:0}
 </style>
 </head>
 <body>
@@ -1791,14 +1809,152 @@ function buildPetReport(p, c, settings, family) {
 }
 // ===== PET REPORT END =====
 
+// ===== CLICKKIT START =====
+// The Click engine (same maths as scvd.app/click), wrapped so its names stay private. Uses the global Astro / numerology / Chinese zodiac code above.
+var ClickKit = (function () {
+/* ---------- the little bits of data we need ---------- */
+var SIGN = [['Aries', 'fire', 'cardinal'], ['Taurus', 'earth', 'fixed'], ['Gemini', 'air', 'mutable'], ['Cancer', 'water', 'cardinal'], ['Leo', 'fire', 'fixed'], ['Virgo', 'earth', 'mutable'],
+  ['Libra', 'air', 'cardinal'], ['Scorpio', 'water', 'fixed'], ['Sagittarius', 'fire', 'mutable'], ['Capricorn', 'earth', 'cardinal'], ['Aquarius', 'air', 'fixed'], ['Pisces', 'water', 'mutable']];
+var PL = { sun: 'Sun', moon: 'Moon', mercury: 'Mercury', venus: 'Venus', mars: 'Mars', jupiter: 'Jupiter', saturn: 'Saturn' };
+var EL_WORD = { fire: 'fire (drive and enthusiasm)', earth: 'earth (practical and grounded)', air: 'air (ideas and people)', water: 'water (feelings and intuition)' };
+var TYPES = {
+  friend:  { label: 'Friend',   plural: 'friends',    other: 'friend',          asks: 'as friends' },
+  partner: { label: 'Partner',  plural: 'partners',   other: 'partner',         asks: 'as a couple' },
+  family:  { label: 'Family',   plural: 'family',     other: 'family member',   asks: 'as family' },
+  work:    { label: 'Workmate', plural: 'workmates',  other: 'workmate',        asks: 'as workmates' }
+};
+var ASP = [
+  { k: 'conj', a: 0,   orb: 6, q: 'merge', v: 'sits right on' },
+  { k: 'sext', a: 60,  orb: 4, q: 'flow',  v: 'gets a nudge from' },
+  { k: 'sq',   a: 90,  orb: 6, q: 'spark', v: 'squares' },
+  { k: 'tri',  a: 120, orb: 6, q: 'flow',  v: 'flows with' },
+  { k: 'opp',  a: 180, orb: 6, q: 'spark', v: 'faces off with' }
+];
+/* which planet pairs matter for which kind of relationship, and what each pair is "about" */
+var PAIRS = {
+  friend: [['sun', 'sun', 'Your core selves', 1.0], ['mercury', 'mercury', 'How you talk and think together', 1.0], ['venus', 'venus', 'What you enjoy together', 0.9], ['mars', 'mars', 'Energy and drive', 0.8], ['jupiter', 'sun', 'What you bring out in each other', 0.7]],
+  partner: [['venus', 'mars', 'Attraction and chemistry', 1.3], ['sun', 'sun', 'Core compatibility', 1.0], ['venus', 'venus', 'What you love, and how', 1.0], ['mars', 'mars', 'Drive, and how you handle disagreements', 0.9], ['mercury', 'mercury', 'How you communicate', 0.9], ['saturn', 'venus', 'Staying power and commitment', 0.8], ['jupiter', 'venus', 'Warmth and generosity', 0.7]],
+  family: [['sun', 'sun', 'Core personalities', 0.9], ['mercury', 'mercury', 'Conversations', 1.0], ['mars', 'mars', 'Arguments and energy', 1.0], ['saturn', 'sun', 'Expectations and who calls the shots', 1.0], ['jupiter', 'sun', 'Encouragement', 0.8], ['venus', 'venus', 'Affection and shared tastes', 0.8]],
+  work: [['mercury', 'mercury', 'How you communicate', 1.2], ['mars', 'mars', 'Working pace and disagreements', 1.1], ['sun', 'sun', 'Ego, and who leads', 0.9], ['saturn', 'mars', 'Discipline versus drive', 0.8], ['saturn', 'mercury', 'Detail versus ideas', 0.8], ['jupiter', 'sun', 'Support and opportunity', 0.8]]
+};
+var ASPQ = {
+  friend:  { flow: 'That comes easily, so there’s little effort needed.', merge: 'These two run together, so you feel each other strongly.', spark: 'There’s friction here, which can mean banter, debate, or a nudge to grow.' },
+  partner: { flow: 'A natural ease that’s read as feeling comfortable together.', merge: 'A strong pull: the two energies blend and amplify each other.', spark: 'Chemistry with friction: exciting, and it asks for honest conversation.' },
+  family:  { flow: 'Understanding that comes without much explaining.', merge: 'You tend to feel this one strongly and quickly.', spark: 'A friction point that usually eases once it’s been named.' },
+  work:    { flow: 'A style that meshes without much effort.', merge: 'You’ll notice this one: you tend to amplify each other.', spark: 'Different approaches here. Good if roles are clear, bumpy if they aren’t.' }
+};
+var OUT = {
+  friend:  { flow: ['Easy company', 'The kind of friends who just fit. A lot of this comes without effort.'], spark: ['Sparks and good banter', 'You rub each other in useful ways. Never boring, occasionally spicy.'], mix: ['A well-rounded pair', 'Some things come easy and some take a little work. That mix is what keeps a friendship interesting.'], quiet: ['A quiet match', 'No big fireworks in the usual tests, which often means a steady, low-drama click.'] },
+  partner: { flow: ['A natural fit', 'A lot of this looks easy, the kind of ease traditionally read as feeling at home together.'], spark: ['Chemistry with friction', 'Plenty of pull and a little push. Exciting, and it rewards honest talking.'], mix: ['Spark and flow', 'Some real ease and some real heat. Astrologers would call it a match with something to enjoy and something to work on.'], quiet: ['A slow burn', 'No loud signals in the usual tests, which is traditionally read as a connection that builds quietly.'] },
+  family:  { flow: ['Easy to be around', 'Much of this comes naturally: the kind of family fit where you just get each other.'], spark: ['Strong personalities', 'Plenty of friction points, which is also where the energy, and the growth, are read to be.'], mix: ['A real mix', 'Some easy understanding and a few bumps. Pretty normal for family.'], quiet: ['Calm waters', 'No big flags in the usual tests: a steady fit.'] },
+  work:    { flow: ['Smooth operators', 'Your styles mesh well. You’re likely to get things done without much friction.'], spark: ['Productive tension', 'Different approaches that can sharpen each other, if the roles are clear.'], mix: ['Complementary', 'Some shared style and some different angles: a good team if you play to each other’s strengths.'], quiet: ['Steady colleagues', 'No strong signals either way. It comes down to the people, not the planets.'] }
+};
+var EL_SAME = {
+  friend: 'Astrologers read a shared element as speaking the same language, so you tend to get each other without explaining.',
+  partner: 'It’s the oldest “same wavelength” test in astrology: easy understanding, though you may share the same blind spots.',
+  family: 'It’s read as seeing the world in a similar way, which can smooth things over (and share the same stubborn streaks).',
+  work: 'It’s read as a similar working style, so you rarely need to translate for each other.'
+};
+var EL_EASY = { 'air-fire': 'Air feeds fire: one brings the ideas, the other brings the drive to act on them.', 'earth-water': 'Water nourishes earth: one brings the feeling, the other brings the steadiness.' };
+var EL_MIXED = 'Different elements are read as different ways of seeing things. That’s the friction that keeps it interesting, and what you can learn from each other.';
+
+/* ---------- helpers ---------- */
+function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function $(s) { return document.querySelector(s); }
+function cleanName(s) { return String(s || '').replace(/[^\p{L}\p{M}\s'’\-.]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 30); }
+function firstOf(s) { return cleanName(s).split(' ')[0] || ''; }
+function validDate(d) { if (!/^\d{4}-\d{2}-\d{2}$/.test(d || '')) return false; var y = +d.slice(0, 4); if (y < 1800 || y > 2050) return false; var t = new Date(d + 'T00:00:00Z'); return !isNaN(t) && t.toISOString().slice(0, 10) === d; }
+function b64e(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function b64d(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return JSON.parse(decodeURIComponent(escape(atob(s)))); }
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+/* ---------- the maths (same engine the app uses) ---------- */
+function person(name, date, full) {
+  var p = date.split('-').map(Number), noon = Date.UTC(p[0], p[1] - 1, p[2], 12, 0);
+  var pos = Astro.positions(Astro.jdFromMs(noon));
+  var o = { name: name, date: date, pos: pos };
+  o.sun = signOf(pos.sun); o.moon = signOf(pos.moon);
+  var ds = Astro.norm(pos.sun) % 30, dm = Astro.norm(pos.moon) % 30;
+  o.sunEdge = ds < 0.6 || ds > 29.4;                 // we only know the date, so a sign-change birthday could be either side
+  o.moonSure = dm > 6.7 && dm < 23.3;                // the Moon moves ~13 degrees a day, so without a time it can be a sign either side near an edge
+  o.lp = lifePath(date, true).n; o.bd = birthdayNumber(date, true).n;
+  o.ex = full ? (nameNumber(full, 'pyth', true, 'all') || {}).n || null : null;
+  o.cz = chineseZodiac(Date.UTC(p[0], p[1] - 1, p[2], 4, 0));
+  return o;
+}
+function elRel(a, b) { if (a === b) return 'same'; var k = [a, b].sort().join('-'); return EL_EASY[k] ? 'easy' : 'mixed'; }
+function nameOfSign(i) { return SIGN[i][0]; }
+
+function analyse(A, B, type) {
+  var items = [], notes = [];
+  /* Sun signs: the headline element test */
+  var ea = SIGN[A.sun][1], eb = SIGN[B.sun][1], rel = elRel(ea, eb), what = A.name + '’s ' + nameOfSign(A.sun) + ' Sun and ' + B.name + '’s ' + nameOfSign(B.sun) + ' Sun';
+  if (rel === 'same') items.push({ kind: 'click', w: 1.2, t: 'Same element', x: what + ' are both ' + EL_WORD[ea] + '. ' + EL_SAME[type] });
+  else if (rel === 'easy') items.push({ kind: 'click', w: 1.1, t: 'Friendly elements', x: what + ' are ' + ea + ' and ' + eb + '. ' + EL_EASY[[ea, eb].sort().join('-')] });
+  else items.push({ kind: 'spark', w: 1.0, t: 'Different elements', x: what + ' are ' + ea + ' and ' + eb + '. ' + EL_MIXED });
+  /* Sun and Moon crossing over, only where the Moon sign is safe to call without a birth time */
+  var cross = [[A, B], [B, A]];
+  cross.forEach(function (c) {
+    var s = c[0], m = c[1]; if (!m.moonSure) return;
+    var r = elRel(SIGN[s.sun][1], SIGN[m.moon][1]), t = s.name + '’s Sun (' + nameOfSign(s.sun) + ') and ' + m.name + '’s Moon (' + nameOfSign(m.moon) + ')';
+    if (r === 'same') items.push({ kind: 'click', w: 0.9, t: 'Feels like home', x: t + ' share an element. In astrology that’s the classic “I feel at home with you” link.' });
+    else if (r === 'easy') items.push({ kind: 'click', w: 0.8, t: 'Soothing mix', x: t + ' are friendly elements. Read as ' + m.name + ' feeling understood by ' + s.name + '.' });
+    else items.push({ kind: 'spark', w: 0.6, t: 'Feelings in translation', x: t + ' are different elements, so you may sometimes need to translate each other’s moods.' });
+  });
+  if (!A.moonSure || !B.moonSure) notes.push('Moon signs need a birth time to be sure, so we’ve left them out for ' + (!A.moonSure && !B.moonSure ? 'both of you' : (!A.moonSure ? A.name : B.name)) + '.');
+  if (A.sunEdge || B.sunEdge) notes.push((A.sunEdge ? A.name : B.name) + ' was born right on the edge between two Sun signs, so the sign could be the one next door. The full Duology app (with birth time and place) settles it.');
+  /* planet to planet, across the two charts */
+  var found = [];
+  PAIRS[type].forEach(function (pr) {
+    var dirs = [[pr[0], pr[1]]]; if (pr[0] !== pr[1]) dirs.push([pr[1], pr[0]]);
+    var best = null;
+    dirs.forEach(function (d) {
+      var sep = sepDeg(A.pos[d[0]], B.pos[d[1]]);
+      ASP.forEach(function (as) { var off = Math.abs(sep - as.a); if (off <= as.orb) { var sc = pr[3] * (1 - off / as.orb * 0.6); if (!best || sc > best.sc) best = { sc: sc, as: as, a: d[0], b: d[1], off: off }; } });
+    });
+    if (best) found.push({ pr: pr, b: best });
+  });
+  found.forEach(function (f) {
+    var b = f.b, k = b.as.q === 'spark' ? 'spark' : 'click';
+    items.push({ kind: k, w: f.b.sc, t: f.pr[2], x: A.name + '’s ' + nameOfSign(signOf(A.pos[b.a])) + ' ' + PL[b.a] + ' ' + b.as.v + ' ' + B.name + '’s ' + nameOfSign(signOf(B.pos[b.b])) + ' ' + PL[b.b] + '. ' + ASPQ[type][b.as.q] });
+  });
+  /* numerology */
+  var ra = rootNum(A.lp), rb = rootNum(B.lp), fa = FAMILY[ra], fb = FAMILY[rb];
+  if (A.lp === B.lp) items.push({ kind: 'click', w: 0.9, t: 'Same Life Path', x: 'You both walk Life Path ' + A.lp + ' (the ' + NUM_SHORT[A.lp] + '). Numerologists read that as the same road: you understand each other’s motives, and share each other’s blind spots.' });
+  else if (fa === fb) items.push({ kind: 'click', w: 0.8, t: 'Life Paths in the same family', x: 'Life Paths ' + A.lp + ' and ' + B.lp + ' are both ' + FAMILY_NAME[fa] + '. Numerologists read those as working together easily.' });
+  else items.push({ kind: 'spark', w: 0.7, t: 'Different Life Path families', x: 'Life Path ' + A.lp + ' (' + NUM_SHORT[A.lp] + ') and ' + B.lp + ' (' + NUM_SHORT[B.lp] + ') come from different families, so you approach life differently. Traditionally that’s read as complementary: each has something the other lacks.' });
+  if (A.ex && B.ex) {
+    var xa = FAMILY[rootNum(A.ex)], xb = FAMILY[rootNum(B.ex)];
+    items.push(A.ex === B.ex || xa === xb
+      ? { kind: 'click', w: 0.6, t: 'Matching talents', x: 'Your Expression numbers (' + A.ex + ' and ' + B.ex + ', worked out from your full names) are in the same family, which numerologists read as similar natural talents.' }
+      : { kind: 'spark', w: 0.5, t: 'Different talents', x: 'Your Expression numbers (' + A.ex + ' and ' + B.ex + ', from your full names) are in different families: different natural talents that can fill each other’s gaps.' });
+  }
+  /* Chinese zodiac */
+  var ca = A.cz, cb = B.cz;
+  if (ca.animal === cb.animal) items.push({ kind: 'click', w: 0.7, t: 'Same Chinese animal', x: 'You’re both the ' + ca.animal + '. Traditionally that’s read as an instant understanding of each other’s habits.' });
+  else if (ca.friends.indexOf(cb.animal) >= 0) items.push({ kind: 'click', w: 0.8, t: 'Chinese zodiac allies', x: A.name + ' the ' + ca.animal + ' and ' + B.name + ' the ' + cb.animal + ' are traditionally natural allies.' });
+  else if (ca.clash === cb.animal) items.push({ kind: 'spark', w: 0.8, t: 'Chinese zodiac opposites', x: A.name + ' the ' + ca.animal + ' and ' + B.name + ' the ' + cb.animal + ' are traditionally the classic opposites: the pair that challenges each other most.' });
+  /* verdict */
+  items.sort(function (x, y) { return y.w - x.w; });
+  var clicks = items.filter(function (i) { return i.kind === 'click'; }), sparks = items.filter(function (i) { return i.kind === 'spark'; });
+  var cw = clicks.reduce(function (s, i) { return s + i.w; }, 0), sw = sparks.reduce(function (s, i) { return s + i.w; }, 0), key;
+  if (items.length <= 2) key = 'quiet'; else if (cw - sw >= 1.5) key = 'flow'; else if (sw - cw >= 1.5) key = 'spark'; else key = 'mix';
+  return { type: type, a: A, b: B, clicks: clicks.slice(0, 5), sparks: sparks.slice(0, 4), headline: OUT[type][key][0], summary: OUT[type][key][1], notes: notes };
+}
+
+function cleanFull(s) { return String(s || '').replace(/[^\p{L}\p{M}\s'\u2019\-.]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 60); }
+return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, cleanFull: cleanFull, firstOf: firstOf, validDate: validDate, b64e: b64e, nameOfSign: nameOfSign };
+})();
+// ===== CLICKKIT END =====
+
 // ===== APP START =====
 (function () {
   var KEY = 'chartExplained.v1';
-  var DEFAULT_STORE = { profiles: [], activeId: null, settings: { houses: 'placidus', numSys: 'pyth', masters: true } };
+  var DEFAULT_STORE = { profiles: [], clicks: [], activeId: null, settings: { houses: 'placidus', numSys: 'pyth', masters: true } };
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(KEY));
-      if (s && Array.isArray(s.profiles)) { s.settings = Object.assign({}, DEFAULT_STORE.settings, s.settings || {}); return s; }
+      if (s && Array.isArray(s.profiles)) { if (!Array.isArray(s.clicks)) s.clicks = []; s.settings = Object.assign({}, DEFAULT_STORE.settings, s.settings || {}); return s; }
     } catch (e) {}
     return JSON.parse(JSON.stringify(DEFAULT_STORE));
   }
@@ -1908,11 +2064,12 @@ function buildPetReport(p, c, settings, family) {
     numbers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><line x1="9" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="15" y2="20"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/></svg>',
     learn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 5.5c3-1.5 6-1.5 9 0v14c-3-1.5-6-1.5-9 0z"/><path d="M21 5.5c-3-1.5-6-1.5-9 0v14c3-1.5 6-1.5 9 0z"/></svg>',
     settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.3" fill="var(--surface)"/><circle cx="15" cy="17" r="2.3" fill="var(--surface)"/></svg>',
+    clicks: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg>',
     lock: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>',
     x: '<svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>'
   };
-  var TABS = [['chart', 'Chart'], ['forecast', 'Forecast'], ['numbers', 'Numbers'], ['learn', 'Learn'], ['settings', 'Settings']];
-  var NAMES = { onboard: 'New chart', chart: 'My chart', forecast: 'Forecast', numbers: 'Numbers', learn: 'Learn', settings: 'Settings', signs: 'Star signs', report: 'Your reading' };
+  var TABS = [['chart', 'Chart'], ['forecast', 'Forecast'], ['numbers', 'Numbers'], ['clicks', 'Clicks'], ['learn', 'Learn'], ['settings', 'Settings']];
+  var NAMES = { onboard: 'New chart', chart: 'My chart', forecast: 'Forecast', numbers: 'Numbers', clicks: 'Clicks', learn: 'Learn', settings: 'Settings', signs: 'Star signs', report: 'Your reading' };
   var ABBR = { sun: 'SUN', moon: 'MOON', mercury: 'MERC', venus: 'VEN', mars: 'MARS', jupiter: 'JUP', saturn: 'SAT', uranus: 'URA', neptune: 'NEP', pluto: 'PLU' };
 
   // ---------- wheel ----------
@@ -2241,7 +2398,7 @@ function buildPetReport(p, c, settings, family) {
   }
   function backupData() {
     return { app: 'duology', version: 1, exported: new Date().toISOString(), settings: { houses: store.settings.houses, numSys: store.settings.numSys, masters: store.settings.masters },
-      profiles: store.profiles, activeId: store.activeId, pro: pro ? { token: pro.token } : null };
+      profiles: store.profiles, clicks: store.clicks, activeId: store.activeId, pro: pro ? { token: pro.token } : null };
   }
   function doBackup(how) {
     var name = 'duology-backup-' + new Date().toISOString().slice(0, 10) + '.json';
@@ -2281,17 +2438,28 @@ function buildPetReport(p, c, settings, family) {
         else if (typeof x.nowName === 'string' && x.nowName.trim()) rec.nowName = x.nowName.trim();
         store.profiles.push(rec); have[key(x)] = 1; added++;
       });
+      var ckAdd = 0;
+      if (Array.isArray(d.clicks)) {
+        var ckHave = {}; store.clicks.forEach(function (x) { ckHave[ckKey(x)] = 1; });
+        d.clicks.forEach(function (x) {
+          if (!ckValid(x) || store.clicks.length >= CLICK_MAX) return; var k = ckKey(x); if (ckHave[k]) return;
+          var side = function (s) { return { n: ClickKit.firstOf(s.n), d: s.d, f: ClickKit.cleanFull(s.f || '') }; };
+          store.clicks.push({ id: 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), type: x.type, a: side(x.a), b: side(x.b), t: +x.t > 0 ? +x.t : Date.now() }); ckHave[k] = 1; ckAdd++;
+        });
+        store.clicks.sort(function (p, q) { return q.t - p.t; });
+      }
       if (!store.activeId && store.profiles.length) store.activeId = store.profiles[0].id;
       if (d.settings && before === 0) { ['houses', 'numSys'].forEach(function (k) { if (typeof d.settings[k] === 'string') store.settings[k] = d.settings[k]; }); if (typeof d.settings.masters === 'boolean') store.settings.masters = d.settings.masters; }
       save(); chartCache = {}; fcCache = {};
       var bits = [];
-      bits.push(added ? 'Loaded ' + added + ' chart' + (added === 1 ? '' : 's') + '.' : 'No new charts to load.');
+      bits.push(added ? 'Loaded ' + added + ' chart' + (added === 1 ? '' : 's') + '.' : (ckAdd ? 'Loaded your saved Clicks.' : 'No new charts to load.'));
+      if (added && ckAdd) bits.push(ckAdd + ' saved Click' + (ckAdd === 1 ? '' : 's') + ' too.');
       if (dup) bits.push(dup + ' already here, so skipped.');
       if (over) bits.push(over + ' left out: ' + (isPro() ? 'that\u2019s the ' + MAX_PROFILES + '-chart limit.' : 'the free version keeps one chart. Go Pro to load the rest.'));
       if (bad) bits.push(bad + ' couldn\u2019t be read.');
       if (gotPro) bits.push('Pro is back on too.');
-      ui.importOk = added > 0 || gotPro || dup > 0; ui.importMsg = bits.join(' ');
-      if (!added && !dup && !gotPro && !over) ui.importOk = false;
+      ui.importOk = added > 0 || gotPro || dup > 0 || ckAdd > 0; ui.importMsg = bits.join(' ');
+      if (!added && !dup && !gotPro && !over && !ckAdd) ui.importOk = false;
       if (ui.screen === 'onboard' && added) { var m = ui.importMsg; go('chart'); toast(m); return; }
       render();
     };
@@ -2370,6 +2538,89 @@ function buildPetReport(p, c, settings, family) {
       LESSONS.map(function (l, i) { return '<details class="lesson" id="lesson-' + l.id + '"' + (ui.lesson === l.id ? ' open' : '') + '><summary><span class="n">' + (i + 1) + '</span><span style="flex:1">' + l.title + '</span><span class="plus" aria-hidden="true">+</span></summary><div class="body">' + l.body + '</div></details>'; }).join('') + '</div>';
   }
 
+  // ---------- Clicks: saved Click matches (Pro) ----------
+  var CLICK_URL = 'https://scvd.app/click', CLICK_MAX = 60;
+  var ck = { view: 'list', type: 'friend', you: '', them: '', tName: '', tDate: '', tFull: '', err: '', open: null, confirmDel: null };
+  var ckCache = {};
+  function ckPeople() { return store.profiles.filter(function (p) { return p.kind !== 'pet'; }); }
+  function ckSide(p) { return { n: ClickKit.firstOf(p.nowName || p.name) || 'Friend', d: p.date, f: ClickKit.cleanFull(p.name) }; }
+  function ckRead() {
+    var v = function (id) { var e = document.getElementById(id); return e ? e.value : null; };
+    var y = v('ck-you'), t = v('ck-them'); if (y !== null) ck.you = y; if (t !== null) ck.them = t;
+    if (v('ck-tname') !== null) { ck.tName = v('ck-tname'); ck.tDate = v('ck-tdate'); ck.tFull = v('ck-tfull') || ''; }
+  }
+  function ckValidSide(x) { return x && typeof x.n === 'string' && x.n.trim() && ClickKit.validDate(x.d); }
+  function ckValid(x) { return x && ClickKit.TYPES[x.type] && ckValidSide(x.a) && ckValidSide(x.b); }
+  function ckKey(x) { return x.type + '|' + x.a.n.toLowerCase() + x.a.d + '|' + x.b.n.toLowerCase() + x.b.d; }
+  function ckRes(x) { return ckCache[x.id] || (ckCache[x.id] = ClickKit.analyse(ClickKit.person(x.a.n, x.a.d, x.a.f || ''), ClickKit.person(x.b.n, x.b.d, x.b.f || ''), x.type)); }
+  function ckLink(x) { return CLICK_URL + '?ref=cc#c=' + ClickKit.b64e({ v: 1, n: x.a.n, d: x.a.d, t: x.type }); }
+  function ckSave() {
+    var people = ckPeople(), A, B;
+    var you = people.filter(function (p) { return p.id === ck.you; })[0];
+    if (!you) { ck.err = 'Pick which chart is you.'; return false; }
+    A = ckSide(you);
+    if (ck.them === 'new') {
+      var tn = ClickKit.firstOf(ck.tName);
+      if (!tn) { ck.err = 'Add a first name for them.'; return false; }
+      if (!ClickKit.validDate(ck.tDate)) { ck.err = 'Add their birth date (the calculations cover 1800 to 2050).'; return false; }
+      B = { n: tn, d: ck.tDate, f: ClickKit.cleanFull(ck.tFull) };
+    } else {
+      var them = people.filter(function (p) { return p.id === ck.them; })[0];
+      if (!them) { ck.err = 'Pick who it is with.'; return false; }
+      if (them.id === you.id) { ck.err = 'Pick two different people.'; return false; }
+      B = ckSide(them);
+    }
+    var rec = { id: 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), type: ck.type, a: A, b: B, t: Date.now() };
+    var k = ckKey(rec), old = store.clicks.filter(function (x) { return ckKey(x) === k; })[0];
+    if (old) { old.t = Date.now(); old.a = A; old.b = B; delete ckCache[old.id]; rec = old; }
+    else { store.clicks.unshift(rec); if (store.clicks.length > CLICK_MAX) store.clicks.length = CLICK_MAX; }
+    store.clicks.sort(function (x, y) { return y.t - x.t; });
+    save(); ck.open = rec.id; ck.err = ''; return true;
+  }
+  function ckNames(r) { return esc(r.a.name) + ' <em>&amp;</em> ' + esc(r.b.name); }
+  function ckList(items, kind) { return items.map(function (i) { return '<div class="ck-item ' + kind + '"><b>' + esc(i.t) + '</b><p>' + esc(i.x) + '</p></div>'; }).join(''); }
+  function ckChip(p) { return '<div class="ck-chip"><b>' + esc(p.name) + '</b><span>' + ClickKit.nameOfSign(p.sun) + ' Sun</span><span>Life Path ' + p.lp + '</span><span>' + esc(p.cz.animal) + '</span></div>'; }
+  function screenClicks() {
+    var pro = isPro(), out = ['<div class="stack">'];
+    var people = ckPeople();
+    if (ck.view === 'result') {
+      var x = store.clicks.filter(function (z) { return z.id === ck.open; })[0];
+      if (!x) { ck.view = 'list'; return screenClicks(); }
+      var r = ckRes(x), T = ClickKit.TYPES[x.type];
+      out.push('<button type="button" class="link" data-act="ck-back">← All your Clicks</button>');
+      out.push('<div class="ck-hero"><span class="ck-badge">' + esc(T.label) + ' check</span><div class="ck-names">' + ckNames(r) + '</div><div class="ck-hl">' + esc(r.headline) + '</div><div style="font-size:14px;color:var(--ink2)">' + esc(r.summary) + '</div><div class="stack-s">' + ckChip(r.a) + ckChip(r.b) + '</div></div>');
+      if (r.clicks.length) out.push('<section class="stack-s"><h3 class="ck-h">Where you click</h3>' + ckList(r.clicks, 'click') + '</section>');
+      if (r.sparks.length) out.push('<section class="stack-s"><h3 class="ck-h">Where you spark</h3>' + ckList(r.sparks, 'spark') + '</section>');
+      if (r.notes.length) out.push('<div class="note">' + r.notes.map(esc).join(' ') + '</div>');
+      out.push('<button type="button" class="btn" data-act="ck-share:' + x.id + '">Send ' + esc(x.b.n) + ' a link to check back</button>');
+      out.push('<div class="small">The link carries ' + esc(x.a.n) + '’s first name and birth date, so only send it to someone you trust with them. Reflection and fun, not a verdict on anyone.</div>');
+      out.push('<button type="button" class="btn-ghost" style="color:var(--danger);border-color:var(--danger)" data-act="ck-del:' + x.id + '">' + (ck.confirmDel === x.id ? 'Tap again to delete this Click' : 'Delete this Click') + '</button>');
+    } else if (ck.view === 'new' && pro) {
+      var act = active(); if (!ck.you || !people.some(function (p) { return p.id === ck.you; })) ck.you = (act && act.kind !== 'pet' ? act.id : (people[0] && people[0].id)) || '';
+      var others = people.filter(function (p) { return p.id !== ck.you; });
+      if (ck.them !== 'new' && !others.some(function (p) { return p.id === ck.them; })) ck.them = others.length ? others[0].id : 'new';
+      var sel = function (id, val, opts) { return '<select class="input" id="' + id + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === val ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; };
+      out.push('<button type="button" class="link" data-act="ck-back">← All your Clicks</button>');
+      out.push('<div><h1>New <em style="font-style:italic;font-weight:500;color:var(--accent)">click</em> check</h1><p class="lede">Pick two people and see where your stars and numbers line up.</p></div>');
+      out.push('<div class="stack-s"><div class="small" style="font-weight:700">Who is it with?</div><div class="ck-pills" role="group" aria-label="Who is it with?">' + Object.keys(ClickKit.TYPES).map(function (k) { return '<button type="button" class="ck-pill" data-act="ck-type:' + k + '" aria-pressed="' + (ck.type === k) + '">' + ClickKit.TYPES[k].label + '</button>'; }).join('') + '</div></div>');
+      out.push('<div class="field"><label for="ck-you">You</label>' + sel('ck-you', ck.you, people.map(function (p) { return [p.id, p.nowName || p.name]; })) + '</div>');
+      out.push('<div class="field"><label for="ck-them">Your ' + esc(ClickKit.TYPES[ck.type].other) + '</label>' + sel('ck-them', ck.them, others.map(function (p) { return [p.id, p.nowName || p.name]; }).concat([['new', 'Someone new…']])) + '</div>');
+      if (ck.them === 'new') out.push('<div class="card" style="padding:14px;display:flex;flex-direction:column;gap:12px"><div class="field"><label for="ck-tname">First name</label><input class="input" id="ck-tname" maxlength="30" autocomplete="off" value="' + esc(ck.tName) + '"></div><div class="field"><label for="ck-tdate">Birth date</label><input class="input" id="ck-tdate" type="date" min="1800-01-01" max="2050-12-31" value="' + esc(ck.tDate) + '"></div><div class="field"><label for="ck-tfull">Full birth name <span class="small">(optional, adds name numbers)</span></label><input class="input" id="ck-tfull" maxlength="60" autocomplete="off" value="' + esc(ck.tFull) + '"></div></div>');
+      if (ck.err) out.push('<div class="err" role="alert">' + esc(ck.err) + '</div>');
+      out.push('<button type="button" class="btn" data-act="ck-go">Check if we click</button>');
+      out.push('<div class="small">Saved on this device only, with the rest of your charts.</div>');
+    } else {
+      out.push('<div><h1>Your <em style="font-style:italic;font-weight:500;color:var(--accent)">clicks</em></h1><p class="lede">Who you flow with, who you spark with, and what the traditions say about each pair. Saved here so you can come back to them.</p></div>');
+      if (pro) out.push('<button type="button" class="btn" data-act="ck-new">+ New click check</button>');
+      else out.push(proCard('Keep track of your Clicks', 'Pro keeps every Click you check, lets you pick people straight from your saved charts, and adds the name numbers from full birth names. Want a quick one first? The free check at scvd.app/click needs no sign-up.', 'clicks', 'See Pro'));
+      if (!store.clicks.length) out.push('<div class="card" style="padding:16px"><b>No Clicks saved yet.</b><div class="small" style="margin-top:4px">' + (pro ? 'Run your first one above. It saves itself.' : 'Pro users see every Click they’ve checked here.') + '</div></div>');
+      else out.push('<section class="stack-s">' + store.clicks.map(function (x) { var r = ckRes(x); return '<button type="button" class="card ck-row" data-act="ck-open:' + x.id + '"><div style="min-width:0"><span class="nm">' + ckNames(r) + '</span><span class="small">' + esc(ClickKit.TYPES[x.type].label) + ' · ' + esc(r.headline) + '</span></div><span class="go" aria-hidden="true">›</span></button>'; }).join('') + '</section>');
+      if (pro && store.clicks.length) out.push('<div class="small">' + store.clicks.length + ' saved. They’re included when you back up your charts.</div>');
+    }
+    out.push('</div>');
+    return out.join('');
+  }
+
   function screenSettings() {
     var s = store.settings, p = active(), out = ['<div class="stack">'];
     out.push(proSection());
@@ -2435,7 +2686,7 @@ function buildPetReport(p, c, settings, family) {
     return o.join('');
   }
   var PAY_WHY = {
-    report: 'Your full reading.', chart: 'Unlock the rest of your chart.', aspects: 'See every aspect, explained.', place: 'Every placement, explained.', forecast: 'Your whole personal forecast.', numbers: 'All your numbers, and how they fit.',
+    clicks: 'Keep every Click you check.', report: 'Your full reading.', chart: 'Unlock the rest of your chart.', aspects: 'See every aspect, explained.', place: 'Every placement, explained.', forecast: 'Your whole personal forecast.', numbers: 'All your numbers, and how they fit.',
     profiles: 'Charts for the whole family.', houses: 'Choose your house system.', settings: 'Everything in Duology, unlocked.', extend: 'Add more time.'
   };
   function paywallSheet() {
@@ -2494,7 +2745,7 @@ function buildPetReport(p, c, settings, family) {
   function render() {
     var scr = ui.screen;
     if (scr !== 'onboard' && scr !== 'signs' && scr !== 'learn' && !active()) scr = ui.screen = 'onboard';
-    var body = scr === 'onboard' ? screenOnboard() : scr === 'chart' ? screenChart() : scr === 'forecast' ? screenForecast() : scr === 'numbers' ? screenNumbers() : scr === 'learn' ? screenLearn() : scr === 'signs' ? screenSigns() : scr === 'report' ? screenReport() : screenSettings();
+    var body = scr === 'onboard' ? screenOnboard() : scr === 'chart' ? screenChart() : scr === 'forecast' ? screenForecast() : scr === 'numbers' ? screenNumbers() : scr === 'clicks' ? screenClicks() : scr === 'learn' ? screenLearn() : scr === 'signs' ? screenSigns() : scr === 'report' ? screenReport() : screenSettings();
     var tabs = (scr === 'onboard' || !active()) ? '' : '<nav class="tabs" aria-label="Main">' + TABS.map(function (t) { return '<button type="button" data-act="tab:' + t[0] + '"' + (scr === t[0] || (scr === 'signs' && t[0] === 'forecast') || (scr === 'report' && t[0] === 'chart') ? ' aria-current="page"' : '') + '>' + ICON[t[0]] + t[1] + '</button>'; }).join('') + '</nav>';
     root.innerHTML = '<header class="top"><div class="brand">Du<em>ology</em>' + (isPro() ? '<button type="button" class="pro-badge" data-act="tab:settings" aria-label="Duology Pro is active. Open Settings">Pro</button>' : '') + '</div><div class="screen-name">' + NAMES[scr] + '</div></header><main id="main">' + body + '</main>' + tabs + sheet();
     var anySheet = ui.card || ui.paywall || ui.claim;
@@ -2650,6 +2901,7 @@ function buildPetReport(p, c, settings, family) {
   root.addEventListener('focusin', function (e) {
     var t = e.target; if (t && t.id && /^(f-(name|now|date|time|place|species|sex|notime)|m-(lat|lon|name))$/.test(t.id)) milestone('form');
   });
+  root.addEventListener('change', function (e) { var id = e.target && e.target.id; if (id === 'ck-you' || id === 'ck-them') { ckRead(); render(); } });
   root.addEventListener('click', function (e) {
     var el = e.target.closest('[data-act]'); if (!el) return;
     if (el.classList.contains('scrim') && e.target !== el) return;
@@ -2670,7 +2922,22 @@ function buildPetReport(p, c, settings, family) {
       case 'remove-pro':
         if (!ui.confirmRemovePro) { ui.confirmRemovePro = true; render(); break; }
         pro = null; savePro(); ui.confirmRemovePro = false; chartCache = {}; fcCache = {}; render(); break;
-      case 'tab': ui.editId = null; ui.place = null; ui.formErr = ''; go(arg); break;
+      case 'ck-new': ckRead(); ck.view = 'new'; ck.err = ''; render(); window.scrollTo(0, 0); break;
+      case 'ck-back': ck.view = 'list'; ck.err = ''; ck.confirmDel = null; render(); window.scrollTo(0, 0); break;
+      case 'ck-type': ckRead(); ck.type = arg; render(); break;
+      case 'ck-go': ckRead(); if (!isPro()) { openPaywall('clicks'); break; } if (ckSave()) { ck.view = 'result'; render(); window.scrollTo(0, 0); } else render(); break;
+      case 'ck-open': ck.open = arg; ck.view = 'result'; ck.confirmDel = null; render(); window.scrollTo(0, 0); break;
+      case 'ck-del':
+        if (ck.confirmDel !== arg) { ck.confirmDel = arg; render(); break; }
+        store.clicks = store.clicks.filter(function (x) { return x.id !== arg; }); delete ckCache[arg]; ck.confirmDel = null; ck.view = 'list'; save(); render(); window.scrollTo(0, 0); break;
+      case 'ck-share':
+        var cx = store.clicks.filter(function (x) { return x.id === arg; })[0]; if (!cx) break;
+        var lk = ckLink(cx), msg = 'Do we click? Check it with me:';
+        if (navigator.share) { navigator.share({ title: 'Duology Click', text: msg, url: lk }).catch(function () {}); }
+        else if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(lk).then(function () { toast('Link copied. Send it to ' + cx.b.n + '.'); }, function () { toast('Couldn\u2019t copy the link.'); }); }
+        else toast('Couldn\u2019t copy the link.');
+        break;
+      case 'tab': if (arg === 'clicks') { ck.view = 'list'; ck.err = ''; ck.confirmDel = null; } ui.editId = null; ui.place = null; ui.formErr = ''; go(arg); break;
       case 'card-place': if (!isPro() && !FREE_POINTS[arg]) { openPaywall('place'); break; } ui.card = { type: 'place', id: arg }; milestone('read'); render(); break;
       case 'card-asp': if (!isPro()) { openPaywall('aspects'); break; } ui.card = { type: 'asp', idx: +arg }; milestone('read'); render(); break;
       case 'close-card': ui.card = null; render(); break;
