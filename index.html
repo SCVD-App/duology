@@ -2191,6 +2191,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
       out.push('<div class="field"><label for="f-switch" class="sr">Showing chart for</label><select class="input" id="f-switch">' + store.profiles.map(function (x) { return '<option value="' + x.id + '"' + (x.id === p.id ? ' selected' : '') + '>' + esc(x.name) + '</option>'; }).join('') + '</select></div>');
     }
     out.push('<div><h1>' + esc(p.name.split(/\s+/)[0]) + '’s chart</h1><p class="lede">' + birthLine(c) + '</p></div>');
+    out.push(todayEntry());
     if (!c.hasTime) out.push('<div class="note">No birth time, so no houses or Rising sign. Those depend on which bit of sky was on the horizon when you were born, and that changes every few minutes. <button type="button" class="link" data-act="learn:time">Why?</button></div>');
     if (c.houseFallback) out.push('<div class="note">Placidus houses don’t work this close to the poles (the maths breaks down), so we’ve used Equal houses instead.</div>');
     out.push('<div class="wheel">' + wheelSVG(c) + '</div>');
@@ -2538,6 +2539,94 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
       LESSONS.map(function (l, i) { return '<details class="lesson" id="lesson-' + l.id + '"' + (ui.lesson === l.id ? ' open' : '') + '><summary><span class="n">' + (i + 1) + '</span><span style="flex:1">' + l.title + '</span><span class="plus" aria-hidden="true">+</span></summary><div class="body">' + l.body + '</div></details>'; }).join('') + '</div>';
   }
 
+  // ---------- Today: the daily sky and numbers (Pro) ----------
+  var TD_SEEN = 'duology.todaySeen', TD_STREAK = 'duology.streak';
+  var DAY_THEME = {
+    1: 'A day to start something and back yourself.', 2: 'A day for patience, listening and small kindnesses.', 3: 'A day for talking, writing and being around people.',
+    4: 'A day to get the dull jobs done properly.', 5: 'A day for change: expect the unexpected and stay flexible.', 6: 'A day for home, family and looking after the people around you.',
+    7: 'A day for quiet thinking, and doing less but better.', 8: 'A day for business, money decisions and getting results.', 9: 'A day to finish things, tidy loose ends and let go.'
+  };
+  var RETRO_LINE = {
+    mercury: 'Mercury is retrograde, so double-check messages, plans and gear, and expect revisits more than breakthroughs.',
+    venus: 'Venus is retrograde, a time to revisit relationships, money and taste rather than commit to anything new.',
+    mars: 'Mars is retrograde: energy runs lower and tempers shorter, so pace yourself and pick your battles.'
+  };
+  var MOON_TONE = ['quick starts, short fuses and a bias for action', 'steady, comfort-seeking and happiest with the familiar', 'chatty and curious, with attention that hops about', 'tender, protective and drawn to home and the people in it',
+    'warm, generous and wanting to be seen', 'practical and fussy in a useful way, good for sorting things out', 'sociable, fair-minded and keen to keep the peace', 'intense and private, with feelings that run deep',
+    'restless, upbeat and ready for something bigger', 'sober, focused and good at getting on with it', 'detached, original and happier with room to move', 'dreamy and soft-edged: trust your intuition and watch the overwhelm'];
+  var TP_THEME = { moon: 'Your mood and instincts', sun: 'Your energy and focus', mercury: 'Conversation and decisions', venus: 'Affection, money and taste', mars: 'Drive and temper', jupiter: 'Luck and confidence', saturn: 'Responsibility and limits' };
+  var NP_THEME = { sun: 'your sense of self', moon: 'your emotional needs', mercury: 'how you think and talk', venus: 'what you love and value', mars: 'how you act and push', asc: 'how you come across', mc: 'your direction and reputation' };
+  var TD_ORB = { moon: 3, sun: 2, mercury: 2, venus: 2, mars: 2, jupiter: 1.5, saturn: 1.5 };
+  var TD_PW = { moon: 1, sun: 1.2, mercury: 1, venus: 1.1, mars: 1.2, jupiter: 1.6, saturn: 1.7 };
+  var TD_NW = { sun: 1.5, moon: 1.5, asc: 1.5, mc: 1.3, mercury: 1, venus: 1, mars: 1 };
+  function dayKey(ms) { var t = new Date(ms || Date.now()); return t.getFullYear() + '-' + ('0' + (t.getMonth() + 1)).slice(-2) + '-' + ('0' + t.getDate()).slice(-2); }
+  function tdPerson() { var a = active(); if (a && a.kind !== 'pet') return a; return store.profiles.filter(function (x) { return x.kind !== 'pet'; })[0] || null; }
+  function retroAt(id, ms) { var j = Astro.jdFromMs(ms), a = Astro.positions(j - 0.5)[id], b = Astro.positions(j + 0.5)[id]; return ((b - a + 540) % 360) - 180 < 0; }
+  function todayReport(p, ms) {
+    var c = getChart(p), pos = Astro.positions(Astro.jdFromMs(ms)), mt = moonToday(c, ms), nd = new Date(ms);
+    var lp = lifePath(p.date, store.settings.masters), py = personalYear(p.date, nd.getFullYear()), pm = personalMonth(py.n, nd.getMonth() + 1);
+    var dsum = pm.n + reduceNum(nd.getDate(), false).n, pd = reduceNum(dsum, false);
+    var fit = yearVsLifePath(lp.n, py.n), DAY = 86400000, retro = [], stations = [];
+    ['mercury', 'venus', 'mars'].forEach(function (id) {
+      var r = retroAt(id, ms), name = PLANETS[id].name;
+      if (r) retro.push(id);
+      if (retroAt(id, ms + 3 * DAY) !== r) stations.push(name + (r ? ' turns direct within a few days' : ' turns retrograde within a few days'));
+      else if (retroAt(id, ms - 3 * DAY) !== r) stations.push(name + (r ? ' has only just turned retrograde' : ' has only just turned direct'));
+    });
+    var targets = ['sun', 'moon', 'mercury', 'venus', 'mars'].concat(c.hasTime ? ['asc', 'mc'] : []), found = [];
+    Object.keys(TD_ORB).forEach(function (tp) {
+      targets.forEach(function (np) {
+        var sep = Math.abs(((pos[tp] - c.pos[np] + 540) % 360) - 180); sep = 180 - sep; // 0..180 separation
+        ASPECTS.forEach(function (A) {
+          var off = Math.abs(sep - A.angle); if (off > TD_ORB[tp]) return;
+          if (tp === np && A.angle === 0 && tp !== 'moon' && tp !== 'sun') return;
+          var sc = TD_PW[tp] * (TD_NW[np] || 1) * (1 - off / TD_ORB[tp] * 0.5) * (A.key === 'conj' ? 1.2 : A.key === 'sext' ? 0.8 : 1);
+          found.push({ sc: sc, tp: tp, np: np, A: A });
+        });
+      });
+    });
+    found.sort(function (a, b) { return b.sc - a.sc; });
+    var lines = found.slice(0, 2).map(function (f) {
+      var tone = f.A.easy === true ? 'It flows.' : f.A.easy === false ? 'Expect a little friction, which can be useful.' : 'The two blend, for better or worse.';
+      return 'Today’s ' + PLANETS[f.tp].name + ' ' + f.A.verb + ' your ' + PLANETS[f.np].name + '. ' + TP_THEME[f.tp] + ' meet ' + NP_THEME[f.np] + '. ' + tone;
+    });
+    var mod = retro.length > 1 ? retro.map(function (id) { return PLANETS[id].name; }).join(' and ') + ' are both retrograde, so slow down, double-check, and revisit old business rather than starting new things.' : retro.length ? RETRO_LINE[retro[0]] : stations.length ? stations[0] + '.' : (mt.phase === 'New Moon' ? 'It’s a New Moon: a good day to set an intention and start small.' : mt.phase === 'Full Moon' ? 'It’s a Full Moon: feelings run high and things come to light, so go easy on big arguments.' : 'The Moon is in ' + mt.sign + ': ' + MOON_TONE[signOf(pos.moon)] + '.');
+    return { p: p, c: c, mt: mt, sun: SIGNS[signOf(pos.sun)].name, lp: lp.n, py: py.n, pm: pm.n, pd: pd.n, fit: fit.kind, retro: retro, stations: stations, lines: lines, take: DAY_THEME[pd.n] + ' ' + mod };
+  }
+  function tdStreak(touch) {
+    var s = { last: '', n: 0, best: 0 }; try { s = Object.assign(s, JSON.parse(localStorage.getItem(TD_STREAK)) || {}); } catch (e) {}
+    var t = dayKey(), y = dayKey(Date.now() - 86400000);
+    if (touch && s.last !== t) { s.n = s.last === y ? (s.n || 0) + 1 : 1; s.best = Math.max(s.best || 0, s.n); s.last = t; try { localStorage.setItem(TD_STREAK, JSON.stringify(s)); } catch (e) {} }
+    return s;
+  }
+  function openToday(auto) {
+    if (!tdPerson()) return;
+    ui.today = true; ui.card = null; ui.paywall = null;
+    try { localStorage.setItem(TD_SEEN, dayKey()); } catch (e) {}
+    tdStreak(true); if (!auto) render();
+  }
+  function todaySheet() {
+    var p = tdPerson(); if (!p || !isPro()) return '';
+    var r = todayReport(p, Date.now()), st = tdStreak(false), first = esc((p.nowName || p.name).split(/\s+/)[0]);
+    var tile = function (k, v, s) { return '<div class="card" style="padding:10px 6px;text-align:center"><div class="small" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px">' + k + '</div><div style="font-family:var(--serif);font-size:26px;font-weight:600;line-height:1.2">' + v + '</div><div class="small" style="font-size:11px">' + s + '</div></div>'; };
+    var sky = ['<div>' + r.mt.phase + ' in ' + r.mt.sign + (r.c.hasTime && r.mt.text.indexOf('house') > 0 ? ', through your ' + r.mt.text.split('your ')[1].split(' house')[0] + ' house' : '') + '</div>', '<div>The Sun is in ' + r.sun + '</div>'];
+    r.retro.forEach(function (id) { sky.push('<div><b>' + PLANETS[id].name + ' is retrograde</b></div>'); });
+    r.stations.forEach(function (s) { sky.push('<div>' + esc(s) + '</div>'); });
+    return '<div class="scrim" data-act="close-today"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="td-title">' +
+      '<div class="sheet-head"><div><span class="lock">' + ICON.lock + 'Duology Pro</span><div class="sheet-title" id="td-title">Today in the sky, ' + first + '</div><div class="small">' + fmtDate(Date.now(), { weekday: 'long', day: 'numeric', month: 'long' }) + (st.n > 1 ? ' · ' + st.n + ' days in a row' : '') + '</div></div><button type="button" class="x" aria-label="Close" data-act="close-today" id="td-close">' + ICON.x + '</button></div>' +
+      '<div class="dark-strip"><div class="k">Today’s take</div><div class="v" style="font-family:var(--serif);font-style:italic;font-size:17px;font-weight:500;line-height:1.35">' + esc(r.take) + '</div></div>' +
+      '<div class="stack-s" style="gap:6px"><div class="sec-k a">In the sky</div><div style="font-size:15px;display:flex;flex-direction:column;gap:3px">' + sky.join('') + '</div>' +
+      (r.lines.length ? '<div class="small" style="color:var(--ink2);display:flex;flex-direction:column;gap:6px;margin-top:4px">' + r.lines.map(function (l) { return '<div>' + esc(l) + '</div>'; }).join('') + '</div>' : '') + '</div>' +
+      '<div class="stack-s" style="gap:8px"><div class="sec-k a">In your numbers</div><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px">' + tile('Life Path', r.lp, esc(NUM_SHORT[r.lp] || '')) + tile('Year', r.py, 'personal') + tile('Month', r.pm, 'personal') + tile('Day', r.pd, 'personal') + '</div>' +
+      '<div class="small">A ' + r.py + ' year inside Life Path ' + r.lp + ' is read as <b>' + esc(r.fit.toLowerCase()) + '</b>. Today is a ' + r.pd + ' day: ' + esc(DAY_THEME[r.pd].charAt(0).toLowerCase() + DAY_THEME[r.pd].slice(1)) + '</div></div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" style="flex:1" data-act="today-go:forecast">What’s coming up</button><button type="button" class="btn-ghost" data-act="close-today">Done</button></div>' +
+      '<div class="small">Astrology and numerology are traditions for reflection, not predictions. Take what’s useful.</div></div></div>';
+  }
+  function todayEntry() {
+    if (isPro()) { var st = tdStreak(false); return '<button type="button" class="card ck-row" data-act="today"><div style="min-width:0"><span class="nm">Today in the sky</span><span class="small">Your sky and numbers for today' + (st.n > 1 ? ' · ' + st.n + ' days in a row' : '') + '</span></div><span class="go" aria-hidden="true">›</span></button>'; }
+    return '<button type="button" class="card ck-row" data-act="paywall:today"><div style="min-width:0"><span class="lock" style="color:var(--rust)">' + ICON.lock + 'Duology Pro</span><span class="nm">Today in the sky</span><span class="small">A daily read of the sky and your numbers, made for you.</span></div><span class="go" aria-hidden="true">›</span></button>';
+  }
+
   // ---------- Clicks: saved Click matches (Pro) ----------
   var CLICK_URL = 'https://scvd.app/click', CLICK_MAX = 60;
   var ck = { view: 'list', type: 'friend', you: '', them: '', tName: '', tDate: '', tFull: '', err: '', open: null, confirmDel: null };
@@ -2686,7 +2775,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
     return o.join('');
   }
   var PAY_WHY = {
-    clicks: 'Keep every Click you check.', report: 'Your full reading.', chart: 'Unlock the rest of your chart.', aspects: 'See every aspect, explained.', place: 'Every placement, explained.', forecast: 'Your whole personal forecast.', numbers: 'All your numbers, and how they fit.',
+    today: 'Your sky and numbers, every day.', clicks: 'Keep every Click you check.', report: 'Your full reading.', chart: 'Unlock the rest of your chart.', aspects: 'See every aspect, explained.', place: 'Every placement, explained.', forecast: 'Your whole personal forecast.', numbers: 'All your numbers, and how they fit.',
     profiles: 'Charts for the whole family.', houses: 'Choose your house system.', settings: 'Everything in Duology, unlocked.', extend: 'Add more time.'
   };
   function paywallSheet() {
@@ -2717,6 +2806,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
   function sheet() {
     if (ui.claim) return claimSheet();
     if (ui.paywall) return paywallSheet();
+    if (ui.today) return todaySheet();
     var p = active(); if (!ui.card || !p) return '';
     var c = getChart(p), cd;
     if (ui.card.type === 'place') cd = placementCard(c, ui.card.id); else { var ap = c.aspects[ui.card.idx]; if (!ap) return ''; cd = aspectCard(c, ap); }
@@ -2748,9 +2838,9 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
     var body = scr === 'onboard' ? screenOnboard() : scr === 'chart' ? screenChart() : scr === 'forecast' ? screenForecast() : scr === 'numbers' ? screenNumbers() : scr === 'clicks' ? screenClicks() : scr === 'learn' ? screenLearn() : scr === 'signs' ? screenSigns() : scr === 'report' ? screenReport() : screenSettings();
     var tabs = (scr === 'onboard' || !active()) ? '' : '<nav class="tabs" aria-label="Main">' + TABS.map(function (t) { return '<button type="button" data-act="tab:' + t[0] + '"' + (scr === t[0] || (scr === 'signs' && t[0] === 'forecast') || (scr === 'report' && t[0] === 'chart') ? ' aria-current="page"' : '') + '>' + ICON[t[0]] + t[1] + '</button>'; }).join('') + '</nav>';
     root.innerHTML = '<header class="top"><div class="brand">Du<em>ology</em>' + (isPro() ? '<button type="button" class="pro-badge" data-act="tab:settings" aria-label="Duology Pro is active. Open Settings">Pro</button>' : '') + '</div><div class="screen-name">' + NAMES[scr] + '</div></header><main id="main">' + body + '</main>' + tabs + sheet();
-    var anySheet = ui.card || ui.paywall || ui.claim;
+    var anySheet = ui.card || ui.paywall || ui.claim || ui.today;
     document.body.style.overflow = anySheet ? 'hidden' : '';
-    if (anySheet && !keepFocus) { var cb = document.getElementById('cl-close') || document.getElementById('pw-close') || document.getElementById('sheet-close'); if (cb) cb.focus(); }
+    if (anySheet && !keepFocus) { var cb = document.getElementById('cl-close') || document.getElementById('td-close') || document.getElementById('pw-close') || document.getElementById('sheet-close'); if (cb) cb.focus(); }
     keepFocus = false;
     if (ui.payNote) { var pn = ui.payNote; ui.payNote = ''; toast(pn); }
     if (scr === 'onboard') wireOnboard();
@@ -2941,6 +3031,9 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
       case 'card-place': if (!isPro() && !FREE_POINTS[arg]) { openPaywall('place'); break; } ui.card = { type: 'place', id: arg }; milestone('read'); render(); break;
       case 'card-asp': if (!isPro()) { openPaywall('aspects'); break; } ui.card = { type: 'asp', idx: +arg }; milestone('read'); render(); break;
       case 'close-card': ui.card = null; render(); break;
+      case 'today': openToday(false); break;
+      case 'close-today': ui.today = false; render(); break;
+      case 'today-go': ui.today = false; go(arg); break;
       case 'range': ui.range = +arg; render(); break;
       case 'tag': ui.tag = arg; render(); break;
       case 'houses': s.houses = arg; save(); render(); break;
@@ -3005,6 +3098,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
     if (e.key !== 'Escape') return;
     if (ui.claim && ui.claim.state !== 'working') { ui.claim = null; render(); }
     else if (ui.paywall && !ui.payBusy) { ui.paywall = null; render(); }
+    else if (ui.today) { ui.today = false; render(); }
     else if (ui.card) { ui.card = null; render(); }
   });
   root.addEventListener('keydown', function (e) {
@@ -3034,6 +3128,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
     }
   })();
 
+  try { if (isPro() && !ui.claim && ui.screen !== 'onboard' && localStorage.getItem(TD_SEEN) !== dayKey()) openToday(true); } catch (e) {}
   render();
   countToday();
 })();
