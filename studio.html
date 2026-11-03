@@ -1419,6 +1419,409 @@ var DEPTHS = { tight: { sky: 2, items: 1, facts: false }, standard: { sky: 3, it
 
 function topSky(sky, n) { return sky.events.slice().sort(function (a, b) { return b.score - a.score || a.ms - b.ms; }).slice(0, n).sort(function (a, b) { return a.ms - b.ms; }); }
 
+
+// ===== SIGN PROFILE VIDEOS: every birthday in a sign, with decan + birthday number (evergreen, one long video per sign) =====
+var PROFILES = {
+"1": {
+"si": 1,
+"start": "20 April",
+"end": "20 May",
+"sign": {
+"strengths": "Patient, reliable and loyal, with a real eye for quality and a gift for making a place feel like home.",
+"shadow": "Stubborn, possessive of what it loves, and prone to comfort turning into a rut."
+},
+"decans": [
+{
+"range": "20 \u2013 29 April",
+"ruler": "Venus",
+"tag": "Pure Taurus",
+"flavour": "Sensual, loyal and comfort-loving. Slow to change its mind.",
+"vo": "First decan, April 20th to 29th. Pure Venus. This is Taurus at full volume: loyal, sensual, and slow to change its mind."
+},
+{
+"range": "30 April \u2013 9 May",
+"ruler": "Mercury",
+"tag": "Taurus with a Virgo edge",
+"flavour": "Practical, curious and more talkative. A planner with a sharp eye.",
+"vo": "Second decan, April 30th to May 9th. Mercury joins in, so Taurus gets curious, practical, and a lot more talkative."
+},
+{
+"range": "10 \u2013 20 May",
+"ruler": "Saturn",
+"tag": "Taurus with a Capricorn edge",
+"flavour": "Serious, ambitious and here for the long game.",
+"vo": "Third decan, May 10th to 20th. Saturn\u2019s influence: the most disciplined, ambitious Taurus of the three."
+}
+],
+"vo": {
+"hook": "Two Taurus, born a week apart, can be nothing alike. This is every Taurus birthday, April 20th to May 20th, with the number hiding in each date. Find yours, pause on it, and see how much it sounds like you.",
+"sign": "Taurus is the second sign: fixed earth, ruled by Venus, symbolised by the bull. Steady, sensual, loyal, and famously hard to move. The strengths are patience, reliability and a real eye for quality. The shadow is stubbornness, and a love of comfort that can turn into a rut.",
+"decans": "A sign is thirty days long, so astrologers cut it into three ten-day slices called decans. Each adds its own flavour. Early Taurus is pure Venus. Middle Taurus picks up Mercury, a practical, chatty edge. Late Taurus picks up Saturn: serious and ambitious.",
+"number": "Here\u2019s the twist. Take the day you were born and add the digits. The twenty-sixth is two plus six, which is eight. That\u2019s your birthday number, a talent you arrived with. Every number has a ruling planet, and so does every sign. Born on the eleventh or twenty-second? Those are master numbers, kept as they are.",
+"cta": "That\u2019s your birthday number: just the day you were born. Your life path comes from your full birth date, and your whole chart goes deeper still, your Moon, your Rising sign, your Chinese animal. Duology works all of it out, free, in plain English. The link\u2019s in the description. And tell me in the comments: which date is yours?"
+},
+"days": [
+{
+"m": 4,
+"d": 20,
+"dec": 0,
+"cusp": 1,
+"s": "Gentle on the surface, immovable underneath. The 2 softens Taurus into a natural peacemaker who wants calm and closeness above all.",
+"w": "Dodges conflict until it boils over, then digs in. Can swallow what they need just to keep the peace.",
+"l": "Tender and devoted. Wants a settled home and a partner who says the loving thing out loud.",
+"k": "Best in partnerships, teams and support roles, where steady hands matter.",
+"vo": "The 20th, right on the Aries line, so check your birth year. If it\u2019s Taurus, you\u2019re the gentle one: a 2, the peacemaker, wrapped in all that Venus stubbornness. Calm matters more to you than winning."
+},
+{
+"m": 4,
+"d": 21,
+"dec": 0,
+"cusp": 0,
+"s": "Taurus with a voice. Warm, funny and easy company, with the 3 adding charm to all that steady Venus comfort.",
+"w": "Likes to be liked, so can say yes when they mean no. Moods swing between sociable and stubbornly homebound.",
+"l": "Playful and affectionate. Wins people over with laughter and good food.",
+"k": "Anything with an audience or a creative side: teaching, selling, cooking, making.",
+"vo": "The 21st. A 3 on a Taurus gives you the charmer: warm, funny, great with food and company. But that easy smile can be saying yes when the real answer is no."
+},
+{
+"m": 4,
+"d": 22,
+"dec": 0,
+"cusp": 0,
+"s": "Taurus with a big vision. The 22 is the master builder: practical enough to actually construct what it imagines.",
+"w": "Pressure. Carries huge expectations, often self-set, and can go quiet or rigid when the load feels too heavy.",
+"l": "Steady and committed. The mission can come first, so needs a partner who shares the dream.",
+"k": "Builds things meant to last: businesses, homes, legacies.",
+"vo": "The 22nd is a master number, the master builder, sitting on Taurus ground. Big vision, and the patience to actually build it. But it\u2019s a heavy thing to carry, and most of the pressure is self-set."
+},
+{
+"m": 4,
+"d": 23,
+"dec": 0,
+"cusp": 0,
+"s": "A Taurus who wants out of the paddock now and then. The 5 adds curiosity and an appetite for new places to a sign that loves its comforts.",
+"w": "Torn between security and freedom, so can dig in and itch to leave in the same week.",
+"l": "Sensual and adventurous. Needs a partner who is up for trips and spontaneity as well as the couch.",
+"k": "Sales, travel, hospitality, anything with variety and good pay.",
+"vo": "The 23rd, a 5. Taurus loves home comforts, the 5 wants a ticket out of town. Which one wins on any given week? That\u2019s the whole story of this date."
+},
+{
+"m": 4,
+"d": 24,
+"dec": 0,
+"cusp": 0,
+"s": "The heart of the family. Venus rules both the sign and the 6, so care, beauty and loyalty all point the same way.",
+"w": "Looks after everyone else first, then quietly resents it. Finds it hard to receive help.",
+"l": "The marrying kind. Devoted, generous, a full table every time.",
+"k": "Care, craft and creating good spaces: health, home, design, food.",
+"vo": "The 24th is Venus twice over: she rules Taurus, and she rules the 6. Care, beauty, loyalty. This is the person the family runs to, and the one who forgets to ask for anything back."
+},
+{
+"m": 4,
+"d": 25,
+"dec": 0,
+"cusp": 0,
+"s": "The thinker of the sign. Quiet, observant and happiest with space, the 7 adds depth to Taurus\u2019s patience.",
+"w": "Hard to read, and slow to let people in. Silence can look like coldness.",
+"l": "Takes a long time to trust, then loves deeply. Needs a partner who respects the quiet.",
+"k": "Specialist work: research, craft, anything that rewards depth over speed.",
+"vo": "The 25th, a 7. Quiet, watchful, and slow to let anyone in. Silence isn\u2019t coldness with you, it\u2019s thinking. But once someone\u2019s in, they\u2019re in for life."
+},
+{
+"m": 4,
+"d": 26,
+"dec": 0,
+"cusp": 0,
+"s": "Taurus at full volume: loyal, sensual, impossible to rush. The 8 adds drive, so this is the one who builds the business, the house or the savings.",
+"w": "Stubborn, and a bit status-minded. Can measure their worth by what they own, and dig in when pushed.",
+"l": "Shows love by providing. Slow to trust, loyal once in. Needs an equal.",
+"k": "Anywhere effort visibly pays off: business, trades, property.",
+"vo": "The 26th: Taurus with an 8, the money number. Loyal, determined, and built to build things. The question for this date is whether you measure yourself by what you own."
+},
+{
+"m": 4,
+"d": 27,
+"dec": 0,
+"cusp": 0,
+"s": "A Taurus with a big heart. The 9 gives Venus\u2019s loyalty a cause to fight for beyond the home front.",
+"w": "Gives until empty, then goes stubbornly silent. Holds on to old hurts.",
+"l": "Generous and romantic. Needs to feel they make a difference to the person they love.",
+"k": "Work with meaning: teaching, care, community, anything bigger than a pay cheque.",
+"vo": "The 27th brings a 9, the humanitarian. A Taurus who\u2019ll feed the whole street and back a cause. The risk is giving until the tank\u2019s empty, then going stubbornly quiet."
+},
+{
+"m": 4,
+"d": 28,
+"dec": 0,
+"cusp": 0,
+"s": "A Taurus who leads. The 1 adds self-starting grit to Venus\u2019s patience: slow to start, then unstoppable.",
+"w": "Stubborn squared. Doing it alone is the default, and so is refusing advice.",
+"l": "Loyal and protective. Wants a partner who lets them lead without becoming a doormat.",
+"k": "Best self-employed, or in charge of their own patch.",
+"vo": "The 28th, a 1. Slow off the mark, then nothing stops you. Stubborn doubled, and happiest running your own patch. Good advice has to be very well timed to get through."
+},
+{
+"m": 4,
+"d": 29,
+"dec": 0,
+"cusp": 0,
+"s": "The intuitive Taurus. The 11 turns up the sensitivity, so this is someone who picks up on moods before anyone says a word.",
+"w": "Nervous energy under a calm exterior. Overthinks, then retreats.",
+"l": "Soulmate energy. Intense, deeply connected, easily overwhelmed.",
+"k": "Inspiring work: teaching, healing, creative paths.",
+"vo": "The 29th reduces to an 11, a master number: the intuitive. Calm on the outside, a very busy antenna on the inside. You feel the room before anyone speaks."
+},
+{
+"m": 4,
+"d": 30,
+"dec": 1,
+"cusp": 0,
+"s": "A talker with common sense. Mercury sharpens Taurus\u2019s mind, and the 3 gives it a stage.",
+"w": "Scatters energy across too many interests. Big on ideas, slower on follow-through.",
+"l": "Playful, witty, affectionate. Needs a partner who can banter.",
+"k": "Writing, teaching, selling, anywhere with a voice.",
+"vo": "The 30th opens the second decan, where Taurus picks up a Mercury edge: sharper, chattier, more curious. With a 3, that makes a natural communicator whose ideas can outrun their follow-through."
+},
+{
+"m": 5,
+"d": 1,
+"dec": 1,
+"cusp": 0,
+"s": "Practical and original. A self-starter with a methodical streak, who plans carefully, then moves.",
+"w": "Critical of self and others. Struggles to delegate.",
+"l": "Loyal but guarded. Shows care through fixing and doing.",
+"k": "Building something of their own, step by step.",
+"vo": "May the 1st, a 1 in the Mercury decan. The planner who actually starts: precise, independent, and a little hard on everyone, you included. Delegating is where it gets tricky."
+},
+{
+"m": 5,
+"d": 2,
+"dec": 1,
+"cusp": 0,
+"s": "Observant and considerate. Notices the small things others miss, and quietly makes life run smoother.",
+"w": "Worries. Overanalyses what was said, and holds back what they need.",
+"l": "Gentle and attentive. Loves through practical kindness.",
+"k": "Support, advisory and detail roles, where reliability counts.",
+"vo": "The 2nd. A 2 with a sharp eye for detail: you notice the small things and fix them quietly. The cost is worry, and a habit of keeping your own needs off the table."
+},
+{
+"m": 5,
+"d": 3,
+"dec": 1,
+"cusp": 0,
+"s": "The Taurus who talks. Practical, curious and funny, with the 3 bringing a natural audience.",
+"w": "Taurus wants to finish, the 3 wants to try everything. Big on talk, slower on follow-through.",
+"l": "Playful and affectionate. Needs laughter.",
+"k": "Anywhere a voice counts: teaching, selling, creating.",
+"vo": "The 3rd: Taurus with a 3, in the chatty decan. Practical, curious, funny, and the audience arrives on its own. Finishing what you start is the only catch."
+},
+{
+"m": 5,
+"d": 4,
+"dec": 1,
+"cusp": 0,
+"s": "Reliable to the bone. The 4 and Taurus both prize steady effort, so this is the person everyone trusts with the keys.",
+"w": "Rigid about routines. Works too hard and forgets to rest.",
+"l": "Shows love by turning up and fixing things. Not big on flowery words.",
+"k": "Skilled trades, systems, finance, anything that rewards doing it properly.",
+"vo": "The 4th, a 4. Reliable, methodical, the person with the keys to everything. Nobody doubts you\u2019ll do it properly. The harder bit is putting the tools down."
+},
+{
+"m": 5,
+"d": 5,
+"dec": 1,
+"cusp": 0,
+"s": "A restless, clever Taurus. Mercury and the 5 are both quick, so this Taurus learns fast and bores easily.",
+"w": "Impatient with routine. Starts brilliantly, drifts when it gets dull.",
+"l": "Fun, curious and flirty. Needs freedom inside commitment.",
+"k": "Variety: sales, media, travel, anything that keeps the brain busy.",
+"vo": "The 5th. Mercury and the 5 are both fast, so this Taurus learns quickly and bores quickly. Great starts, a wobble in the middle, and a standing need for something new."
+},
+{
+"m": 5,
+"d": 6,
+"dec": 1,
+"cusp": 0,
+"s": "The fixer who cares. Practical Mercury plus the carer 6 makes the person who sorts everyone\u2019s problems.",
+"w": "Perfectionist about the people they love. Can nag, and take on too much.",
+"l": "Committed and nurturing. Shows love through service.",
+"k": "Health, home, hospitality, education, anything that looks after people.",
+"vo": "The 6th, a 6 with a practical streak. You solve everyone\u2019s problems before they\u2019ve finished explaining them. Lovely, but easy to overload. Who looks after the fixer?"
+},
+{
+"m": 5,
+"d": 7,
+"dec": 1,
+"cusp": 0,
+"s": "The analyst of the sign. Thoughtful, private and thorough, with a mind that likes to get to the bottom of things.",
+"w": "Over-analyses. Can retreat into their head and miss the moment.",
+"l": "Reserved, but loyal for life. Needs space and a partner who does not push.",
+"k": "Research, craft, technical roles, expertise built over years.",
+"vo": "The 7th. A 7 with Mercury\u2019s mind: thorough, private, always working something out. Brilliant at depth. Occasionally lost in your own head while life carries on around you."
+},
+{
+"m": 5,
+"d": 8,
+"dec": 1,
+"cusp": 0,
+"s": "Business-minded and practical. Combines Taurus\u2019s money sense with Mercury\u2019s wit and the 8\u2019s ambition.",
+"w": "Controlling about money and details. Struggles to relax if it is not done right.",
+"l": "Provider by nature. Needs respect as much as affection.",
+"k": "Business, finance, negotiation, property.",
+"vo": "The 8th, an 8 with a sharp mind: the dealmaker. Money sense, quick wit and real ambition. The shadow is control, so notice if you ever redo other people\u2019s work."
+},
+{
+"m": 5,
+"d": 9,
+"dec": 1,
+"cusp": 0,
+"s": "A generous, thoughtful Taurus. The 9 pairs well with Mercury\u2019s mind: someone who wants their knowledge to help people.",
+"w": "Takes on others\u2019 problems. Can be quietly judgemental when standards are not met.",
+"l": "Big-hearted and loyal, with high standards.",
+"k": "Teaching, care, advice, community work.",
+"vo": "The 9th closes out the Mercury decan with a 9. Smart, generous, and keen for what you know to help someone. High standards are your gift, and sometimes your judgement."
+},
+{
+"m": 5,
+"d": 10,
+"dec": 2,
+"cusp": 0,
+"s": "The most driven Taurus. Saturn\u2019s discipline plus the 1\u2019s leadership makes someone who sets a goal and goes.",
+"w": "Hard on themselves, and on others. Can come across as cold or demanding.",
+"l": "Reserved but fiercely loyal. Shows it by building a life together.",
+"k": "Leadership, business, anywhere they own the result.",
+"vo": "May the 10th opens the third decan, where Taurus takes on a Saturn edge: more serious, more driven. With a 1, that makes a natural leader. The one hardest on you is you."
+},
+{
+"m": 5,
+"d": 11,
+"dec": 2,
+"cusp": 0,
+"s": "Quietly powerful. The 11\u2019s intuition meets Saturn\u2019s discipline: someone who senses what matters and sticks with it.",
+"w": "Sensitive under a serious face. Pressure and self-doubt build behind closed doors.",
+"l": "Deep and committed, but slow to show it.",
+"k": "Guiding others: teaching, counselling, creative disciplines built over years.",
+"vo": "The 11th is a master number, the intuitive, in the serious decan. Sensitive underneath, disciplined on top. People call you calm. A lot goes on behind closed doors."
+},
+{
+"m": 5,
+"d": 12,
+"dec": 2,
+"cusp": 0,
+"s": "A serious Taurus with a sense of humour. The 3 lightens Saturn\u2019s weight; dry wit is the signature.",
+"w": "Self-critical when the spotlight is on. Hides doubts behind jokes.",
+"l": "Loyal and warm in private. Needs a partner who gets the dry humour.",
+"k": "Creative work with discipline: writing, design, performance, teaching.",
+"vo": "The 12th: a 3 in the Saturn decan. A serious Taurus with a dry sense of humour. Worth asking how many of the jokes are covering for self-doubt."
+},
+{
+"m": 5,
+"d": 13,
+"dec": 2,
+"cusp": 0,
+"s": "The pillar. The 4 and Saturn share the same patient, long-game logic, so this is the most dependable Taurus of the lot.",
+"w": "Workaholic tendencies. Slow to change, even when change is needed.",
+"l": "Steady for decades. Expresses love by providing security.",
+"k": "Building, management, finance, anything with a long runway.",
+"vo": "The 13th, and forget the superstition. A 4 in the Saturn decan is the pillar of the sign: patient, dependable, built for the long game. Switching off is the hard part."
+},
+{
+"m": 5,
+"d": 14,
+"dec": 2,
+"cusp": 0,
+"s": "A Taurus who wants freedom but takes responsibility seriously. The 5 gives Saturn\u2019s discipline somewhere to go.",
+"w": "Pulled between duty and adventure. Can resent obligations they chose.",
+"l": "Committed but needs room to breathe.",
+"k": "Careers with structure and variety: consulting, travel, project work.",
+"vo": "The 14th, a 5 in the serious decan. Disciplined, but itching for freedom. Duty pulls one way, adventure the other, and you tend to take both seriously."
+},
+{
+"m": 5,
+"d": 15,
+"dec": 2,
+"cusp": 0,
+"s": "The most serious Taurus: disciplined, reliable, playing the long game. The 6 makes them the one everyone leans on.",
+"w": "Carries everyone else, hard on themselves, quietly resentful when nobody notices.",
+"l": "The marrying kind. Devoted for keeps.",
+"k": "Care and craft: health, home, design, food.",
+"vo": "The 15th: a 6 in the Saturn decan. The one the family leans on. Reliable, devoted, and a bit hard on yourself. Does anyone notice everything you carry?"
+},
+{
+"m": 5,
+"d": 16,
+"dec": 2,
+"cusp": 0,
+"s": "Deep and self-contained. Saturn and the 7 both value solitude and mastery, so this Taurus builds expertise slowly and well.",
+"w": "Distant. Can shut people out and mistake that for strength.",
+"l": "Few relationships, but lasting. Needs patience from a partner.",
+"k": "Expert, specialist and research roles.",
+"vo": "The 16th, a 7. Self-contained and built for mastery. You\u2019d rather be good than loud. The shadow is shutting people out when you most need them."
+},
+{
+"m": 5,
+"d": 17,
+"dec": 2,
+"cusp": 0,
+"s": "Ambition with staying power. Saturn rewards effort over time, and the 8 is the money number: a serious builder of wealth.",
+"w": "Ties self-worth to achievement. Hard to relax, hard to ask for help.",
+"l": "Loyal provider. Needs a partner who sees past the title.",
+"k": "Business, management, property, long-term investment.",
+"vo": "The 17th: an 8 in the Saturn decan, maybe the strongest builder in the sign. Ambition with real staying power. Just don\u2019t let results become your whole sense of worth."
+},
+{
+"m": 5,
+"d": 18,
+"dec": 2,
+"cusp": 0,
+"s": "A principled Taurus. Saturn\u2019s discipline gives the 9\u2019s big heart a backbone, so this is someone who actually follows through on their causes.",
+"w": "Rigid about right and wrong. Can burn out carrying a cause.",
+"l": "Loyal, with big feeling kept under tight control.",
+"k": "Service with structure: teaching, community, law, health.",
+"vo": "The 18th, a 9 with a Saturn spine. A big heart that actually follows through. Principled, sometimes rigid, and prone to burning out for a cause."
+},
+{
+"m": 5,
+"d": 19,
+"dec": 2,
+"cusp": 0,
+"s": "Independent and quietly ambitious. A 1 with Saturn\u2019s patience, who works steadily towards something of their own.",
+"w": "Withholds feelings. Struggles to accept help or praise.",
+"l": "Reserved, loyal, shows love by building a future.",
+"k": "Self-directed work: running their own show.",
+"vo": "The 19th, a 1, close to the Gemini line. Independent, patient, quietly building something of your own. Compliments and offers of help are the hard bits to accept."
+},
+{
+"m": 5,
+"d": 20,
+"dec": 2,
+"cusp": 1,
+"s": "Steady and thoughtful, with a gentle side. The 2 softens Saturn, giving a Taurus who is reliable and kind.",
+"w": "Holds back. Wants harmony, then feels unseen.",
+"l": "Gentle, loyal, a patient partner.",
+"k": "Partnerships and support roles that need steady judgement.",
+"vo": "The 20th sits on the Gemini edge, so check your birth year. If it\u2019s Taurus, you\u2019re a 2 with Saturn\u2019s steadiness: reliable and kind, and prone to holding things back."
+}
+]
+}
+};
+var MONTH_ABBR = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function profDay(P, x) { var r = reduceNum(x.d, true); return { n: r.n, calc: r.txt ? r.txt.replace(/^ \u2192 /, '').replace(/ \(master.*$/, '') : String(x.d), A: ARCH[r.n], lab: x.d + ' ' + MONTH_ABBR[x.m] }; }
+function buildProfileScript(si) {
+  var P = PROFILES[si]; if (!P) return [];
+  var secs = [];
+  function add(id, label, text, scene) { secs.push({ id: id, label: label, text: text, scene: scene }); }
+  add('p-hook', 'Hook', P.vo.hook, { type: 'p-title', si: si });
+  add('p-sign', SIGNS[si].name + ' overview', P.vo.sign, { type: 'p-sign', si: si });
+  add('p-decans', 'The three decans', P.vo.decans, { type: 'p-decans', si: si });
+  add('p-number', 'Birthday number', P.vo.number, { type: 'p-number', si: si });
+  for (var k = 0; k < 3; k++) {
+    add('p-dec' + k, 'Decan ' + (k + 1), P.decans[k].vo, { type: 'p-decan', si: si, k: k });
+    P.days.forEach(function (x, ix) { if (x.dec === k) add('p-d' + x.m + '-' + x.d, x.d + ' ' + MONTH_ABBR[x.m], x.vo, { type: 'p-day', si: si, ix: ix }); });
+  }
+  add('p-cta', 'Outro', P.vo.cta, { type: 'p-cta', si: si });
+  return secs;
+}
 function buildScript(sky, depthKey, order) {
   var D = DEPTHS[depthKey] || DEPTHS.standard, rnd = seeded(sky.y * 100 + sky.m), pick = function (a) { return a[Math.floor(rnd() * a.length)]; };
   var Mon = monthName(sky.start), secs = [];
@@ -1872,15 +2275,16 @@ function buildLinkShort() {
   function signSky() { var per = ui.signPer || '1w'; return per === 'month' ? sky() : skyWindow(weekStartOf(Date.now()) + signOffV() * 7 * DAY_MS, per === '1w' ? 7 : per === '2w' ? 14 : 28); }
   function signOffV() { if (ui.signOff != null) return ui.signOff; var wd = new Date().getDay(); return (wd === 0 || wd >= 3) ? 1 : 0; }
   function signKey() { var S = signSky(); return S.win ? 'w' + S.start + '-' + S.days : mkey(); }
+  function editKey() { return ui.vmode === 'profile' ? 'prof' + (ui.vsign == null ? 1 : ui.vsign) : mkey(); }
   function sections() {
-    var secs = buildScript(sky(), st.depth, st.order), k = mkey();
+    var secs = ui.vmode === 'profile' ? buildProfileScript(ui.vsign == null ? 1 : ui.vsign) : buildScript(sky(), st.depth, st.order), k = editKey();
     secs.forEach(function (s) { s.generated = s.text; var e = st.edits[k + '|' + s.id]; if (e != null) { s.text = e; s.edited = true; } });
     return secs;
   }
   function secDur(s) { return Math.max(4, wordCount(s.text) / st.wpm * 60); }
   // ---------- voice files + playback engine + recorder ----------
   var audioSets = {}, audioCtx = null, run = null, recording = null;
-  function audioKey() { return ui.tab === 'video' ? 'v|' + mkey() : (ui.shortMode === 'num' ? 'n|' + mkey() + '|' + ui.numWhich : ui.shortMode === 'bday' ? 'b|' + mkey() : ui.shortMode === 'cz' ? 'c|' + mkey() : ui.shortMode === 'tour' ? 't|' + mkey() : ui.shortMode === 'link' ? 'l|link' : ui.shortMode === 'chart' ? 'ch|chart' : ui.shortMode === 'arch' ? 'a|' + mkey() + '|' + ui.archN : ui.shortMode === 'week' ? 'w|' + weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS) : 's|' + signKey() + '|' + ui.shortSign + (ui.signFmt === 'quick' ? '|q' : '')); }
+  function audioKey() { return ui.tab === 'video' ? 'v|' + (ui.vmode === 'profile' ? 'prof' + (ui.vsign == null ? 1 : ui.vsign) : mkey()) : (ui.shortMode === 'num' ? 'n|' + mkey() + '|' + ui.numWhich : ui.shortMode === 'bday' ? 'b|' + mkey() : ui.shortMode === 'cz' ? 'c|' + mkey() : ui.shortMode === 'tour' ? 't|' + mkey() : ui.shortMode === 'link' ? 'l|link' : ui.shortMode === 'chart' ? 'ch|chart' : ui.shortMode === 'arch' ? 'a|' + mkey() + '|' + ui.archN : ui.shortMode === 'week' ? 'w|' + weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS) : 's|' + signKey() + '|' + ui.shortSign + (ui.signFmt === 'quick' ? '|q' : '')); }
   function curAudio() { return audioSets[audioKey()] || []; }
   function ebOn() { return st.elBg !== false; }
   function ttSync() { TT.on = !!st.tt; TT.say = (st.ttSay && st.ttSay.trim()) || 'Find it at S C V D dot app slash duology.'; }
@@ -1983,7 +2387,7 @@ function buildLinkShort() {
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
   }
   function recName(ext) {
-    if (ui.tab === 'video') return 'duology-' + mkey() + '-forecast.' + ext;
+    if (ui.tab === 'video') return ui.vmode === 'profile' ? 'duology-' + SIGNS[ui.vsign == null ? 1 : ui.vsign].name.toLowerCase() + '-birthdays.' + ext : 'duology-' + mkey() + '-forecast.' + ext;
     return 'duology-' + mkey() + '-short-' + (ui.shortMode === 'num' ? (ui.numWhich ? 'month-' + ui.numWhich : 'numbers') : ui.shortMode === 'bday' ? 'birthday-number' : ui.shortMode === 'cz' ? 'chinese-zodiac' : ui.shortMode === 'tour' ? 'app-tour' : ui.shortMode === 'link' ? 'stars-x-numbers' : ui.shortMode === 'chart' ? 'how-to-read-a-chart' : ui.shortMode === 'arch' ? (ui.archN ? 'number-' + ui.archN : 'numerology-101') : ui.shortMode === 'week' ? 'week-' + new Date(weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS)).getFullYear() + '-' + localMD(weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS)) : SIGNS[ui.shortSign].name.toLowerCase() + (ui.signFmt === 'quick' ? '-quick' : '') + (signSky().win ? '-' + localMD(signSky().start) + '-' + signSky().days + 'd' : '')) + '.' + ext;
   }
   function finishRecording(msg) {
@@ -2156,7 +2560,32 @@ function buildLinkShort() {
   function d(ms, o) { return new Date(ms).toLocaleDateString('en-AU', o); }
 
   // ---------- scenes (16:9, 1920x1080) ----------
+
+  // ---------- sign-profile scenes (16:9) ----------
+  function profScene(sc) {
+    var P = PROFILES[sc.si], Sg = SIGNS[sc.si], rp = PLANETS[SIGN_RULER[sc.si]].name, rn = signNumber(sc.si);
+    var eb = ebCls(Sg), ebh = ebHtml(Sg);
+    if (sc.type === 'p-title') return '<div class="v v-title' + eb + '">' + ebh + '<div class="a1 v-kicker">Every birthday explained</div><div class="a2 v-huge" style="font-size:250px">' + Sg.name + '</div><div class="a3 v-year">' + P.start + ' \u2013 ' + P.end + ' · decans + birthday numbers</div><div class="a4 v-glyphrow" style="font-size:150px;margin-top:30px">' + Sg.glyph + VS + '</div><div class="a4" style="position:absolute;right:90px;bottom:70px">' + wordmark(64) + '</div></div>';
+    if (sc.type === 'p-sign') return '<div class="v v-sign' + eb + '">' + ebh + '<div class="v-left"><div class="a1 v-signglyph">' + Sg.glyph + VS + '</div><div class="a2 v-h1" style="font-size:96px">' + Sg.name + '</div><div class="a3 v-note">' + P.start + ' \u2013 ' + P.end + '</div></div><div class="v-right">' +
+      '<div class="a1 v-block" style="font-size:40px"><b>Element + mode</b>' + Sg.el.charAt(0).toUpperCase() + Sg.el.slice(1) + ' · ' + Sg.mode.charAt(0).toUpperCase() + Sg.mode.slice(1) + ': ' + esc(Sg.style) + '</div>' +
+      '<div class="a2 v-block" style="font-size:40px"><b>Ruled by</b>' + rp + ', which is also the planet of the number ' + rn + '</div>' +
+      '<div class="a3 v-block" style="font-size:40px"><b>The strengths</b>' + esc(P.sign.strengths) + '</div><div class="a4 v-block" style="font-size:40px"><b>The shadow side</b>' + esc(P.sign.shadow) + '</div></div></div>';
+    if (sc.type === 'p-decans') return '<div class="v v-center' + eb + '">' + ebh + '<div class="a1 v-kicker">Three slices of ' + Sg.name + '</div><div class="a2 v-h1" style="text-align:center;font-size:84px">Which decan are you?</div><div class="a3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:36px;width:100%;margin-top:20px">' +
+      P.decans.map(function (x, k) { return '<div class="v-ev" style="flex-direction:column;gap:10px;text-align:left"><div class="v-kicker" style="font-size:26px">Decan ' + (k + 1) + '</div><div style="font-family:var(--serif);font-size:48px;font-weight:600;line-height:1.1">' + x.range + '</div><div style="font-size:32px;color:var(--v-accent);font-weight:700">' + x.ruler + ' · ' + x.tag + '</div><div style="font-size:30px;color:var(--v-muted);line-height:1.35">' + esc(x.flavour) + '</div></div>'; }).join('') + '</div></div>';
+    if (sc.type === 'p-number') return '<div class="v v-center' + eb + '">' + ebh + '<div class="a1 v-kicker">Your birthday number</div><div class="a2 v-calc big" style="font-size:150px">26 \u2192 2 + 6 = 8</div><div class="a3 v-sub" style="max-width:1500px">Add the digits of the day you were born until one is left.</div><div class="a4 v-work" style="max-width:1500px">' + esc(Sg.name) + ' is ruled by ' + rp + ', the planet of the number ' + rn + '. Your birthday number adds its own flavour on top.</div><div class="a5 v-note">Born on the 11th, 22nd or 29th? 11 and 22 are master numbers, kept as they are. The 29th is an 11.</div></div>';
+    if (sc.type === 'p-decan') { var dc = P.decans[sc.k]; return '<div class="v v-center' + eb + '">' + ebh + '<div class="a1 v-kicker">Decan ' + (sc.k + 1) + ' of 3</div><div class="a2 v-huge" style="font-size:150px;letter-spacing:-2px">' + dc.range + '</div><div class="a3 v-h1" style="text-align:center;font-size:76px;color:var(--v-accent)">' + dc.ruler + ' · ' + dc.tag + '</div><div class="a4 v-sub" style="max-width:1400px">' + esc(dc.flavour) + '</div></div>'; }
+    if (sc.type === 'p-day') {
+      var x = P.days[sc.ix], pd = profDay(P, x), dc2 = P.decans[x.dec];
+      return '<div class="v v-sky"><div class="v-left"><div class="a1 v-date"><span>' + MONTH_ABBR[x.m].toUpperCase() + '</span>' + x.d + '</div><div class="a2" style="margin-top:26px;text-align:center"><div style="font-family:var(--serif);font-size:150px;font-weight:600;line-height:1;color:var(--v-accent)">' + pd.n + '</div><div style="font-size:38px;font-weight:700">' + esc(pd.A.name) + '</div><div class="v-note" style="margin-top:6px">' + pd.calc + ' · birthday number</div></div>' +
+        '<div class="a3 v-fact" style="text-align:center"><b>' + (x.dec + 1) + (x.dec === 0 ? 'st' : x.dec === 1 ? 'nd' : 'rd') + ' decan</b> · ' + dc2.ruler + '</div>' + (x.cusp ? '<div class="a3 v-note" style="margin-top:12px;text-align:center">Edge of the sign: check your birth year</div>' : '') + '</div>' +
+        '<div class="v-right"><div class="a1 v-kicker">' + Sg.glyph + VS + ' ' + Sg.name + ' born on the ' + ord(x.d) + ' of ' + d(new Date(2026, x.m - 1, 1).getTime(), { month: 'long' }) + '</div>' +
+        '<div class="a2 v-block" style="font-size:38px"><b>Strengths</b>' + esc(x.s) + '</div><div class="a3 v-block" style="font-size:38px"><b>Shadow side</b>' + esc(x.w) + '</div><div class="a4 v-block" style="font-size:38px"><b>In love</b>' + esc(x.l) + '</div><div class="a5 v-block" style="font-size:38px"><b>At work</b>' + esc(x.k) + '</div></div></div>';
+    }
+    if (sc.type === 'p-cta') return '<div class="v v-center"><div class="a1 v-kicker">That\u2019s your birthday number</div><div class="a2 v-h1" style="text-align:center;font-size:92px;max-width:1500px">Your life path comes from<br>your full birth date.</div><div class="a3" style="margin-top:36px">' + wordmark(120) + '</div><div class="a4 v-sub">Your Moon, Rising sign, life path and Chinese animal · free</div><div class="a5 v-url">scvd.app/duology</div></div>';
+    return '';
+  }
   function scene16(sec, S) {
+    if (sec.scene && /^p-/.test(sec.scene.type)) return profScene(sec.scene);
     var sk = S, sc = sec.scene, Mon = d(sk.start, { month: 'long' });
     if (sc.type === 'title') return '<div class="v v-title"><div class="a1 v-kicker">Your sky, explained</div><div class="a2 v-huge">' + Mon + '</div><div class="a3 v-year">' + sk.y + ' · all twelve signs</div><div class="a4 v-glyphrow">' + SIGNS.map(function (x) { return '<span>' + x.glyph + VS + '</span>'; }).join('') + '</div><div class="a4" style="position:absolute;right:90px;bottom:70px">' + wordmark(64) + '</div></div>';
     if (sc.type === 'brand') return '<div class="v v-center">' + '<div class="a1">' + wordmark(170) + '</div><div class="a2 v-sub">Astrology and numerology, explained.</div><div class="a3 v-pills"><span>No glyphs</span><span>No gatekeeping</span><span>Real planet positions</span></div><div class="a4 v-note">For reflection and entertainment. Dates in ' + esc(tzCity()) + ' time.</div></div>';
@@ -2391,13 +2820,15 @@ function buildLinkShort() {
   // ---------- views ----------
   function header(secs) {
     var tot = secs.reduce(function (a, s) { return a + secDur(s); }, 0), words = secs.reduce(function (a, s) { return a + wordCount(s.text); }, 0);
-    var inBand = tot >= 300 && tot <= 435;
+    var prof = ui.vmode === 'profile', inBand = prof ? (tot >= 420 && tot <= 780) : (tot >= 300 && tot <= 435);
     return '<header class="s-top"><div class="s-brand">Du<em>ology</em> <span>Studio</span></div>' +
-      '<div class="s-month"><button class="s-btn" data-act="mprev" aria-label="Previous month">‹</button><b>' + sky().label + '</b><button class="s-btn" data-act="mnext" aria-label="Next month">›</button></div>' +
+      '<label class="s-field">Video <select id="vmode"><option value="forecast"' + (!prof ? ' selected' : '') + '>Monthly forecast</option><option value="profile"' + (prof ? ' selected' : '') + '>Sign birthdays</option></select></label>' +
+      (prof ? '<label class="s-field">Sign <select id="vsign">' + SIGNS.map(function (x, k) { return '<option value="' + k + '"' + (PROFILES[k] ? '' : ' disabled') + (k === (ui.vsign == null ? 1 : ui.vsign) ? ' selected' : '') + '>' + x.glyph + VS + ' ' + x.name + (PROFILES[k] ? '' : ' (not written yet)') + '</option>'; }).join('') + '</select></label>' :
+      '<div class="s-month"><button class="s-btn" data-act="mprev" aria-label="Previous month">‹</button><b>' + sky().label + '</b><button class="s-btn" data-act="mnext" aria-label="Next month">›</button></div>') +
       '<label class="s-field">Depth <select id="depth"><option value="tight"' + (st.depth === 'tight' ? ' selected' : '') + '>Tight (~6 min)</option><option value="standard"' + (st.depth === 'standard' ? ' selected' : '') + '>Standard (~7 min)</option><option value="deep"' + (st.depth === 'deep' ? ' selected' : '') + '>Deep (10+ min)</option></select></label>' +
       '<label class="s-field">Open with <select id="order"><option value="hook"' + (st.order !== 'greet' ? ' selected' : '') + '>Hook, then greeting</option><option value="greet"' + (st.order === 'greet' ? ' selected' : '') + '>Greeting first</option></select></label>' +
       '<label class="s-field">Voice pace <input id="wpm" type="number" min="120" max="200" step="5" value="' + st.wpm + '"> wpm</label>' +
-      '<div class="s-dur ' + (inBand ? 'ok' : 'warn') + '" id="durbadge">' + fmtDur(tot) + ' · ' + words + ' words' + (inBand ? '' : (tot < 300 ? ' · under 5 min' : ' · over 7 min')) + '</div></header>' +
+      '<div class="s-dur ' + (inBand ? 'ok' : 'warn') + '" id="durbadge">' + fmtDur(tot) + ' · ' + words + ' words' + (inBand ? '' : prof ? (tot < 420 ? ' · under 7 min' : ' · over 13 min') : (tot < 300 ? ' · under 5 min' : ' · over 7 min')) + '</div></header>' +
       '<nav class="s-tabs">' + [['script', 'Script'], ['video', 'Video'], ['shorts', 'Shorts'], ['youtube', 'YouTube'], ['reply', 'Replies']].map(function (t) { return '<button data-act="tab:' + t[0] + '" aria-current="' + (ui.tab === t[0] ? 'page' : 'false') + '">' + t[1] + '</button>'; }).join('') + '</nav>';
   }
   function viewScript(secs) {
@@ -2607,8 +3038,16 @@ function buildLinkShort() {
       '<label class="s-field"><input type="checkbox" id="rlink"' + (ui.rLink !== false ? ' checked' : '') + '> Add the app link</label></div>' +
       '<div id="rout" style="margin-top:12px">' + replyOut() + '</div></div>';
   }
+  function ytPk() {
+    if (ui.vmode !== 'profile') return ytPackage(sky(), secsCache, st.wpm);
+    var si = ui.vsign == null ? 1 : ui.vsign, Sg = SIGNS[si], P = PROFILES[si], nm = Sg.name, t = 0, ch = [];
+    secsCache.forEach(function (s, i) { var au = (audioSets['v|prof' + si] || [])[i], dur = au && au.dur ? au.dur + 1.1 : secDur(s) + 1.1; var lab = s.id.indexOf('p-d') === 0 && /^p-d\d/.test(s.id) ? s.label + ' · birthday number ' + profDay(P, P.days[s.scene.ix]).n : s.label; ch.push(fmtDur(t) + ' ' + (i === 0 ? 'Intro' : lab)); t += dur; });
+    var titles = [nm + ' Birthdays Explained: Every Date, ' + P.start + ' to ' + P.end + ' (Decans + Numerology)', nm + ' personality by birthday: why no two ' + nm + ' are alike', 'Born in ' + nm + ' season? What your exact birthday says about you ' + Sg.glyph];
+    var desc = ['Two ' + nm + ', born a week apart, can be nothing alike. This is every ' + nm + ' birthday from ' + P.start + ' to ' + P.end + ': the decan, the birthday number, strengths, shadow side, love and work. Jump to your date using the chapters below.', '', 'Your own chart and your life path (from your full birth date), free, in plain English:', APP_URL, '', 'CHAPTERS'].concat(ch).concat(['', 'For reflection and fun. Decan and sign dates can shift by a day depending on your birth year.', '', '#' + nm.toLowerCase() + ' #astrology #numerology #birthday #zodiac']).join('\n');
+    return { titles: titles, desc: desc };
+  }
   function viewYouTube(secs) {
-    var pk = ytPackage(sky(), secs, st.wpm);
+    var pk = ytPk();
     return '<div class="s-pad"><h2>Title ideas</h2>' + pk.titles.map(function (t, i) { return '<div class="s-row"><span>' + esc(t) + '</span><span class="s-meta">' + t.length + '/100</span><button class="s-btn2" data-act="copyt:' + i + '">Copy</button></div>'; }).join('') +
       '<h2>Description</h2><p class="s-hint">Chapter times are estimates at ' + st.wpm + ' wpm. Once you’ve got the real voice track, nudge them to match.</p><textarea id="ytdesc" rows="24">' + esc(pk.desc) + '</textarea><div class="s-actions"><button class="s-cta" data-act="copy-desc">Copy description</button></div></div>';
   }
@@ -2641,7 +3080,7 @@ function buildLinkShort() {
     render(); if (wasPlaying) playFrom(curIndex());
   }
   function scriptTxt(secs) {
-    var t = 0, out = ['DUOLOGY · ' + sky().label.toUpperCase() + ' FORECAST', 'Estimated ' + fmtDur(secs.reduce(function (a, s) { return a + secDur(s); }, 0)) + ' at ' + st.wpm + ' wpm · ' + secs.reduce(function (a, s) { return a + wordCount(s.text); }, 0) + ' words', ''];
+    var t = 0, out = [ui.vmode === 'profile' ? 'DUOLOGY · ' + SIGNS[ui.vsign == null ? 1 : ui.vsign].name.toUpperCase() + ' BIRTHDAYS' : 'DUOLOGY · ' + sky().label.toUpperCase() + ' FORECAST', 'Estimated ' + fmtDur(secs.reduce(function (a, s) { return a + secDur(s); }, 0)) + ' at ' + st.wpm + ' wpm · ' + secs.reduce(function (a, s) { return a + wordCount(s.text); }, 0) + ' words', ''];
     secs.forEach(function (s, i) { out.push('[SCENE ' + (i + 1) + ' · ' + s.label + ' · starts ' + fmtDur(t) + ' · ' + fmtDur(secDur(s)) + ']'); out.push(s.text); out.push(''); t += secDur(s); });
     return out.join('\n');
   }
@@ -2660,7 +3099,7 @@ function buildLinkShort() {
     else if (act === 'clearmusic') clearMusic();
     else if (act === 'clean') { ui.clean = true; render(); }
     else if (act === 'fs') { var s = document.getElementById('stage'); if (s && s.requestFullscreen) { ui.clean = true; render(); document.documentElement.requestFullscreen().catch(function () {}); } }
-    else if (act === 'reset') { delete st.edits[mkey() + '|' + arg]; persist(); render(); }
+    else if (act === 'reset') { delete st.edits[editKey() + '|' + arg]; persist(); render(); }
     else if (act === 'sreset') { var cs0 = curShort(); delete cs0.store[cs0.key + '|' + arg]; persist(); render(); }
     else if (act === 'ssign') { stopRun(); ui.shortSign = +arg; ui.shortScene = 0; render(); }
     else if (act === 'smode') { stopRun(); ui.shortMode = arg; ui.shortScene = 0; render(); }
@@ -2680,7 +3119,7 @@ function buildLinkShort() {
     else if (act === 'anum') { stopRun(); ui.archN = +arg; ui.shortScene = 0; render(); }
     else if (act === 'nwhich') { stopRun(); ui.numWhich = +arg; ui.shortScene = 0; render(); }
     else if (act === 'copy-voice') copy(secsCache.map(function (s) { return s.text; }).join('\n\n'), el);
-    else if (act === 'dl-script') download('duology-' + mkey() + '-script.txt', scriptTxt(secsCache));
+    else if (act === 'dl-script') download('duology-' + (ui.vmode === 'profile' ? SIGNS[ui.vsign == null ? 1 : ui.vsign].name.toLowerCase() + '-birthdays' : mkey()) + '-script.txt', scriptTxt(secsCache));
     else if (act === 'copy-short') copy(curShort().parts.map(function (p) { return p.text; }).join(' '), el);
     else if (act === 'dl-shorts') {
       var out = [], kk;
@@ -2695,7 +3134,7 @@ function buildLinkShort() {
         ui.shortSign = keep; download('duology-' + mkey() + '-shorts.txt', out.join('\n'));
       }
     }
-    else if (act === 'copyt') copy(ytPackage(sky(), secsCache, st.wpm).titles[+arg], el);
+    else if (act === 'copyt') copy(ytPk().titles[+arg], el);
     else if (act === 'copyr') copy(document.getElementById('rep' + arg).value, el);
     else if (act === 'copy-desc') copy(document.getElementById('ytdesc').value, el);
   });
@@ -2711,7 +3150,7 @@ function buildLinkShort() {
     if (t.id === 'musicvol') { var lb = document.getElementById('musicvoltxt'); if (lb) lb.textContent = t.value + '%'; st.musicVol = +t.value; if (ui.playing) musicRamp(musicLevel(), 0.2); return; }
     if (t.hasAttribute('data-sec')) {
       var id = t.getAttribute('data-sec'), i = +t.getAttribute('data-idx'), s = secsCache[i];
-      s.text = t.value; if (t.value === s.generated) delete st.edits[mkey() + '|' + id]; else st.edits[mkey() + '|' + id] = t.value;
+      s.text = t.value; if (t.value === s.generated) delete st.edits[editKey() + '|' + id]; else st.edits[editKey() + '|' + id] = t.value;
       var m = document.getElementById('meta-' + i); if (m) m.textContent = wordCount(t.value) + ' words · ' + fmtDur(secDur(s));
       var tot = secsCache.reduce(function (a, x) { return a + secDur(x); }, 0), b = document.getElementById('durbadge');
       if (b) { b.textContent = fmtDur(tot) + ' · ' + secsCache.reduce(function (a, x) { return a + wordCount(x.text); }, 0) + ' words'; b.className = 's-dur ' + (tot >= 300 && tot <= 435 ? 'ok' : 'warn'); }
@@ -2729,6 +3168,8 @@ function buildLinkShort() {
     if (e.target.id === 'sting') { st.sting = e.target.checked; persist(); render(); return; }
     if (e.target.id === 'recformat') { st.recFormat = e.target.value; persist(); render(); return; }
     if (e.target.id === 'musicvol') { st.musicVol = +e.target.value; persist(); if (ui.playing) musicRamp(musicLevel(), 0.2); render(); return; }
+    if (e.target.id === 'vmode') { stopRun(); ui.vmode = e.target.value; ui.scene = 0; render(); return; }
+    if (e.target.id === 'vsign') { stopRun(); ui.vsign = +e.target.value; ui.scene = 0; render(); return; }
     if (e.target.id === 'depth') { st.depth = e.target.value; persist(); ui.scene = 0; render(); }
     if (e.target.id === 'order') { st.order = e.target.value; persist(); ui.scene = 0; render(); }
     if (e.target.id === 'wpm') { st.wpm = Math.max(100, Math.min(220, +e.target.value || 160)); persist(); render(); }
