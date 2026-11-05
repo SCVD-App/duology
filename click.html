@@ -71,6 +71,7 @@ h3{margin:0;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:u
 .item{border-left:4px solid var(--line2);padding:4px 0 4px 12px}
 .item.click{border-color:var(--flow)}
 .item.spark{border-color:var(--tension)}
+.item.lens{border-color:var(--accent)}
 .item b{display:block;font-size:14px}
 .item p{margin:2px 0 0;font-size:14px;color:var(--ink2)}
 .lockline{display:inline-block;margin-top:6px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:4px 11px}
@@ -520,18 +521,81 @@ function b64d(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length 
 function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 /* ---------- the maths (same engine the app uses) ---------- */
-function person(name, date, full, ms) {
+function person(name, date, full, ms, asc) {
   var p = date.split('-').map(Number), noon = Date.UTC(p[0], p[1] - 1, p[2], 12, 0), timed = typeof ms === 'number' && isFinite(ms);
   var pos = Astro.positions(Astro.jdFromMs(timed ? ms : noon));
   var o = { name: name, date: date, pos: pos, timed: timed };
   o.sun = signOf(pos.sun); o.moon = signOf(pos.moon);
-  var ds = Astro.norm(pos.sun) % 30, dm = Astro.norm(pos.moon) % 30;
-  o.sunEdge = !timed && (ds < 0.6 || ds > 29.4);     // with only a date, a sign-change birthday could be either side
+  var dm = Astro.norm(pos.moon) % 30;
+  o.edges = [];                                      // with only a date, a planet near a sign change could be either side of it
+  if (!timed) { var e1 = Astro.positions(Astro.jdFromMs(noon - 57600000)), e2 = Astro.positions(Astro.jdFromMs(noon + 57600000));
+    ['sun', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'].forEach(function (k) { if (signOf(e1[k]) !== signOf(e2[k])) o.edges.push(k); }); }
+  o.sunEdge = o.edges.indexOf('sun') >= 0;
   o.moonSure = timed || (dm > 6.7 && dm < 23.3);     // the Moon moves ~13 degrees a day, so without a time it can be a sign either side near an edge
   o.lp = lifePath(date, true).n; o.bd = birthdayNumber(date, true).n;
   o.ex = full ? (nameNumber(full, 'pyth', true, 'all') || {}).n || null : null;
+  o.su = full ? (nameNumber(full, 'pyth', true, 'vowels') || {}).n || null : null;
+  o.pn = full ? (nameNumber(full, 'pyth', true, 'consonants') || {}).n || null : null;
+  o.rise = (timed && typeof asc === 'number' && isFinite(asc)) ? signOf(asc) : null;
   o.cz = chineseZodiac(Date.UTC(p[0], p[1] - 1, p[2], 4, 0));
   return o;
+}
+
+/* ---------- numbers and the stars: which planet a number belongs to, and how each planet reads in each sign ---------- */
+var D_VENUS = ['loves boldly and directly, and enjoys a bit of chase', 'loves slowly and physically: touch, comfort, loyalty and good food', 'loves through words and play: flirty, curious and quickly bored by routine', 'loves by caring: remembering the little things and making a home', 'loves warmly and proudly, and wants to feel adored', 'loves through small, useful kindnesses and quiet attention', 'loves romance, beauty and harmony, and avoids a fight', 'loves intensely and privately: all in, or not at all', 'loves freedom and adventure, and needs room to roam', 'loves steadily and shows it by turning up, not by saying it', 'loves as a friend first, and needs independence inside the closeness', 'loves dreamily and deeply, and often gives more than comes back'];
+var D_MARS_GO = ['pursues things head-on', 'pursues things slowly and steadily', 'pursues things with talk, speed and variety', 'pursues things sideways, with plenty of feeling behind it', 'pursues things with confidence and flair', 'pursues things carefully, with an eye for detail', 'pursues things with charm and diplomacy', 'pursues things with deep focus and intensity', 'pursues things with enthusiasm and a sense of adventure', 'pursues things with patience and a plan', 'pursues things in an unconventional way', 'pursues things by instinct and mood'];
+var D_MERC = ['thinks and talks fast and blunt', 'thinks slowly and deliberately, and sticks to a decision', 'is curious, quick and chatty', 'thinks with feelings, remembers everything said and can take words personally', 'talks warmly and dramatically, and likes to be heard', 'is precise and analytical, and notices the details', 'weighs both sides and is tactful, though slow to choose', 'probes, keeps things private and reads between the lines', 'sees the big picture and speaks plainly', 'is practical, dry and to the point', 'is original and abstract, and likes ideas more than small talk', 'is intuitive and imaginative, and picks up mood more than words'];
+var D_DAY = { 1: 'self-starter energy: quick to take the lead and back their own ideas', 2: 'a gift for people: reads the room and smooths things over', 3: 'a spark: humour, creativity and a way with words', 4: 'a builder’s streak: steady, reliable and gets it finished', 5: 'restless curiosity: adapts fast and gets bored with the same old thing', 6: 'a caring core: looks after people, and home and family matter', 7: 'depth: a thinker who needs to understand how things work, and needs their own space', 8: 'drive: ambitious, practical with money and keen on results', 9: 'a big heart: generous, idealistic and drawn to the bigger picture', 11: 'intuitive, inspiring energy, with some nervous energy to manage', 22: 'big plans and the patience to build them for real', 33: 'deep care, and a pull to teach and look after people on a bigger scale' };
+var NP_SUN = ['leads from the front and acts before overthinking', 'is steady, loyal and hard to push around', 'runs on curiosity, talk and variety', 'leads through care, looking after the people closest', 'is warm, proud and happiest when generous and appreciated', 'is helpful, careful and always improving things', 'is fair-minded and charming, and works better with someone alongside', 'is intense, private and loyal to the bone', 'is restless, honest and always chasing the next horizon', 'is disciplined, patient and built for the long game', 'is independent, original and a little apart from the crowd', 'is gentle, imaginative and soaks up other people’s moods'];
+var NP_MOON = ['feels best when active, and wants feelings dealt with fast', 'needs comfort, calm and routine to feel safe', 'works through feelings by talking, and needs variety', 'feels deeply, needs a safe home base and remembers everything', 'needs to feel appreciated, and is warm in return', 'settles by being useful, and worries when things are out of order', 'needs harmony and company, and dislikes unresolved tension', 'feels intensely, keeps it private and needs real trust', 'needs freedom and space, and copes by finding the funny side', 'keeps feelings in check and shows care by being reliable', 'needs room to think, and handles feelings by stepping back to look at them', 'is deeply sensitive and absorbs the mood of the room'];
+var NP_JUP = ['grows by taking the first step and backing themselves', 'grows through patient building and enjoying what they have earned', 'grows through learning, talking and meeting people', 'grows through family, home and looking after others', 'grows through generosity, confidence and being seen', 'grows through skill, service and attention to detail', 'grows through partnerships and fairness', 'grows through depth, change and trust', 'grows through travel, big ideas and a sense of adventure', 'grows slowly, through discipline and earned responsibility', 'grows through friends, causes and fresh ideas', 'grows through faith, compassion and imagination'];
+var NP_SAT = ['carries pressure by taking charge, and has had to learn patience', 'builds security slowly and hates being rushed', 'learns to focus, and takes thinking and talking seriously', 'carries responsibility for family and feelings, and can be guarded about both', 'takes being respected seriously, and has to learn to share the spotlight', 'sets high standards, mostly for themselves', 'takes commitment seriously and wants fairness in it', 'is guarded, and builds trust slowly and for keeps', 'takes freedom seriously and builds a philosophy from experience', 'is built for ambition and long climbs', 'is a principled, independent worker who keeps a little distance', 'carries a lot of unseen responsibility, and has to learn firm boundaries'];
+var NP = { sun: NP_SUN, moon: NP_MOON, mercury: D_MERC, venus: D_VENUS, mars: D_MARS_GO, jupiter: NP_JUP, saturn: NP_SAT };
+/* the classical scheme: 1 Sun, 2 Moon, 3 Jupiter, 4 Sun (modern writers: Uranus), 5 Mercury, 6 Venus, 7 Moon (modern: Neptune), 8 Saturn, 9 Mars */
+var NUM_PLANET = { 1: 'sun', 2: 'moon', 3: 'jupiter', 4: 'sun', 5: 'mercury', 6: 'venus', 7: 'moon', 8: 'saturn', 9: 'mars' };
+/* where each planet is at home or exalted (sign numbers, Aries = 0); the opposite signs are its detriment and fall */
+var NP_HOME = { sun: [4, 0], moon: [3, 1], mercury: [2, 5], venus: [1, 6, 11], mars: [0, 7, 9], jupiter: [8, 11, 3], saturn: [9, 10, 6] };
+var KIND_L = { lp: 'Life Path', ex: 'Expression', su: 'Soul Urge', pn: 'Personality', bd: 'Birthday Number' };
+function pLab(pl) { return pl === 'sun' || pl === 'moon' ? 'the ' + PL[pl] : PL[pl]; }
+function planetOf(n) { return NUM_PLANET[rootNum(n)]; }
+function relOf(pl, s) {
+  var h = NP_HOME[pl];
+  if (h.indexOf(s) >= 0) return 'strong';
+  if (h.some(function (x) { return (x + 6) % 12 === s; })) return 'weak';
+  var best = 'mixed';
+  h.forEach(function (x) { var r = elRel(SIGN[x][1], SIGN[s][1]); if (r === 'same') best = 'same'; else if (r === 'easy' && best !== 'same') best = 'easy'; });
+  return best;
+}
+function numPhrase(n) { var r = rootNum(n), pl = NUM_PLANET[r]; return pLab(pl) + '’s number' + (n !== r ? ' (a master number, read through its root, ' + r + ')' : (r === 4 || r === 7 ? ' in the classical scheme' : '')); }
+function lensTail(rel, nm, n, pl, sn) {
+  var g = 'The number is about ' + D_DAY[n] + '. ';
+  if (rel === 'strong') return g + sn + ' is where ' + PL[pl] + ' is at its best, so the number and the sign say the same thing: one of the surest parts of ' + nm + '’s read.';
+  if (rel === 'weak') return g + PL[pl] + ' has to work harder in ' + sn + ', so it takes some effort for that to show. It may feel bigger to ' + nm + ' than it looks from outside.';
+  if (rel === 'mixed') return g + sn + ' goes about it its own way, so you get the ' + n + ' in ' + sn + '’s style, not the textbook version.';
+  return g + 'The sign backs that up, so it is a steady, reliable part of ' + nm + '.';
+}
+/* a number read through the planet it belongs to: Life Path and Expression */
+function lensDirect(P, key, label) {
+  var n = P[key]; if (!n) return null;
+  var pl = planetOf(n);
+  if (pl === 'moon' && !P.moonSure) return null;
+  if (P.edges.indexOf(pl) >= 0) return null;
+  var s = signOf(P.pos[pl]), rel = relOf(pl, s), nm = P.name, sn = nameOfSign(s), kl = label || KIND_L[key];
+  return { rel: rel, who: nm, key: key, n: n, label: kl, t: nm + ': ' + kl + ' ' + n + ' and ' + pLab(pl),
+    x: nm + '’s ' + kl + ' ' + n + ' (the ' + NUM_SHORT[n] + ') ' + (label ? 'are ' : 'is ') + numPhrase(n) + ', and ' + nm + '’s ' + PL[pl] + ' is in ' + sn + ': ' + nm + ' ' + NP[pl][s] + '. ' + lensTail(rel, nm, n, pl, sn) };
+}
+function lensFor(A, B, deepOn) {
+  var out = [];
+  [A, B].forEach(function (P) {
+    var same = P.lp && P.ex && P.lp === P.ex, fs = (same ? [lensDirect(P, 'lp', 'Life Path and Expression')] : [lensDirect(P, 'lp'), lensDirect(P, 'ex')]).filter(Boolean);
+    if (fs.length < 2) { var bd = lensDirect(P, 'bd'); if (bd) fs.push(bd); }
+    if (deepOn && typeof deepLens === 'function') fs = fs.concat(deepLens(P));
+    P._lens = fs;
+    (deepOn ? fs : fs.slice(0, 1)).forEach(function (f) { out.push({ kind: 'lens', t: f.t, x: f.x }); });
+  });
+  if (deepOn && typeof deepPair === 'function' && out.length) { var pr = deepPair(A, B); if (pr) out.push({ kind: 'lens', t: pr.t, x: pr.x }); }
+  if (!deepOn && out.length) out.push({ kind: 'lens', deep: true, t: 'Your numbers across every heading', x: 'Duology reads each heading above against your numbers too, and adds how your Soul Urge meets your Moon and your Personality number meets your Rising sign.' });
+  return out;
 }
 function elRel(a, b) { if (a === b) return 'same'; var k = [a, b].sort().join('-'); return EL_EASY[k] ? 'easy' : 'mixed'; }
 function nameOfSign(i) { return SIGN[i][0]; }
@@ -622,7 +686,11 @@ function analyse(A, B, type, opts) {
     else items.push({ kind: 'spark', w: 0.6, t: 'Feelings in translation', mo: mo, x: t + ' are different elements, so you may sometimes need to translate each other’s moods.' });
   });
   if (!A.moonSure || !B.moonSure) notes.push('Moon signs need a birth time to be sure, so we’ve left them out for ' + (!A.moonSure && !B.moonSure ? 'both of you' : (!A.moonSure ? A.name : B.name)) + '.' + (opts.app ? ' Add a birth time to their saved chart and this Click will use it.' : ''));
-  if (A.sunEdge || B.sunEdge) notes.push((A.sunEdge ? A.name : B.name) + ' was born right on the edge between two Sun signs, so the sign could be the one next door. ' + (opts.app ? 'Adding a birth time to their saved chart settles it.' : 'The full Duology app (with birth time and place) settles it.'));
+  [A, B].forEach(function (P) {
+    if (!P.edges.length) return;
+    var nm = P.edges.map(function (k) { return PL[k]; }), list = nm.length > 1 ? nm.slice(0, -1).join(', ') + ' and ' + nm[nm.length - 1] : nm[0];
+    notes.push(P.name + '’s ' + list + (P.edges.length > 1 ? ' sit' : ' sits') + ' close to a sign change, so ' + (P.edges.length > 1 ? 'those could be the signs' : 'that could be the sign') + ' next door. ' + (opts.app ? 'Adding a birth time to their saved chart settles it.' : 'The full Duology app (with birth time and place) settles it.'));
+  });
   /* planet to planet, across the two charts */
   var found = [];
   PAIRS[type].forEach(function (pr) {
@@ -666,7 +734,7 @@ function analyse(A, B, type, opts) {
   all.forEach(function (i) { if (i.mo && seen[i.t] > 1) i.t += ' (' + i.mo + '’s Moon)'; });
   all.sort(function (x, y) { return y.w - x.w; });
   var clicks = all.filter(function (i) { return i.kind === 'click'; }), sparks = all.filter(function (i) { return i.kind === 'spark'; });
-  return { type: type, a: A, b: B, clicks: clicks.slice(0, 9), sparks: sparks.slice(0, 9), headline: OUT[type][key][0], summary: OUT[type][key][1], notes: notes };
+  return { type: type, a: A, b: B, clicks: clicks.slice(0, 9), sparks: sparks.slice(0, 9), lens: lensFor(A, B, !!opts.deep), headline: OUT[type][key][0], summary: OUT[type][key][1], notes: notes };
 }
 
 /* ---------- state + screens ---------- */
@@ -752,13 +820,14 @@ function screenResult() {
     '<div class="hero"><span class="badge">' + T.label + ' check</span><div class="names">' + esc(r.a.name) + ' <em>&amp;</em> ' + esc(r.b.name) + '</div><div class="hl">' + esc(r.headline) + '</div><p style="margin:0;color:var(--ink2)">' + esc(r.summary) + '</p><div class="chips">' + chip(r.a) + chip(r.b) + '</div></div>' +
     '<div class="stack-s"><h3>Where you click</h3>' + (r.clicks.length ? listOf(r.clicks, 'click') : '<p class="small">No big matches by the usual tests, which just means you click in quieter ways.</p>') + '</div>' +
     '<div class="stack-s"><h3>Where you spark</h3>' + (r.sparks.length ? listOf(r.sparks, 'spark') : '<p class="small">Nothing obviously prickly in the usual tests.</p>') + '</div>' +
+    (r.lens && r.lens.length ? '<div class="stack-s"><h3>How your numbers sharpen the stars</h3>' + listOf(r.lens, 'lens') + '</div>' : '') +
     (r.notes.length ? '<div class="note">' + r.notes.map(esc).join('<br><br>') + '</div>' : '') +
     '<div class="stack-s"><h3>Share it</h3><canvas class="cv" id="cv" width="540" height="675" aria-label="Share card preview"></canvas>' +
       '<div class="seg"><button type="button" class="pill" data-act="fmt:4x5" aria-pressed="' + (st.fmt === '4x5') + '">Post (4:5)</button><button type="button" class="pill" data-act="fmt:9x16" aria-pressed="' + (st.fmt === '9x16') + '">Story (9:16)</button></div>' +
       '<button type="button" class="btn" data-act="shareimg">Share the picture</button>' +
       '<button type="button" class="btn-ghost" data-act="link">Make a link so ' + esc(r.b.name) + ' can check too</button>' +
       (st.link ? '<div class="note"><b>Heads up:</b> this link carries your first name and birth date inside it, so anyone who has it can see them. Only send it to people you’re happy to share that with.</div><textarea class="copybox" id="lk" readonly>' + esc(st.link) + '</textarea><button type="button" class="btn-ghost" data-act="copy">Copy the link</button>' : '') + '</div>' +
-    '<div class="card stack-s"><h2>Want the full picture?</h2><p style="margin:0;color:var(--ink2)">This is the quick version, from birth dates only. Every heading marked “Only available in Duology” has a longer reading underneath, and in Duology Pro you can save ' + esc(r.b.name) + ' as a chart, use a real birth time for the Moon, and read every placement, house and aspect, with the why behind each.</p><a class="btn-ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="duology?ref=cc">Open Duology</a></div>' +
+    '<div class="card stack-s"><h2>Want the full picture?</h2><p style="margin:0;color:var(--ink2)">This is the quick version, from birth dates only. Every heading marked “Only available in Duology” has a longer reading underneath, with your numbers applied to it, and in Duology Pro you can save ' + esc(r.b.name) + ' as a chart, use a real birth time for the Moon, and read every placement, house and aspect, with the why behind each.</p><a class="btn-ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="duology?ref=cc">Open Duology</a></div>' +
     '<button type="button" class="link" data-act="again">Check another ' + esc(T.other) + '</button>' +
     '<p class="small">Built on traditional astrology, numerology and Chinese zodiac rules, with no birth times or places. For reflection and fun, not advice.</p></div>';
 }
