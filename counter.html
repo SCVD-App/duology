@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Duology counter</title>
+<style>
+:root{
+  --bg:#F4F1EA;--surface:#FFFDF8;--ink:#1D1B26;--ink2:#3E3947;--muted:#5E5869;--line:#DDD6C8;--line2:#BDB4A3;--soft:#EAE4D7;
+  --accent:#2E3A8C;--accent-soft:#E6E8F4;--on-accent:#FFFFFF;--rust:#A0521A;--up:#1F6B3A;--down:#A8321F;--bar:#2E3A8C;--bar2:#A0521A;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#14131A;--surface:#1E1C26;--ink:#EEEAF2;--ink2:#D2CCDA;--muted:#A9A3B5;--line:#34313F;--line2:#4A4657;--soft:#282533;
+  --accent:#A9B6FF;--accent-soft:#2A2F52;--on-accent:#14131A;--rust:#E4A673;--up:#7FD1A0;--down:#FF9C8A;--bar:#A9B6FF;--bar2:#E4A673;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 60px;display:flex;flex-direction:column;gap:18px}
+h1{font:600 30px/1.1 Georgia,"Times New Roman",serif;margin:0}
+h1 em{font-style:italic;font-weight:500;color:var(--accent)}
+h2{font:700 13px/1.2 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--rust);margin:0 0 10px}
+.sub{margin:4px 0 0;color:var(--muted);font-size:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.small{font-size:13px;color:var(--muted)}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+input[type=password],input[type=text],select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.row{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+@media (max-width:560px){.row{grid-template-columns:1fr}}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:10px}
+.chk input{width:20px;height:20px;accent-color:var(--accent)}
+button{min-height:44px;padding:0 20px;border-radius:999px;border:0;background:var(--accent);color:var(--on-accent);font:700 15px system-ui,sans-serif;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--line2)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center}
+#msg{min-height:22px;font-size:14px}
+#msg.err{color:var(--down);font-weight:600}
+.notice{border-left:4px solid var(--rust);background:var(--soft);padding:12px 14px;border-radius:0 10px 10px 0;font-size:14px}
+.notice code{font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stat .k{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.stat .v{font:600 28px/1.15 Georgia,serif;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.stat .d{font-size:13px;font-weight:600}
+.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.scroll{overflow-x:auto}
+.fn{display:flex;flex-direction:column;gap:12px;font-size:14px}
+.frow{display:grid;grid-template-columns:minmax(120px,1.2fr) 3fr minmax(60px,.6fr);gap:2px 12px;align-items:center}
+.frow .bar{height:18px;background:var(--soft);border-radius:9px;overflow:hidden}
+.frow .bar i{display:block;height:100%;background:var(--bar);border-radius:9px;min-width:2px}
+.frow .n{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+.frow .r{font-size:12px;color:var(--muted);grid-column:1 / -1}
+@media (max-width:560px){.frow{grid-template-columns:1fr auto}.frow .bar{grid-column:1 / -1;order:3}.frow .r{order:4}}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.ch svg{width:100%;height:72px;display:block}
+.ch .t{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
+.ch .t b{font:600 20px Georgia,serif}
+.ch .ax{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.cbar{display:grid;grid-template-columns:48px 1fr 50px;gap:8px;align-items:center;font-size:14px;margin:4px 0}
+.cbar .bar{height:12px;background:var(--soft);border-radius:6px;overflow:hidden}.cbar .bar i{display:block;height:100%;background:var(--bar2)}
+details summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--accent);padding:6px 0}
+.foot{font-size:12.5px;color:var(--muted)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>Du<em>ology</em> counter</h1>
+  <p class="sub">Anonymous head-count and sales. Devices, not people, so treat the rates as a guide.</p>
+</header>
+
+<form id="f" class="card" autocomplete="off">
+  <div class="row">
+    <div><label for="key">Stats key</label><input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your STATS_KEY"></div>
+    <div><label for="win">Window</label>
+      <select id="win">
+        <option value="7">Last 7 days (vs the 7 before)</option>
+        <option value="14" selected>Last 14 days (vs the 14 before)</option>
+        <option value="21">Last 21 days (vs the 21 before)</option>
+        <option value="45">Last 45 days (no comparison)</option>
+      </select></div>
+  </div>
+  <label class="chk"><input id="rem" type="checkbox"> Remember the key on this device</label>
+  <div class="actions"><button type="submit">Load the numbers</button><button type="button" class="ghost" id="forget" hidden>Forget the saved key</button></div>
+</form>
+<div id="msg" role="status" aria-live="polite"></div>
+<div id="out" hidden></div>
+<p class="foot">Days run on UTC, so a counter day ends at 10am Brisbane time. The key is only sent to your own counter Worker and is never saved in this file. This page asks search engines not to list it, but don&rsquo;t put the link anywhere public.</p>
+</main>
+
+<script>
+(function () {
+'use strict';
+var API = 'https://duology-counter.emblen-scott.workers.dev', LS = 'duology.counter.key';
+var EV = ['land','go','open','new','form','first','chart','read','wall','pro','gift','pair','pshare'];
+var PLANS = [['newmoon','New Moon (30 days)'],['fullcircle','Full Circle (12 months)'],['lifetime','Written in the Stars (lifetime)'],['gift','Gift card']];
+var $ = function (s) { return document.querySelector(s); };
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function int(n) { return Math.round(n || 0).toLocaleString('en-AU'); }
+function usd(c) { return '$' + ((c || 0) / 100).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function pct(a, b) { return b ? Math.round(a / b * 1000) / 10 : null; }
+function pctTxt(a, b) { var p = pct(a, b); return p === null ? 'n/a' : p + '%'; }
+function utcDay(offset) { return new Date(Date.now() - offset * 864e5).toISOString().slice(0, 10); }
+function setMsg(t, err) { var m = $('#msg'); m.textContent = t || ''; m.className = err ? 'err' : ''; }
+
+/* ---------- key handling ---------- */
+try { var saved = localStorage.getItem(LS); if (saved) { $('#key').value = saved; $('#rem').checked = true; $('#forget').hidden = false; } } catch (e) {}
+$('#forget').addEventListener('click', function () { try { localStorage.removeItem(LS); } catch (e) {} $('#key').value = ''; $('#rem').checked = false; $('#forget').hidden = true; setMsg('Saved key forgotten.'); });
+$('#f').addEventListener('submit', function (e) { e.preventDefault(); load(); });
+
+/* ---------- fetch ---------- */
+function load() {
+  var key = $('#key').value.trim(), n = parseInt($('#win').value, 10);
+  if (!key) { setMsg('Paste the stats key first.', true); return; }
+  var compare = n * 2 <= 45, ask = compare ? n * 2 : 45;
+  setMsg('Loading…');
+  fetch(API + '/stats?key=' + encodeURIComponent(key) + '&days=' + ask, { cache: 'no-store' }).then(function (r) {
+    if (r.status === 401) throw new Error('That key didn’t work. Check it matches the STATS_KEY secret on the counter Worker.');
+    if (!r.ok) throw new Error('The counter answered with an error (' + r.status + ').');
+    return r.json();
+  }).then(function (data) {
+    try { if ($('#rem').checked) { localStorage.setItem(LS, key); $('#forget').hidden = false; } else localStorage.removeItem(LS); } catch (e) {}
+    setMsg('Updated ' + new Date().toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }) + '.');
+    render(data, n, compare);
+  }).catch(function (err) {
+    var m = err && err.message || '';
+    setMsg(/key|error \(/.test(m) ? m : 'Couldn’t reach the counter. The Worker only answers pages on scvd-app.github.io or scvd.app, so a copy opened from a file on your computer won’t work. Also check you’re online.', true);
+  });
+}
+
+/* ---------- maths ---------- */
+function blank() { var t = { c: {}, r: {}, rf: {}, sales: {}, refunds: {}, gr: 0 }; EV.forEach(function (k) { t[k] = 0; }); PLANS.forEach(function (p) { t.sales[p[0]] = { n: 0, c: 0 }; t.refunds[p[0]] = { n: 0, c: 0 }; }); return t; }
+function agg(rows) {
+  var t = blank();
+  rows.forEach(function (d) {
+    EV.forEach(function (k) { t[k] += d[k] || 0; });
+    Object.keys(d.c || {}).forEach(function (k) { t.c[k] = (t.c[k] || 0) + d.c[k]; });
+    Object.keys(d.rf || {}).forEach(function (r) { t.rf[r] = t.rf[r] || {}; Object.keys(d.rf[r]).forEach(function (e) { t.rf[r][e] = (t.rf[r][e] || 0) + d.rf[r][e]; }); });
+    var m = d.money; if (m) {
+      PLANS.forEach(function (p) {
+        if (m.sales && m.sales[p[0]]) { t.sales[p[0]].n += m.sales[p[0]].n || 0; t.sales[p[0]].c += m.sales[p[0]].c || 0; }
+        if (m.rf && m.rf[p[0]]) { t.refunds[p[0]].n += m.rf[p[0]].n || 0; t.refunds[p[0]].c += m.rf[p[0]].c || 0; }
+      });
+      t.gr += m.gr || 0;
+    }
+  });
+  t.pro = t.pro; // tapped buy (event)
+  t.proSales = t.sales.newmoon.n + t.sales.fullcircle.n + t.sales.lifetime.n;
+  t.gross = 0; t.refunded = 0; PLANS.forEach(function (p) { t.gross += t.sales[p[0]].c; t.refunded += t.refunds[p[0]].c; });
+  t.net = t.gross - t.refunded;
+  return t;
+}
+function delta(cur, prev, money) {
+  if (prev === null || prev === undefined) return '';
+  if (!prev && !cur) return '<div class="d flat">no change</div>';
+  if (!prev) return '<div class="d up">▲ new this period</div>';
+  var p = Math.round((cur - prev) / prev * 100);
+  var cls = p > 0 ? 'up' : p < 0 ? 'down' : 'flat', arrow = p > 0 ? '▲ +' : p < 0 ? '▼ ' : '● ';
+  return '<div class="d ' + cls + '">' + arrow + p + '% <span class="flat">vs ' + (money ? usd(prev) : int(prev)) + '</span></div>';
+}
+
+/* ---------- pieces ---------- */
+function statCard(label, cur, prev, money) { return '<div class="stat"><div class="k">' + esc(label) + '</div><div class="v">' + (money ? usd(cur) : int(cur)) + '</div>' + delta(cur, prev, money) + '</div>'; }
+
+function funnel(t) {
+  var steps = [
+    ['Landing page views', t.land, null, ''],
+    ['Tapped through to the app', t.go, t.land, 'of landing views'],
+    ['New devices', t.new, t.go, 'of tap-throughs (not every new device arrives via the landing page)'],
+    ['Started the birth form', t.form, t.new, 'of new devices'],
+    ['Made a first chart', t.first, t.new, 'of new devices'],
+    ['Opened a placement card', t.read, t.first, 'of first charts'],
+    ['Saw the Pro screen', t.wall, t.first, 'of first charts'],
+    ['Tapped buy', t.pro, t.new, 'of new devices'],
+    ['Paid for Pro', t.proSales, t.pro, 'of buy taps']
+  ], max = Math.max.apply(null, steps.map(function (s) { return s[1]; }).concat([1]));
+  var h = '<div class="fn">';
+  steps.forEach(function (s) {
+    h += '<div class="frow"><div>' + esc(s[0]) + '</div><div class="bar" aria-hidden="true"><i style="width:' + Math.max(0, s[1] / max * 100).toFixed(1) + '%"></i></div><div class="n">' + int(s[1]) + '</div>' +
+      (s[2] === null ? '' : '<div class="r">' + pctTxt(s[1], s[2]) + ' ' + esc(s[3]) + '</div>') + '</div>';
+  });
+  var per = t.new ? Math.round(t.proSales / t.new * 10000) / 10 : null;
+  return h + '</div><p class="small" style="margin:12px 0 0">Paid per 1,000 new devices: <b>' + (per === null ? 'n/a' : per) + '</b>. A device can come back on another day, so a buyer may not have been “new” in this same window.</p>';
+}
+
+function bars(title, vals, dates, fmt, color) {
+  var total = vals.reduce(function (a, b) { return a + b; }, 0), max = Math.max.apply(null, vals.concat([1])), n = vals.length, w = 300, hgt = 70, bw = w / n;
+  var svg = '<svg viewBox="0 0 ' + w + ' ' + hgt + '" preserveAspectRatio="none" role="img" aria-label="' + esc(title) + ' per day, total ' + esc(fmt(total)) + '">';
+  vals.forEach(function (v, i) { var bh = v / max * (hgt - 4); svg += '<rect x="' + (i * bw + 1).toFixed(1) + '" y="' + (hgt - bh).toFixed(1) + '" width="' + Math.max(1, bw - 2).toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="2" fill="' + color + '"><title>' + esc(dates[i] + ': ' + fmt(v)) + '</title></rect>'; });
+  svg += '</svg>';
+  return '<div class="card ch"><div class="t"><span>' + esc(title) + '</span><b>' + esc(fmt(total)) + '</b></div>' + svg + '<div class="ax"><span>' + esc(dates[0].slice(5)) + '</span><span>' + esc(dates[n - 1].slice(5)) + '</span></div></div>';
+}
+
+function sources(t) {
+  var refs = Object.keys(t.rf), cols = ['land', 'go', 'open', 'new', 'first', 'pro'], names = ['Landing', 'Tapped in', 'Opens', 'New', 'First chart', 'Buy taps'];
+  var tagged = {}; cols.forEach(function (k) { tagged[k] = 0; });
+  refs.forEach(function (r) { cols.forEach(function (k) { tagged[k] += t.rf[r][k] || 0; }); });
+  refs.sort(function (a, b) { return ((t.rf[b].new || 0) + (t.rf[b].land || 0)) - ((t.rf[a].new || 0) + (t.rf[a].land || 0)); });
+  var h = '<div class="scroll"><table><thead><tr><th>Source tag</th>' + names.map(function (x) { return '<th>' + x + '</th>'; }).join('') + '<th>New → chart</th></tr></thead><tbody>';
+  refs.forEach(function (r) { var v = t.rf[r]; h += '<tr><td>?ref=' + esc(r) + '</td>' + cols.map(function (k) { return '<td>' + int(v[k]) + '</td>'; }).join('') + '<td>' + pctTxt(v.first || 0, v.new || 0) + '</td></tr>'; });
+  var un = {}; cols.forEach(function (k) { un[k] = Math.max(0, t[k] - tagged[k]); });
+  h += '<tr><td>No tag</td>' + cols.map(function (k) { return '<td>' + int(un[k]) + '</td>'; }).join('') + '<td>' + pctTxt(un.first, un.new) + '</td></tr></tbody></table></div>';
+  return h + '<p class="small" style="margin:10px 0 0">A source tag is the <code>?ref=</code> on a link (for example <code>?ref=fb</code>). “No tag” is everything that came without one, so a big number there means links are going out untagged.</p>';
+}
+
+function countries(t) {
+  var ks = Object.keys(t.c).sort(function (a, b) { return t.c[b] - t.c[a]; }).slice(0, 10), tot = ks.reduce(function (a, k) { return a + t.c[k]; }, 0), max = ks.length ? t.c[ks[0]] : 1, dn = null;
+  try { dn = new Intl.DisplayNames(['en'], { type: 'region' }); } catch (e) {}
+  if (!ks.length) return '<p class="small">No app opens recorded in this window.</p>';
+  return ks.map(function (k) { var nm = k === 'XX' ? 'Unknown' : (dn ? (dn.of(k) || k) : k); return '<div class="cbar"><span>' + esc(k) + '</span><div class="bar" aria-hidden="true"><i style="width:' + (t.c[k] / max * 100).toFixed(1) + '%"></i></div><b>' + int(t.c[k]) + '</b></div><div class="small" style="margin:-2px 0 4px 56px">' + esc(nm) + '</div>'; }).join('') + '<p class="small" style="margin:8px 0 0">App opens by country (once a day per device). Top ' + ks.length + '.</p>';
+}
+
+function salesTable(t) {
+  var h = '<div class="scroll"><table><thead><tr><th>Plan</th><th>Sold</th><th>Gross</th><th>Refunds</th><th>Net</th></tr></thead><tbody>';
+  PLANS.forEach(function (p) { var s = t.sales[p[0]], r = t.refunds[p[0]]; h += '<tr><td>' + esc(p[1]) + '</td><td>' + int(s.n) + '</td><td>' + usd(s.c) + '</td><td>' + (r.n ? int(r.n) + ' (' + usd(r.c) + ')' : '0') + '</td><td>' + usd(s.c - r.c) + '</td></tr>'; });
+  h += '<tr><td><b>Total</b></td><td><b>' + int(PLANS.reduce(function (a, p) { return a + t.sales[p[0]].n; }, 0)) + '</b></td><td><b>' + usd(t.gross) + '</b></td><td><b>' + usd(t.refunded) + '</b></td><td><b>' + usd(t.net) + '</b></td></tr></tbody></table></div>';
+  return h + '<p class="small" style="margin:10px 0 0">Gift cards redeemed in this window: <b>' + int(t.gr) + '</b> (of ' + int(t.sales.gift.n) + ' sold in it; redemptions can be of cards sold earlier). All amounts are US dollars from Stripe.</p>';
+}
+
+function clickPanel(t, hasPair) {
+  if (!hasPair) return '<div class="notice"><b>Click isn’t being counted yet.</b> The counter Worker is still on v2, which refuses the two Click events (<code>pair</code> and <code>pshare</code>). Paste in <code>duology-counter-v3.js</code> and deploy, and Click checks will start showing here from then on. Anything sent before that is gone.</div>';
+  var h = '<div class="grid"><div class="stat"><div class="k">Click checks made</div><div class="v">' + int(t.pair) + '</div></div><div class="stat"><div class="k">Shared</div><div class="v">' + int(t.pshare) + '</div><div class="d flat">' + pctTxt(t.pshare, t.pair) + ' of checks</div></div></div>';
+  var refs = Object.keys(t.rf).filter(function (r) { return (t.rf[r].pair || t.rf[r].pshare); });
+  if (refs.length) h += '<div class="scroll" style="margin-top:12px"><table><thead><tr><th>Source tag</th><th>Checks</th><th>Shared</th></tr></thead><tbody>' + refs.map(function (r) { return '<tr><td>?ref=' + esc(r) + '</td><td>' + int(t.rf[r].pair) + '</td><td>' + int(t.rf[r].pshare) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+  return h + '<p class="small" style="margin:10px 0 0">Counts every check made on the live Click and on any test copy, so your own testing is in here too.</p>';
+}
+
+function dailyTable(rows) {
+  var h = '<div class="scroll"><table><thead><tr><th>Day (UTC)</th><th>Landing</th><th>Opens</th><th>New</th><th>First chart</th><th>Buy taps</th><th>Sales</th><th>Net</th><th>Click</th><th>Shared</th></tr></thead><tbody>';
+  rows.forEach(function (d) { var a = agg([d]); h += '<tr><td>' + esc(d.date) + '</td><td>' + int(a.land) + '</td><td>' + int(a.open) + '</td><td>' + int(a.new) + '</td><td>' + int(a.first) + '</td><td>' + int(a.pro) + '</td><td>' + int(a.proSales + a.sales.gift.n) + '</td><td>' + usd(a.net) + '</td><td>' + int(a.pair) + '</td><td>' + int(a.pshare) + '</td></tr>'; });
+  return h + '</tbody></table></div>';
+}
+
+/* ---------- page ---------- */
+function render(data, n, compare) {
+  var all = (data && data.days) || [], curDates = [], prevDates = [];
+  for (var i = 0; i < n; i++) curDates.push(utcDay(i));
+  if (compare) for (var j = n; j < n * 2; j++) prevDates.push(utcDay(j));
+  var curRows = all.filter(function (d) { return curDates.indexOf(d.date) >= 0; }), prevRows = all.filter(function (d) { return prevDates.indexOf(d.date) >= 0; });
+  var cur = agg(curRows), prev = compare ? agg(prevRows) : null, P = function (k) { return prev ? prev[k] : null; };
+  var hasPair = !!(data && data.total && typeof data.total.pair === 'number');
+  var chron = curDates.slice().reverse(), byDate = {}; curRows.forEach(function (d) { byDate[d.date] = agg([d]); });
+  var series = function (fn) { return chron.map(function (d) { return byDate[d] ? fn(byDate[d]) : 0; }); };
+  var out = '';
+  out += '<section><h2>Last ' + n + ' days' + (compare ? ' and the ' + n + ' before' : '') + '</h2><div class="grid">' +
+    statCard('Net revenue', cur.net, P('net'), true) + statCard('Pro sales', cur.proSales, P('proSales')) + statCard('Gift cards sold', cur.sales.gift.n, prev ? prev.sales.gift.n : null) +
+    statCard('New devices', cur.new, P('new')) + statCard('App opens', cur.open, P('open')) + (hasPair ? statCard('Click checks', cur.pair, P('pair')) : '<div class="stat"><div class="k">Click checks</div><div class="v" style="font-size:18px">Not counted yet</div><div class="d flat">Worker needs v3</div></div>') + '</div></section>';
+  out += '<section class="card"><h2>Where people drop off</h2>' + funnel(cur) + '</section>';
+  out += '<section><h2>Day by day</h2><div class="charts">' +
+    bars('New devices', series(function (a) { return a.new; }), chron, int, 'var(--bar)') + bars('App opens', series(function (a) { return a.open; }), chron, int, 'var(--bar)') +
+    bars('Net revenue', series(function (a) { return a.net; }), chron, usd, 'var(--bar2)') + '</div></section>';
+  out += '<section class="card"><h2>Sales</h2>' + salesTable(cur) + '</section>';
+  out += '<section class="card"><h2>Where visitors came from</h2>' + sources(cur) + '</section>';
+  out += '<section class="card"><h2>Countries</h2>' + countries(cur) + '</section>';
+  out += '<section class="card"><h2>Click</h2>' + clickPanel(cur, hasPair) + '</section>';
+  out += '<section class="card"><details><summary>Every day in this window</summary>' + dailyTable(curRows) + '</details></section>';
+  var el = $('#out'); el.innerHTML = out; el.hidden = false;
+}
+})();
+</script>
+</body>
+</html>
