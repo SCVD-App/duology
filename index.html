@@ -273,7 +273,7 @@ footer.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
 .ck-chip{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:13.5px;border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--bg)}
 .ck-item{border-left:4px solid var(--line2);padding:4px 0 4px 12px}
 .ck-item.click{border-color:var(--flow)}.ck-item.spark{border-color:var(--tension)}
-.ck-item b{display:block;font-size:14px}.ck-item p{margin:2px 0 0;font-size:14px;color:var(--ink2)}
+.ck-item b{display:block;font-size:14px}.ck-item p{margin:2px 0 0;font-size:14px;color:var(--ink2)}.ck-item p.ck-more{margin-top:8px}
 .ck-h{font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--rust);margin:0}
 </style>
 </head>
@@ -1514,7 +1514,7 @@ function buildReport(p, c, settings) {
   var smRel = elPair(rpEl(sun), rpEl(moon));
   o.push('Here’s the reading in one go, ' + first + '. Your Sun is in ' + SIGNS[sun].name + ', your Moon is in ' + SIGNS[moon].name +
     (c.hasTime ? ' and your Rising sign is ' + SIGNS[asc].name : '') + ', and your Life Path number is ' + lp.n + '. Put together, astrologers and numerologists would describe someone who is ' +
-    SIGNS[sun].style + ' at the core, ' + SIGNS[moon].style + ' underneath' + (c.hasTime ? ', and comes across as ' + RISE_LOOK[asc] : '') +
+    (sun === moon ? SIGNS[sun].style + ', and the same all the way down, since your Sun and Moon share a sign' : SIGNS[sun].style + ' at the core, ' + SIGNS[moon].style + ' underneath') + (c.hasTime ? ', and comes across as ' + RISE_LOOK[asc] : '') +
     ', walking the road of the ' + NUM_SHORT[lp.n] + '.');
   o.push(smRel === 'same'
     ? 'Your Sun and Moon share the same element, ' + EL_WORD[rpEl(sun)] + '. Astrologers read that as your head and your heart speaking the same language: what you want and what you need tend to line up, so you’re usually fairly easy to read, for others and for yourself.'
@@ -1535,7 +1535,7 @@ function buildReport(p, c, settings) {
 
   // ---- 3. Inner world: Moon + Soul Urge ----
   o = [];
-  o.push('The Moon is the part of you that feels before it thinks. To feel safe and settled, a ' + SIGNS[moon].name + ' Moon is read as needing ' + MOON_NEED[moon] + '. When those needs go unmet, astrologers say the ' + SIGNS[moon].name + ' Moon’s snag shows up: ' + SIGN_SNAG[moon] + '.' +
+  o.push('The Moon is the part of you that feels before it thinks. To feel safe and settled, a ' + SIGNS[moon].name + ' Moon is read as needing ' + MOON_NEED[moon] + '. ' + (sun === moon ? 'When those needs go unmet, the same snag as your Sun shows up too, only closer to the surface, because your Sun and Moon pull the same way.' : 'When those needs go unmet, astrologers say the ' + SIGNS[moon].name + ' Moon’s snag shows up: ' + SIGN_SNAG[moon] + '.') +
     (!c.hasTime ? ' (Without a birth time the Moon could be a few degrees either side, so if this doesn’t ring true, the next sign over might.)' : ''));
   if (so) {
     var mEl = rpEl(moon), sEl = homeEl(NUM_PLANET[rootNum(so.n)]);
@@ -1869,14 +1869,14 @@ function b64d(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length 
 function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 /* ---------- the maths (same engine the app uses) ---------- */
-function person(name, date, full) {
-  var p = date.split('-').map(Number), noon = Date.UTC(p[0], p[1] - 1, p[2], 12, 0);
-  var pos = Astro.positions(Astro.jdFromMs(noon));
-  var o = { name: name, date: date, pos: pos };
+function person(name, date, full, ms) {
+  var p = date.split('-').map(Number), noon = Date.UTC(p[0], p[1] - 1, p[2], 12, 0), timed = typeof ms === 'number' && isFinite(ms);
+  var pos = Astro.positions(Astro.jdFromMs(timed ? ms : noon));
+  var o = { name: name, date: date, pos: pos, timed: timed };
   o.sun = signOf(pos.sun); o.moon = signOf(pos.moon);
   var ds = Astro.norm(pos.sun) % 30, dm = Astro.norm(pos.moon) % 30;
-  o.sunEdge = ds < 0.6 || ds > 29.4;                 // we only know the date, so a sign-change birthday could be either side
-  o.moonSure = dm > 6.7 && dm < 23.3;                // the Moon moves ~13 degrees a day, so without a time it can be a sign either side near an edge
+  o.sunEdge = !timed && (ds < 0.6 || ds > 29.4);     // with only a date, a sign-change birthday could be either side
+  o.moonSure = timed || (dm > 6.7 && dm < 23.3);     // the Moon moves ~13 degrees a day, so without a time it can be a sign either side near an edge
   o.lp = lifePath(date, true).n; o.bd = birthdayNumber(date, true).n;
   o.ex = full ? (nameNumber(full, 'pyth', true, 'all') || {}).n || null : null;
   o.cz = chineseZodiac(Date.UTC(p[0], p[1] - 1, p[2], 4, 0));
@@ -1885,7 +1885,76 @@ function person(name, date, full) {
 function elRel(a, b) { if (a === b) return 'same'; var k = [a, b].sort().join('-'); return EL_EASY[k] ? 'easy' : 'mixed'; }
 function nameOfSign(i) { return SIGN[i][0]; }
 
-function analyse(A, B, type) {
+/* The deeper headings. Every one gets a free first line; the longer reading under it is for Duology (see deepFor). */
+var REPL = { partner: ['venus-mars', 'mercury-mercury', 'mars-mars'], friend: ['mercury-mercury', 'mars-mars', 'venus-venus'], family: ['mercury-mercury', 'mars-mars', 'venus-venus'], work: ['mercury-mercury', 'mars-mars'] };
+var SECS = {
+  partner: [
+    { id: 'passion', t: 'Passion', a: 'venus', b: 'mars', w: 1.3, spark: true },
+    { id: 'talk', t: 'How you communicate', a: 'mercury', b: 'mercury', w: 1.0 },
+    { id: 'drive', t: 'Drive, and how you handle disagreements', a: 'mars', b: 'mars', w: 0.9 },
+    { id: 'money', t: 'Money and values', a: 'venus', b: 'venus', w: 0.6, noAsp: true },
+    { id: 'day', t: 'Day to day', w: 0.55, day: true }
+  ],
+  friend: [
+    { id: 'talk', t: 'How you talk and think together', a: 'mercury', b: 'mercury', w: 1.0 },
+    { id: 'enjoy', t: 'What you enjoy together', a: 'venus', b: 'venus', w: 0.9 },
+    { id: 'drive', t: 'Energy and drive', a: 'mars', b: 'mars', w: 0.8 },
+    { id: 'day', t: 'Day to day', w: 0.55, day: true }
+  ],
+  family: [
+    { id: 'talk', t: 'Conversations', a: 'mercury', b: 'mercury', w: 1.0 },
+    { id: 'enjoy', t: 'Affection and shared tastes', a: 'venus', b: 'venus', w: 0.8 },
+    { id: 'drive', t: 'Arguments and energy', a: 'mars', b: 'mars', w: 1.0 },
+    { id: 'day', t: 'Day to day', w: 0.55, day: true }
+  ],
+  work: [
+    { id: 'talk', t: 'How you communicate', a: 'mercury', b: 'mercury', w: 1.2 },
+    { id: 'drive', t: 'Working pace and disagreements', a: 'mars', b: 'mars', w: 1.1 },
+    { id: 'day', t: 'Day to day', w: 0.55, day: true }
+  ]
+};
+var REL_LINE = {
+  passion: { same: 'You want and show affection in a similar way, so desire is easy to read.', easy: 'Different approaches to attraction that feed each other.', mixed: 'Different approaches to attraction: part of the excitement, and part translation.' },
+  talk:    { same: 'You tend to think and talk in the same rhythm.', easy: 'Different styles that tend to feed each other.', mixed: 'You think differently, so say the quiet part out loud rather than assuming.' },
+  drive:   { same: 'You push and rest at much the same speed.', easy: 'Your energies feed each other more than they clash.', mixed: 'You go at things differently: handy when you talk it through, bumpy when you don’t.' },
+  enjoy:   { same: 'You enjoy similar things and show care in similar ways.', easy: 'Different tastes that sit well together.', mixed: 'Different tastes and different ways of showing care. Worth learning each other’s.' },
+  money:   { same: 'Similar instincts with money, so fewer arguments over the shopping.', easy: 'Different money styles that can cover each other’s gaps.', mixed: 'Different money instincts. Talk early, and not in the middle of a bill.' }
+};
+function bestAsp(A, B, p1, p2) {
+  var dirs = [[p1, p2]]; if (p1 !== p2) dirs.push([p2, p1]);
+  var best = null;
+  dirs.forEach(function (d) {
+    var sep = sepDeg(A.pos[d[0]], B.pos[d[1]]);
+    ASP.forEach(function (as) { var off = Math.abs(sep - as.a); if (off <= as.orb) { var sc = 1 - off / as.orb * 0.6; if (!best || sc > best.sc) best = { sc: sc, as: as, a: d[0], b: d[1] }; } });
+  });
+  return best;
+}
+function section(A, B, type, d, deepOn) {
+  var kind, x, asp = null, rel = null;
+  if (d.day) {
+    var na = A.bd, nb = B.bd, fa = FAMILY[rootNum(na)], fb = FAMILY[rootNum(nb)];
+    rel = na === nb ? 'same' : fa === fb ? 'easy' : 'mixed';
+    x = A.name + '’s Birthday Number is ' + na + ' (the ' + NUM_SHORT[na] + ') and ' + B.name + '’s is ' + nb + ' (the ' + NUM_SHORT[nb] + '). ' +
+      (rel === 'same' ? 'The same number, so you run on the same everyday energy.' : rel === 'easy' ? 'From the same family, so your days tend to run at a similar pace.' : 'From different families, so you bring different things to the day.');
+    kind = rel === 'mixed' ? 'spark' : 'click';
+  } else {
+    asp = d.noAsp ? null : bestAsp(A, B, d.a, d.b);
+    if (asp) {
+      x = A.name + '’s ' + nameOfSign(signOf(A.pos[asp.a])) + ' ' + PL[asp.a] + ' ' + asp.as.v + ' ' + B.name + '’s ' + nameOfSign(signOf(B.pos[asp.b])) + ' ' + PL[asp.b] + '. ' + ASPQ[type][asp.as.q];
+      kind = asp.as.q === 'spark' ? 'spark' : 'click';
+    } else {
+      var sa = signOf(A.pos[d.a]), sb = signOf(B.pos[d.b]);
+      rel = elRel(SIGN[sa][1], SIGN[sb][1]);
+      x = A.name + '’s ' + PL[d.a] + ' is in ' + nameOfSign(sa) + ' and ' + B.name + '’s ' + PL[d.b] + ' is in ' + nameOfSign(sb) + ': ' + (rel === 'same' ? 'the same element' : rel === 'easy' ? 'friendly elements' : 'different elements') + '. ' + REL_LINE[d.id][rel];
+      kind = rel === 'mixed' ? 'spark' : 'click';
+    }
+  }
+  if (d.spark) kind = 'spark';
+  return { kind: kind, w: d.w, t: d.t, x: x, id: d.id, extra: true, deep: true, more: deepOn ? deepFor(d, A, B, type, asp, rel) : '' };
+}
+
+function analyse(A, B, type, opts) {
+  opts = opts || {};
   var items = [], notes = [];
   /* Sun signs: the headline element test */
   var ea = SIGN[A.sun][1], eb = SIGN[B.sun][1], rel = elRel(ea, eb), what = A.name + '’s ' + nameOfSign(A.sun) + ' Sun and ' + B.name + '’s ' + nameOfSign(B.sun) + ' Sun';
@@ -1896,13 +1965,13 @@ function analyse(A, B, type) {
   var cross = [[A, B], [B, A]];
   cross.forEach(function (c) {
     var s = c[0], m = c[1]; if (!m.moonSure) return;
-    var r = elRel(SIGN[s.sun][1], SIGN[m.moon][1]), t = s.name + '’s Sun (' + nameOfSign(s.sun) + ') and ' + m.name + '’s Moon (' + nameOfSign(m.moon) + ')';
-    if (r === 'same') items.push({ kind: 'click', w: 0.9, t: 'Feels like home', x: t + ' share an element. In astrology that’s the classic “I feel at home with you” link.' });
-    else if (r === 'easy') items.push({ kind: 'click', w: 0.8, t: 'Soothing mix', x: t + ' are friendly elements. Read as ' + m.name + ' feeling understood by ' + s.name + '.' });
-    else items.push({ kind: 'spark', w: 0.6, t: 'Feelings in translation', x: t + ' are different elements, so you may sometimes need to translate each other’s moods.' });
+    var r = elRel(SIGN[s.sun][1], SIGN[m.moon][1]), mo = m.name, t = s.name + '’s Sun (' + nameOfSign(s.sun) + ') and ' + m.name + '’s Moon (' + nameOfSign(m.moon) + ')';
+    if (r === 'same') items.push({ kind: 'click', w: 0.9, t: 'Feels like home', mo: mo, x: t + ' share an element. In astrology that’s the classic “I feel at home with you” link.' });
+    else if (r === 'easy') items.push({ kind: 'click', w: 0.8, t: 'Soothing mix', mo: mo, x: t + ' are friendly elements. Read as ' + m.name + ' feeling understood by ' + s.name + '.' });
+    else items.push({ kind: 'spark', w: 0.6, t: 'Feelings in translation', mo: mo, x: t + ' are different elements, so you may sometimes need to translate each other’s moods.' });
   });
-  if (!A.moonSure || !B.moonSure) notes.push('Moon signs need a birth time to be sure, so we’ve left them out for ' + (!A.moonSure && !B.moonSure ? 'both of you' : (!A.moonSure ? A.name : B.name)) + '.');
-  if (A.sunEdge || B.sunEdge) notes.push((A.sunEdge ? A.name : B.name) + ' was born right on the edge between two Sun signs, so the sign could be the one next door. The full Duology app (with birth time and place) settles it.');
+  if (!A.moonSure || !B.moonSure) notes.push('Moon signs need a birth time to be sure, so we’ve left them out for ' + (!A.moonSure && !B.moonSure ? 'both of you' : (!A.moonSure ? A.name : B.name)) + '.' + (opts.app ? ' Add a birth time to their saved chart and this Click will use it.' : ''));
+  if (A.sunEdge || B.sunEdge) notes.push((A.sunEdge ? A.name : B.name) + ' was born right on the edge between two Sun signs, so the sign could be the one next door. ' + (opts.app ? 'Adding a birth time to their saved chart settles it.' : 'The full Duology app (with birth time and place) settles it.'));
   /* planet to planet, across the two charts */
   var found = [];
   PAIRS[type].forEach(function (pr) {
@@ -1916,7 +1985,7 @@ function analyse(A, B, type) {
   });
   found.forEach(function (f) {
     var b = f.b, k = b.as.q === 'spark' ? 'spark' : 'click';
-    items.push({ kind: k, w: f.b.sc, t: f.pr[2], x: A.name + '’s ' + nameOfSign(signOf(A.pos[b.a])) + ' ' + PL[b.a] + ' ' + b.as.v + ' ' + B.name + '’s ' + nameOfSign(signOf(B.pos[b.b])) + ' ' + PL[b.b] + '. ' + ASPQ[type][b.as.q] });
+    items.push({ kind: k, w: f.b.sc, t: f.pr[2], pk: f.pr[0] + '-' + f.pr[1], x: A.name + '’s ' + nameOfSign(signOf(A.pos[b.a])) + ' ' + PL[b.a] + ' ' + b.as.v + ' ' + B.name + '’s ' + nameOfSign(signOf(B.pos[b.b])) + ' ' + PL[b.b] + '. ' + ASPQ[type][b.as.q] });
   });
   /* numerology */
   var ra = rootNum(A.lp), rb = rootNum(B.lp), fa = FAMILY[ra], fb = FAMILY[rb];
@@ -1934,12 +2003,69 @@ function analyse(A, B, type) {
   if (ca.animal === cb.animal) items.push({ kind: 'click', w: 0.7, t: 'Same Chinese animal', x: 'You’re both the ' + ca.animal + '. Traditionally that’s read as an instant understanding of each other’s habits.' });
   else if (ca.friends.indexOf(cb.animal) >= 0) items.push({ kind: 'click', w: 0.8, t: 'Chinese zodiac allies', x: A.name + ' the ' + ca.animal + ' and ' + B.name + ' the ' + cb.animal + ' are traditionally natural allies.' });
   else if (ca.clash === cb.animal) items.push({ kind: 'spark', w: 0.8, t: 'Chinese zodiac opposites', x: A.name + ' the ' + ca.animal + ' and ' + B.name + ' the ' + cb.animal + ' are traditionally the classic opposites: the pair that challenges each other most.' });
-  /* verdict */
-  items.sort(function (x, y) { return y.w - x.w; });
-  var clicks = items.filter(function (i) { return i.kind === 'click'; }), sparks = items.filter(function (i) { return i.kind === 'spark'; });
-  var cw = clicks.reduce(function (s, i) { return s + i.w; }, 0), sw = sparks.reduce(function (s, i) { return s + i.w; }, 0), key;
+  /* verdict: worked out from the original tests only, so adding headings never changes the headline */
+  var vs = items.slice().sort(function (x, y) { return y.w - x.w; });
+  var vc = vs.filter(function (i) { return i.kind === 'click'; }), vk = vs.filter(function (i) { return i.kind === 'spark'; });
+  var cw = vc.reduce(function (s, i) { return s + i.w; }, 0), sw = vk.reduce(function (s, i) { return s + i.w; }, 0), key;
   if (items.length <= 2) key = 'quiet'; else if (cw - sw >= 1.5) key = 'flow'; else if (sw - cw >= 1.5) key = 'spark'; else key = 'mix';
-  return { type: type, a: A, b: B, clicks: clicks.slice(0, 5), sparks: sparks.slice(0, 4), headline: OUT[type][key][0], summary: OUT[type][key][1], notes: notes };
+  /* what we show: the original findings, with the headings that have a deeper reading folded in */
+  var rp = REPL[type] || [], all = items.filter(function (i) { return !i.pk || rp.indexOf(i.pk) < 0; });
+  (SECS[type] || []).forEach(function (d) { all.push(section(A, B, type, d, !!opts.deep)); });
+  var seen = {}; all.forEach(function (i) { if (i.mo) seen[i.t] = (seen[i.t] || 0) + 1; });
+  all.forEach(function (i) { if (i.mo && seen[i.t] > 1) i.t += ' (' + i.mo + '’s Moon)'; });
+  all.sort(function (x, y) { return y.w - x.w; });
+  var clicks = all.filter(function (i) { return i.kind === 'click'; }), sparks = all.filter(function (i) { return i.kind === 'spark'; });
+  return { type: type, a: A, b: B, clicks: clicks.slice(0, 9), sparks: sparks.slice(0, 9), headline: OUT[type][key][0], summary: OUT[type][key][1], notes: notes };
+}
+
+/* ---------- the deeper reading (Duology only: this block is not in the free Click page) ---------- */
+var D_VENUS = ['loves boldly and directly, and enjoys a bit of chase', 'loves slowly and physically: touch, comfort, loyalty and good food', 'loves through words and play: flirty, curious and quickly bored by routine', 'loves by caring: remembering the little things and making a home', 'loves warmly and proudly, and wants to feel adored', 'loves through small, useful kindnesses and quiet attention', 'loves romance, beauty and harmony, and avoids a fight', 'loves intensely and privately: all in, or not at all', 'loves freedom and adventure, and needs room to roam', 'loves steadily and shows it by turning up, not by saying it', 'loves as a friend first, and needs independence inside the closeness', 'loves dreamily and deeply, and often gives more than comes back'];
+var D_MARS_GO = ['pursues things head-on', 'pursues things slowly and steadily', 'pursues things with talk, speed and variety', 'pursues things sideways, with plenty of feeling behind it', 'pursues things with confidence and flair', 'pursues things carefully, with an eye for detail', 'pursues things with charm and diplomacy', 'pursues things with deep focus and intensity', 'pursues things with enthusiasm and a sense of adventure', 'pursues things with patience and a plan', 'pursues things in an unconventional way', 'pursues things by instinct and mood'];
+var D_MARS_ROW = ['flares fast and forgets fast', 'is slow to anger, then won’t budge', 'argues with words and moves on quickly', 'goes quiet or moody, and shields the soft spots', 'wants to be heard and hates being brushed off', 'gets critical and picks at the details', 'avoids open conflict and can quietly stew', 'goes deep and cold, and rarely forgets a slight', 'says it bluntly and is over it quickly', 'stays cool and keeps the long game in mind', 'turns detached and stands on principle', 'avoids the fight and withdraws'];
+var D_MERC = ['thinks and talks fast and blunt', 'thinks slowly and deliberately, and sticks to a decision', 'is curious, quick and chatty', 'thinks with feelings, remembers everything said and can take words personally', 'talks warmly and dramatically, and likes to be heard', 'is precise and analytical, and notices the details', 'weighs both sides and is tactful, though slow to choose', 'probes, keeps things private and reads between the lines', 'sees the big picture and speaks plainly', 'is practical, dry and to the point', 'is original and abstract, and likes ideas more than small talk', 'is intuitive and imaginative, and picks up mood more than words'];
+var D_MONEY = ['spends on impulse and likes a win', 'saves, buys quality and loves comfort', 'spends on gadgets, ideas and experiences', 'saves for security and spends on family and home', 'is generous and likes treating people and nice things', 'budgets carefully and hates waste', 'spends on beauty and good company, and avoids money rows', 'is private and strategic about money', 'is generous and optimistic, and spends on travel and experiences', 'saves and plans for the long term', 'is unconventional about money and spends on causes or gadgets', 'is soft-hearted, gives easily and can lose track of the numbers'];
+var D_TAIL = {
+  talk:  { same: 'You tend to think and talk at the same speed, so conversations flow and misunderstandings are rare. The risk is both of you missing the same blind spot.', easy: 'Your styles are different but friendly: each tends to supply what the other is missing, so talks usually end up somewhere useful.', mixed: 'You think and talk differently, so it pays to say what you mean plainly and check what you heard. Handled well, you each see what the other misses.' },
+  drive: { same: 'You tend to heat up and cool down at the same pace, so rows are short and rarely personal. Watch for both of you digging in at once.', easy: 'Your styles feed rather than fight each other, so disagreements usually have somewhere to go.', mixed: 'You handle pressure differently, so one of you may want to talk it out now while the other needs space. Agreeing how you will disagree helps more than winning the point.' },
+  enjoy: { same: 'You tend to enjoy the same things and show care in similar ways, which makes time together easy.', easy: 'Your tastes are different but sit well together, so you can swap favourites without a fight.', mixed: 'Your tastes and the way you show care differ. Learn each other’s language and it becomes a strength; ignore it and it can feel like being overlooked.' },
+  money: { same: 'You have similar instincts with money, so fewer arguments over the shopping and the savings.', easy: 'Your money styles are different but friendly, and you can cover each other’s gaps.', mixed: 'You have different instincts with money, such as one who saves and one who spends. Talk about it early and calmly, not in the middle of a bill.' },
+  day:   { same: 'You run on the same everyday energy, so days together tend to feel in step.', easy: 'Your everyday energies are in the same family, so you tend to keep a similar pace.', mixed: 'Your everyday energies come from different families, so you bring different things to a day. That’s useful when you cover each other’s gaps, and tiring when you each expect the other to match.' }
+};
+var D_DAY = { 1: 'self-starter energy: quick to take the lead and back their own ideas', 2: 'a gift for people: reads the room and smooths things over', 3: 'a spark: humour, creativity and a way with words', 4: 'a builder’s streak: steady, reliable and gets it finished', 5: 'restless curiosity: adapts fast and gets bored with the same old thing', 6: 'a caring core: looks after people, and home and family matter', 7: 'a deep thinker: needs to understand how things work, and needs their own space', 8: 'drive: ambitious, practical with money and keen on results', 9: 'a big heart: generous, idealistic and drawn to the bigger picture', 11: 'intuitive, inspiring energy, with some nervous energy to manage', 22: 'big plans and the patience to build them for real' };
+var D_PASSION_END = {
+  none: 'The usual tests show no strong tie between Venus and Mars here, so expect a slow build: attraction that grows with time together more than instant fireworks.',
+  flow: 'The Venus and Mars link between you flows, so attraction tends to feel comfortable and natural rather than tense.',
+  merge: 'The Venus and Mars link between you sits right on top of each other, which is read as a strong, immediate pull.',
+  spark: 'The Venus and Mars link between you is a friction one, which is read as chemistry with an edge: exciting, and it rewards honest talk.'
+};
+function deepFor(d, A, B, type, asp, rel) {
+  var sg = function (P, X) { return signOf(X.pos[P]); }, out = [];
+  if (d.id === 'passion') {
+    var vA = sg('venus', A), vB = sg('venus', B), mA = sg('mars', A), mB = sg('mars', B), mcA = sg('mercury', A), mcB = sg('mercury', B), mr = elRel(SIGN[mcA][1], SIGN[mcB][1]);
+    out.push('The physical pull. ' + A.name + '’s Venus is in ' + nameOfSign(vA) + ': ' + A.name + ' ' + D_VENUS[vA] + '. ' + B.name + '’s Mars is in ' + nameOfSign(mB) + ': ' + B.name + ' ' + D_MARS_GO[mB] + '. The other way round, ' + B.name + '’s Venus in ' + nameOfSign(vB) + ' means ' + B.name + ' ' + D_VENUS[vB] + ', while ' + A.name + '’s Mars in ' + nameOfSign(mA) + ' means ' + A.name + ' ' + D_MARS_GO[mA] + '.');
+    out.push('The mental pull. ' + A.name + '’s Mercury is in ' + nameOfSign(mcA) + ': ' + A.name + ' ' + D_MERC[mcA] + '. ' + B.name + '’s is in ' + nameOfSign(mcB) + ': ' + B.name + ' ' + D_MERC[mcB] + '. ' + (mr === 'mixed' ? 'You think differently, which can be exciting or frustrating. Say the quiet part out loud.' : 'You can talk each other round, which keeps interest alive between the big moments.'));
+    out.push(D_PASSION_END[asp ? asp.as.q : 'none']);
+  } else if (d.id === 'talk') {
+    var a1 = sg('mercury', A), b1 = sg('mercury', B);
+    out.push(A.name + '’s Mercury is in ' + nameOfSign(a1) + ': ' + A.name + ' ' + D_MERC[a1] + '. ' + B.name + '’s is in ' + nameOfSign(b1) + ': ' + B.name + ' ' + D_MERC[b1] + '.');
+    out.push(D_TAIL.talk[elRel(SIGN[a1][1], SIGN[b1][1])]);
+  } else if (d.id === 'drive') {
+    var a2 = sg('mars', A), b2 = sg('mars', B);
+    out.push(A.name + '’s Mars is in ' + nameOfSign(a2) + ': ' + A.name + ' ' + D_MARS_GO[a2] + ', and in a row ' + A.name + ' ' + D_MARS_ROW[a2] + '. ' + B.name + '’s is in ' + nameOfSign(b2) + ': ' + B.name + ' ' + D_MARS_GO[b2] + ', and in a row ' + B.name + ' ' + D_MARS_ROW[b2] + '.');
+    out.push(D_TAIL.drive[elRel(SIGN[a2][1], SIGN[b2][1])]);
+  } else if (d.id === 'enjoy') {
+    var a3 = sg('venus', A), b3 = sg('venus', B);
+    out.push(A.name + '’s Venus is in ' + nameOfSign(a3) + ': ' + A.name + ' ' + D_VENUS[a3] + '. ' + B.name + '’s is in ' + nameOfSign(b3) + ': ' + B.name + ' ' + D_VENUS[b3] + '.');
+    out.push(D_TAIL.enjoy[elRel(SIGN[a3][1], SIGN[b3][1])]);
+  } else if (d.id === 'money') {
+    var a4 = sg('venus', A), b4 = sg('venus', B);
+    out.push('Venus is also the planet of money and what you value. ' + A.name + '’s is in ' + nameOfSign(a4) + ': ' + A.name + ' ' + D_MONEY[a4] + '. ' + B.name + '’s is in ' + nameOfSign(b4) + ': ' + B.name + ' ' + D_MONEY[b4] + '.');
+    out.push(D_TAIL.money[elRel(SIGN[a4][1], SIGN[b4][1])]);
+  } else if (d.id === 'day') {
+    out.push(A.name + ' (Birthday Number ' + A.bd + ') brings ' + D_DAY[A.bd] + '. ' + B.name + ' (' + B.bd + ') brings ' + D_DAY[B.bd] + '.');
+    out.push(D_TAIL.day[rel]);
+  }
+  return out.join('\n\n');
 }
 
 function cleanFull(s) { return String(s || '').replace(/[^\p{L}\p{M}\s'\u2019\-.]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 60); }
@@ -2641,7 +2767,17 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
   function ckValidSide(x) { return x && typeof x.n === 'string' && x.n.trim() && ClickKit.validDate(x.d); }
   function ckValid(x) { return x && ClickKit.TYPES[x.type] && ckValidSide(x.a) && ckValidSide(x.b); }
   function ckKey(x) { return x.type + '|' + x.a.n.toLowerCase() + x.a.d + '|' + x.b.n.toLowerCase() + x.b.d; }
-  function ckRes(x) { return ckCache[x.id] || (ckCache[x.id] = ClickKit.analyse(ClickKit.person(x.a.n, x.a.d, x.a.f || ''), ClickKit.person(x.b.n, x.b.d, x.b.f || ''), x.type)); }
+  function ckUtc(s) {
+    var k = String(s.n || '').toLowerCase(), hit = store.profiles.filter(function (p) { return p.kind !== 'pet' && p.time && p.date === s.d && ClickKit.firstOf(p.nowName || p.name).toLowerCase() === k; })[0];
+    if (!hit) return null;
+    try { return buildChart(hit, 'placidus').utcMs; } catch (e) { return null; }
+  }
+  function ckRes(x) {
+    var ua = ckUtc(x.a), ub = ckUtc(x.b), sig = ua + '|' + ub, c = ckCache[x.id];
+    if (c && c.sig === sig) return c.res;
+    var res = ClickKit.analyse(ClickKit.person(x.a.n, x.a.d, x.a.f || '', ua), ClickKit.person(x.b.n, x.b.d, x.b.f || '', ub), x.type, { app: true, deep: true });
+    ckCache[x.id] = { sig: sig, res: res }; return res;
+  }
   function ckLink(x) { return CLICK_URL + '?ref=cc#c=' + ClickKit.b64e({ v: 1, n: x.a.n, d: x.a.d, t: x.type }); }
   function ckSave() {
     var people = ckPeople(), A, B;
@@ -2667,7 +2803,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
     save(); ck.open = rec.id; ck.err = ''; return true;
   }
   function ckNames(r) { return esc(r.a.name) + ' <em>&amp;</em> ' + esc(r.b.name); }
-  function ckList(items, kind) { return items.map(function (i) { return '<div class="ck-item ' + kind + '"><b>' + esc(i.t) + '</b><p>' + esc(i.x) + '</p></div>'; }).join(''); }
+  function ckList(items, kind) { return items.map(function (i) { return '<div class="ck-item ' + kind + '"><b>' + esc(i.t) + '</b><p>' + esc(i.x) + '</p>' + (i.more ? String(i.more).split('\n\n').map(function (p) { return '<p class="ck-more">' + esc(p) + '</p>'; }).join('') : '') + '</div>'; }).join(''); }
   function ckChip(p) { return '<div class="ck-chip"><b>' + esc(p.name) + '</b><span>' + ClickKit.nameOfSign(p.sun) + ' Sun</span><span>Life Path ' + p.lp + '</span><span>' + esc(p.cz.animal) + '</span></div>'; }
   function screenClicks() {
     var pro = isPro(), out = ['<div class="stack">'];
