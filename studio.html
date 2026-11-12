@@ -1905,7 +1905,10 @@ function buildLinkShort() {
   // ---------- voice files + playback engine + recorder ----------
   var audioSets = {}, audioCtx = null, run = null, recording = null;
   function audioKey() { return ui.tab === 'video' ? 'v|' + (ui.vmode === 'profile' ? 'prof' + (ui.vsign == null ? 1 : ui.vsign) : mkey()) : (ui.shortMode === 'num' ? 'n|' + mkey() + '|' + ui.numWhich : ui.shortMode === 'bday' ? 'b|' + mkey() : ui.shortMode === 'cz' ? 'c|' + mkey() : ui.shortMode === 'tour' ? 't|' + mkey() : ui.shortMode === 'link' ? 'l|link' : ui.shortMode === 'chart' ? 'ch|chart' : ui.shortMode === 'arch' ? 'a|' + mkey() + '|' + ui.archN : ui.shortMode === 'week' ? 'w|' + weekStartOf(Date.now() + ui.weekOff * 7 * DAY_MS) : 's|' + signKey() + '|' + ui.shortSign + (ui.signFmt === 'quick' ? '|q' : '')); }
-  function curAudio() { return audioSets[audioKey()] || []; }
+  function rawAudio() { return audioSets[audioKey()] || []; }
+  // One more file than there are scenes on a Short: the first is the spoken hook line, played over scene 1 before that scene's own voice.
+  function hookVoice() { if (ui.tab === 'video') return null; var s = rawAudio(); return (s.length && s.length === sceneCount() + 1) ? s[0] : null; }
+  function curAudio() { var s = rawAudio(); return hookVoice() ? s.slice(1) : s; }
   function ebOn() { return st.elBg !== false; }
   function ttSync() { TT.on = !!st.tt; TT.say = (st.ttSay && st.ttSay.trim()) || 'Find it at S C V D dot app slash duology.'; }
   ttSync();
@@ -1924,7 +1927,7 @@ function buildLinkShort() {
   function setIndex(i) { if (ui.tab === 'video') ui.scene = i; else ui.shortScene = i; }
   function holdOf(i) { if (ui.tab === 'video') return 0; var p = curShort().parts[i]; return (p && p.hold) || 0; }
   function estDur(i) { return ui.tab === 'video' ? secDur(secsCache[i]) : Math.max(4, wordCount(curShort().parts[i].text) / st.wpm * 60) + holdOf(i); }
-  function sceneDur(i) { var a = curAudio()[i]; return a && a.dur ? a.dur + 1.1 + holdOf(i) : estDur(i); }
+  function sceneDur(i) { var a = curAudio()[i], hv = i === 0 ? hookVoice() : null, h = hv && hv.dur ? hv.dur + 0.9 : 0; return a && a.dur ? a.dur + 1.1 + holdOf(i) + h : estDur(i) + h; }
   function slug(i, label) { return String(i + 1).padStart(2, '0') + '-' + String(label).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 28) + '.mp3'; }
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   function loadVoiceFiles(fileList) {
@@ -1987,7 +1990,8 @@ function buildLinkShort() {
       }
       setIndex(i);
       if (opts.record) renderStage(); else render();
-      var a = curAudio()[i];
+      var a = curAudio()[i], hv = i === 0 ? hookVoice() : null;
+      function runScene() {
       if (a && a.dur) {
         r.t = setTimeout(function () {
           if (r.cancelled) return;
@@ -1999,6 +2003,16 @@ function buildLinkShort() {
       } else {
         r.t = setTimeout(function () { step(i + 1); }, estDur(i) * 1000);
       }
+          }
+      if (hv && hv.dur) {
+        r.t = setTimeout(function () {
+          if (r.cancelled) return;
+          var d2 = false, nx = function () { if (d2 || r.cancelled) return; d2 = true; hv.el.onended = null; r.t = setTimeout(runScene, 300); };
+          hv.el.currentTime = 0; r.audio = hv.el; hv.el.onended = nx;
+          var p2 = hv.el.play(); if (p2 && p2.catch) p2.catch(function () { r.t = setTimeout(nx, hv.dur * 1000); });
+          setTimeout(nx, hv.dur * 1000 + 1500);
+        }, 600);
+      } else runScene();
     }
     step(start);
   }
@@ -2037,7 +2051,7 @@ function buildLinkShort() {
     if (recording) return;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || !window.MediaRecorder) { ui.recMsg = 'Recording needs Chrome or Edge on a computer.'; render(); return; }
     stopRun(); recording = { pending: true };
-    var set = curAudio();
+    var set = rawAudio();
     ui.recMsg = ''; ui.clean = true; setIndex(0); render();
     try { if (document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(function () {}); } catch (e) {}
     var stream;
@@ -2086,20 +2100,21 @@ function buildLinkShort() {
     playFrom(0, { record: true, onDone: function () { setTimeout(function () { finishRecording('Done!'); }, 400); } });
   }
   function voicePanel() {
-    var set = curAudio(), n = sceneCount(), labels = ui.tab === 'video' ? secsCache.map(function (x) { return x.label; }) : curShort().labels;
+    var raw = rawAudio(), hv = hookVoice(), set = curAudio(), n = sceneCount(), labels = ui.tab === 'video' ? secsCache.map(function (x) { return x.label; }) : curShort().labels;
     var rows = labels.map(function (lb, i) {
       var a = set[i];
       return '<div class="s-vrow"><span class="s-vn">' + (i + 1) + '. ' + esc(lb) + '</span><span class="' + (a ? 's-vok' : 's-vmiss') + '">' + (a ? esc(a.name) + (a.dur ? ' · ' + fmtDur(a.dur) : '') : 'no file yet (would be ' + slug(i, lb) + ')') + '</span></div>';
     }).join('');
+    var hvRow = hv ? '<div class="s-vrow"><span class="s-vn">Hook line (plays first)</span><span class="s-vok">' + esc(hv.name) + (hv.dur ? ' \u00B7 ' + fmtDur(hv.dur) : '') + '</span></div>' : '';
     var extra = set.length > n ? '<div class="s-vwarn">' + (set.length - n) + ' extra file(s) won’t be used. Check you loaded the right set.</div>' : '';
     var miss = set.length && set.length < n ? '<div class="s-vwarn">' + (n - set.length) + ' scene(s) have no voice file. They’ll play silent for their estimated time.</div>' : '';
     var tot = (ui.tab === 'video' && st.sting !== false) ? 3 : 0; for (var i = 0; i < n; i++) tot += sceneDur(i);
-    return '<div class="s-voicepanel"><div class="s-vhead"><b>Scotty’s voice files</b><span class="s-meta">' + (set.length ? set.length + ' loaded · video runs about ' + fmtDur(tot) : 'Load the MP3s for this ' + (ui.tab === 'video' ? 'video' : 'Short') + ', named in scene order') + '</span></div>' +
+    return '<div class="s-voicepanel"><div class="s-vhead"><b>Scotty’s voice files</b><span class="s-meta">' + (raw.length ? raw.length + ' loaded · video runs about ' + fmtDur(tot) : 'Load the MP3s for this ' + (ui.tab === 'video' ? 'video' : 'Short') + ', named in scene order') + '</span></div>' +
       '<div class="s-actions" style="margin:8px 0"><label class="s-btn2 s-file">Load voice files<input type="file" id="voicefiles" accept="audio/*,.mp3,.wav,.m4a" multiple></label>' + (set.length ? '<button class="s-btn2" data-act="clearvoice">Clear</button>' : '') +
       '<button class="s-rec" data-act="record">● Record finished video</button>' +
       '<label class="s-field" title="WebM records cleanly on every PC. Chrome\u2019s MP4 recorder can produce glitchy (green-flashing) video on some PCs.">File <select id="recformat"><option value="webm"' + (st.recFormat !== 'mp4' ? ' selected' : '') + '>WebM (clean, recommended)</option><option value="mp4"' + (st.recFormat === 'mp4' ? ' selected' : '') + '>MP4 (experimental, can glitch)</option></select></label></div>' +
       (st.recFormat === 'mp4' && window.MediaRecorder && !mp4Ok() ? '<div class="s-vwarn">This browser can\u2019t record MP4, so it\u2019ll save WebM instead. Update Chrome to record MP4.</div>' : '') + extra + miss +
-      '<details class="s-vlist"' + (set.length ? ' open' : '') + '><summary>Which file goes with which scene</summary>' + rows + '</details>' +
+      '<details class="s-vlist"' + (set.length ? ' open' : '') + '><summary>Which file goes with which scene</summary>' + hvRow + rows + '</details>' +
       '<div class="s-music"><b>Background music</b> <span class="s-meta">' + (music ? esc(music.name) : 'optional, loops quietly under Scotty') + '</span>' +
       '<label class="s-btn2 s-file">' + (music ? 'Change track' : 'Load music') + '<input type="file" id="musicfile" accept="audio/*,.mp3,.wav,.m4a"></label>' + (music ? '<button class="s-btn2" data-act="clearmusic">Remove</button>' : '') +
       '<label class="s-field">Volume <input type="range" id="musicvol" min="0" max="40" value="' + Math.round(musicLevel() * 100) + '"> <span id="musicvoltxt">' + Math.round(musicLevel() * 100) + '%</span></label>' +
