@@ -366,8 +366,21 @@ var Astro = (function () {
 
   var BODIES = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
 
+  // Zodiac switch. 'tropical' (Western, tied to the seasons) or 'sidereal' (Vedic, tied to the stars).
+  var ZODIAC = 'tropical';
+  function setZodiac(z) { ZODIAC = z === 'sidereal' ? 'sidereal' : 'tropical'; }
+  function getZodiac() { return ZODIAC; }
+  function withZodiac(z, fn) { var prev = ZODIAC; ZODIAC = z === 'sidereal' ? 'sidereal' : 'tropical'; try { return fn(); } finally { ZODIAC = prev; } }
+  // Lahiri (Chitrapaksha) ayanamsa, India's official standard: how far the star-based zodiac sits behind the
+  // season-based one. Fixed to the Calendar Reform Committee value at 21 Mar 1956, then moved on by general precession.
+  function ayanamsa(jd) {
+    function prec(T) { return 5028.796195 * T + 1.1054348 * T * T; }
+    var T0 = (2435553.5 - 2451545.0) / 36525, T = (jd - 2451545.0) / 36525;
+    return 23.245524743 + (prec(T) - prec(T0)) / 3600;
+  }
+
   // Tropical ecliptic longitudes (mean equinox of date) for all bodies at a Julian Day (UT).
-  function positions(jd) {
+  function positionsTrop(jd) {
     var T = (jd - 2451545.0) / 36525;
     var pr = precession(T);
     var ea = helio('earth', T);
@@ -380,6 +393,13 @@ var Astro = (function () {
     return out;
   }
 
+  // Positions in whichever zodiac is switched on. Everything in the app reads from here.
+  function positions(jd) {
+    var out = positionsTrop(jd);
+    if (ZODIAC === 'sidereal') { var a = ayanamsa(jd); for (var k in out) out[k] = norm(out[k] - a); }
+    return out;
+  }
+
   function angles(jd, lat, lon) {
     var T = (jd - 2451545.0) / 36525;
     var gmst = norm(280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T);
@@ -387,6 +407,7 @@ var Astro = (function () {
     var eps = obliquity(T);
     var mc = norm(atan2d(sind(ramc), cosd(ramc) * cosd(eps)));
     var asc = norm(atan2d(cosd(ramc), -(sind(ramc) * cosd(eps) + tand(lat) * sind(eps))));
+    if (ZODIAC === 'sidereal') { var ay = ayanamsa(jd); asc = norm(asc - ay); mc = norm(mc - ay); }
     return { asc: asc, mc: mc, ramc: ramc, eps: eps };
   }
 
@@ -421,6 +442,7 @@ var Astro = (function () {
 
   function cusps(system, ang, lat) {
     var c = [], i;
+    if (ZODIAC === 'sidereal' && system === 'placidus') system = 'whole';   // Vedic charts use Whole Sign
     if (system === 'placidus') {
       var p = placidus(ang, lat);
       if (p) return { cusps: p, system: 'placidus' };
@@ -458,7 +480,7 @@ var Astro = (function () {
     return { ms: guess, offsetMin: tzOffsetMin(guess, tz) };
   }
 
-  return { norm: norm, jdFromMs: jdFromMs, msFromJd: msFromJd, positions: positions, angles: angles, cusps: cusps, houseOf: houseOf, zonedToUtc: zonedToUtc, tzOffsetMin: tzOffsetMin, BODIES: BODIES };
+  return { norm: norm, jdFromMs: jdFromMs, msFromJd: msFromJd, positions: positions, positionsTrop: positionsTrop, ayanamsa: ayanamsa, setZodiac: setZodiac, getZodiac: getZodiac, withZodiac: withZodiac, angles: angles, cusps: cusps, houseOf: houseOf, zonedToUtc: zonedToUtc, tzOffsetMin: tzOffsetMin, BODIES: BODIES };
 })();
 // ===== ENGINE END =====
 
@@ -617,7 +639,7 @@ var LESSONS = [
   { id: 'weigh', title: 'How astrologers weigh a transit',
     body: "Not every transit counts the same. Astrologers weigh them on three things.\n\nHow slow the moving planet is. The Sun, Mercury and Venus race past in a day or two. Saturn, Uranus, Neptune and Pluto can sit on the same spot for months, so they count for more.\n\nWhat it hits. Your Sun, Moon, Rising and Midheaven are the most personal points in your chart.\n\nThe angle. Conjunctions, squares and oppositions are read as louder than trines and sextiles.\n\nSlow planets often hit the same spot three times because of retrograde. Astrologers read that as a story: the first pass raises the issue, the second revisits it, and the third settles it.\n\nThat's why the 12-month forecast only shows the big stuff, and the 30-day one shows everything." },
   { id: 'vedic', title: 'Why is my Vedic sign different?',
-    body: "Western astrology ties the signs to the seasons: Aries always starts at the March equinox. Vedic astrology ties them to the actual star constellations.\n\nThe two lined up about 2,000 years ago. Since then Earth's slow wobble (precession) has shifted them apart by roughly 24°. So in Vedic astrology your Sun sign is usually one sign earlier.\n\nNeither is 'wrong'. They're different rulebooks." },
+    body: "Western astrology ties the signs to the seasons: Aries always starts at the March equinox. Vedic astrology ties them to the actual star constellations.\n\nThe two lined up about 2,000 years ago. Since then Earth's slow wobble (precession) has shifted them apart by roughly 24°. So in Vedic astrology your Sun sign is usually one sign earlier.\n\nNeither is 'wrong'. They're different rulebooks.\n\nDuology can show you both. Switch in Settings, under Astrology system. Sidereal uses the Lahiri value, India's official standard, and Whole Sign houses, the Vedic standard." },
   { id: 'numerology', title: 'How numerology works',
     body: "Numerology turns your birth date and birth name into single digits and reads meaning into each number.\n\nDates: add the digits until you get a single number. Names: each letter gets a value, you add them up, and reduce the same way.\n\nThe two main letter systems are Pythagorean (A = 1 up to I = 9, then round again) and Chaldean (older, based on the sound of each letter, never uses 9). The letter Y is counted as a consonant here. Some numerologists treat it as a vowel when it sounds like one.\n\nThe number meanings come mostly from Pythagoras and his followers, who believed numbers had personalities of their own." },
   { id: 'real', title: 'Where does science stand on this?',
@@ -627,6 +649,12 @@ var LESSONS = [
 // ---------- helpers ----------
 function ord(n) { var s = { 1: 'st', 2: 'nd', 3: 'rd' }; return n + ((n % 100 > 10 && n % 100 < 14) ? 'th' : (s[n % 10] || 'th')); }
 function signOf(lon) { return Math.floor(Astro.norm(lon) / 30); }
+// On the star-based zodiac the season stories (equinox, harvest, midwinter...) don't apply, so keep only the symbol.
+function signWhy(S) {
+  if (Astro.getZodiac() !== 'sidereal') return S.why;
+  var i = S.why.indexOf('Its symbol is');
+  return 'On the star-based zodiac the signs follow the constellations, not the seasons, so the season story doesn\u2019t apply here. ' + (i >= 0 ? S.why.slice(i) : '');
+}
 function degIn(lon) { var d = Astro.norm(lon) % 30; var deg = Math.floor(d); var min = Math.floor((d - deg) * 60); return deg + '°' + (min < 10 ? '0' : '') + min + "'"; }
 function sepDeg(a, b) { var d = Math.abs(Astro.norm(a - b)); return d > 180 ? 360 - d : d; }
 function glyph(id) { var p = PLANETS[id]; return p.isPoint ? p.glyph : p.glyph + VS; }
@@ -635,6 +663,7 @@ function glyph(id) { var p = PLANETS[id]; return p.isPoint ? p.glyph : p.glyph +
 var CHART_POINTS = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
 
 function buildChart(profile, houseSystem) {
+  if (Astro.getZodiac() === 'sidereal') houseSystem = 'whole';
   var dp = profile.date.split('-').map(Number);
   var hasTime = !!profile.time;
   var tp = hasTime ? profile.time.split(':').map(Number) : [12, 0];
@@ -644,7 +673,7 @@ function buildChart(profile, houseSystem) {
   var before = Astro.positions(jd - 0.5), after = Astro.positions(jd + 0.5);
   var retro = {};
   CHART_POINTS.forEach(function (b) { var sp = ((after[b] - before[b] + 540) % 360) - 180; retro[b] = sp < 0; });
-  var chart = { profile: profile, hasTime: hasTime, utcMs: z.ms, offsetMin: z.offsetMin, jd: jd, pos: pos, retro: retro, houses: {}, cusps: null, points: CHART_POINTS.slice() };
+  var chart = { zodiac: Astro.getZodiac(), profile: profile, hasTime: hasTime, utcMs: z.ms, offsetMin: z.offsetMin, jd: jd, pos: pos, retro: retro, houses: {}, cusps: null, points: CHART_POINTS.slice() };
   if (hasTime) {
     var ang = Astro.angles(jd, profile.lat, profile.lon);
     var hc = Astro.cusps(houseSystem, ang, profile.lat);
@@ -693,7 +722,7 @@ function placementCard(chart, id) {
   if (chart.retro[id]) meta += ' · retrograde';
   var card = {
     title: title, glyph: glyph(id), meta: meta, what: what, whyLabel: P.isPoint ? 'The point' : 'The planet', whyPlanet: P.why,
-    whySign: S.name + ' is ' + (S.el === 'earth' || S.el === 'air' ? 'an ' : 'a ') + S.el + ' sign (' + ELEMENT[S.el] + ') and a ' + S.mode + ' sign (' + MODE[S.mode] + '). ' + S.why,
+    whySign: S.name + ' is ' + (S.el === 'earth' || S.el === 'air' ? 'an ' : 'a ') + S.el + ' sign (' + ELEMENT[S.el] + ') and a ' + S.mode + ' sign (' + MODE[S.mode] + '). ' + signWhy(S),
     dignity: dignityNote(id, si), keep: P.keep, hasHouse: false,
     retro: chart.retro[id] ? P.name + " was retrograde when you were born: from Earth it looked like it was moving backwards. Astrologers read that as its energy turned inward, more reflective and less straightforward." : ''
   };
@@ -1124,8 +1153,8 @@ function czIndex(y) { return ((y - 4) % 12 + 12) % 12; }
 function czElement(y) { return CZ_ELEMENTS[Math.floor((((y - 4) % 10) + 10) % 10 / 2)]; }
 function czYang(y) { return (((y - 4) % 2) + 2) % 2 === 0; }
 var _cnyCache = {};
-function _elong(jd) { var p = Astro.positions(jd); return Astro.norm(p.moon - p.sun); }
-function _sunLon(jd) { return Astro.positions(jd).sun; }
+function _elong(jd) { var p = Astro.positionsTrop(jd); return Astro.norm(p.moon - p.sun); }
+function _sunLon(jd) { return Astro.positionsTrop(jd).sun; }
 function chineseNewYearMs(y) {
   if (_cnyCache[y]) return _cnyCache[y];
   // winter solstice of the previous year (Sun at 270°)
@@ -1173,6 +1202,7 @@ function czNote(z) {
 // ===== SIGNS START =====
 // General star-sign readings (no birth details), using solar houses.
 var DAY_MS = 86400000;
+var SIGN_DATES_SID = ['14 Apr – 14 May', '15 May – 14 Jun', '15 Jun – 15 Jul', '16 Jul – 16 Aug', '17 Aug – 16 Sep', '17 Sep – 16 Oct', '17 Oct – 15 Nov', '16 Nov – 15 Dec', '16 Dec – 13 Jan', '14 Jan – 12 Feb', '13 Feb – 13 Mar', '14 Mar – 13 Apr'];
 var SIGN_DATES = ['21 Mar – 19 Apr', '20 Apr – 20 May', '21 May – 20 Jun', '21 Jun – 22 Jul', '23 Jul – 22 Aug', '23 Aug – 22 Sep', '23 Sep – 22 Oct', '23 Oct – 21 Nov', '22 Nov – 21 Dec', '22 Dec – 19 Jan', '20 Jan – 18 Feb', '19 Feb – 20 Mar'];
 var CO_RULER = { 7: 'pluto', 10: 'uranus', 11: 'neptune' };
 var PLANET_FACT = {
@@ -1199,7 +1229,7 @@ function solarHouse(lon, si) { return ((signOf(lon) - si + 12) % 12) + 1; }
 
 var _skyCache = {};
 function skyMonth(y, m) {
-  var key = y + '-' + m; if (_skyCache[key]) return _skyCache[key];
+  var key = y + '-' + m + '|' + Astro.getZodiac(); if (_skyCache[key]) return _skyCache[key];
   var R = monthStartEnd(y, m), start = R[0] - DAY_MS, N = Math.round((R[1] - start) / DAY_MS) + 2, P = [];
   for (var i = 0; i < N; i++) P.push(Astro.positions(Astro.jdFromMs(start + i * DAY_MS)));
   function wrap(x) { return ((x % 360) + 540) % 360 - 180; }
@@ -1272,7 +1302,7 @@ function skyText(e) {
     var P = PLANETS[e.p], F = SIGNS[e.from];
     o.title = P.name + (e.back ? ' slips back into ' : ' moves into ') + S.name;
     o.what = P.name + (e.back ? ' backs out of ' + F.name + ' and returns to ' : ' leaves ' + F.name + ' and enters ') + S.name + '.';
-    o.real = e.p === 'sun' ? 'The Sun reaches the start of ' + S.name + '. This is the moment the horoscope columns switch over to ' + S.name + ' season.'
+    o.real = e.p === 'sun' ? (Astro.getZodiac() === 'sidereal' ? 'The Sun reaches the start of ' + S.name + ' on the star-based zodiac. This is when Vedic calendars switch over to ' + S.name + '.' : 'The Sun reaches the start of ' + S.name + '. This is the moment the horoscope columns switch over to ' + S.name + ' season.')
       : 'Astrologers split the Sun’s yearly path into twelve 30-degree slices, and ' + P.name + ' is crossing from one slice into the next.';
     o.why = 'Planets are read as taking on the flavour of the sign they’re in. ' + S.name + ' is ' + S.el + ' and ' + S.mode + ' (' + ELEMENT[S.el] + ', ' + MODE[S.mode] + '), so astrologers would read ' + P.theme + ' as going ' + S.style + ' for ' + DUR[e.p] + '.';
     o.fact = PLANET_FACT[e.p];
@@ -1377,7 +1407,7 @@ function signReading(sky, si) {
   });
   var top = items.slice().sort(function (a, b) { return b.score - a.score || a.ms - b.ms; }).slice(0, 3).sort(function (a, b) { return a.ms - b.ms; });
   return {
-    si: si, sign: Sg, dates: SIGN_DATES[si], rulers: rulers, items: items, top: top, theme: theme,
+    si: si, sign: Sg, dates: (Astro.getZodiac() === 'sidereal' ? SIGN_DATES_SID : SIGN_DATES)[si], rulers: rulers, items: items, top: top, theme: theme,
     themeText: 'This month leans on your ' + ord(theme) + ' house: ' + HOUSES[theme].area + '.',
     themeWhy: 'We add up every event landing in each of your solar houses, weighting the big ones (eclipses, retrogrades, slow planets, and anything involving your ruling planet ' + rulers.map(pName).join(' or ') + ') more heavily. The house with the most going on sets the tone.',
     recharge: recharge, rechargeRaw: ranges,
@@ -1647,7 +1677,7 @@ function buildReport(p, c, settings) {
   secs.push({ h: 'Keep in mind', paras: ['Astrology and numerology are old systems for describing people, not lab results. Read this the way you’d read a thoughtful letter from someone who knows the traditions well: keep what rings true, and leave the rest. Every claim here is traced back to a placement or a number you can tap on in the app to see the working.'] });
 
   return { title: 'What your stars and numbers say about you', name: p.name, first: first, sections: secs,
-    meta: SIGNS[sun].name + ' Sun · ' + SIGNS[moon].name + ' Moon' + (c.hasTime ? ' · ' + SIGNS[asc].name + ' Rising' : '') + ' · Life Path ' + lp.n };
+    meta: SIGNS[sun].name + ' Sun · ' + SIGNS[moon].name + ' Moon' + (c.hasTime ? ' · ' + SIGNS[asc].name + ' Rising' : '') + ' · Life Path ' + lp.n + (c.zodiac === 'sidereal' ? ' · Sidereal' : '') };
 }
 // ===== REPORT END =====
 // ===== PET REPORT START =====
@@ -2199,7 +2229,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
 // ===== APP START =====
 (function () {
   var KEY = 'chartExplained.v1';
-  var DEFAULT_STORE = { profiles: [], clicks: [], activeId: null, settings: { houses: 'placidus', numSys: 'pyth', masters: true } };
+  var DEFAULT_STORE = { profiles: [], clicks: [], activeId: null, settings: { houses: 'placidus', numSys: 'pyth', masters: true, zodiac: 'tropical' } };
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(KEY));
@@ -2277,9 +2307,11 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
   function savePro() { try { if (pro) localStorage.setItem(PRO_KEY, JSON.stringify(pro)); else localStorage.removeItem(PRO_KEY); } catch (e) {} }
   function setPro(token) { var t = parseToken(token); pro = { token: token.trim(), plan: t.plan, expires: t.expires, checkedAt: Date.now() }; savePro(); }
   function isPro() { return !!(pro && (pro.expires === null || pro.expires > Date.now())); }
-  function houseSys() { return isPro() ? store.settings.houses : 'placidus'; }
+  function zodiac() { return store.settings.zodiac === 'sidereal' ? 'sidereal' : 'tropical'; }
+  function houseSys() { if (zodiac() === 'sidereal') return 'whole'; return isPro() ? store.settings.houses : 'placidus'; }
 
   var store = load();
+  Astro.setZodiac(store.settings.zodiac);
   var PET_KINDS = [['dog', 'Dog'], ['cat', 'Cat'], ['horse', 'Horse'], ['bird', 'Bird'], ['rabbit', 'Rabbit'], ['other', 'Other']];
   var ui = { kind: 'person', paywall: null, claim: null, payBusy: null, payMsg: '', codeMsg: '', codeOk: false, restoreMsg: '', copied: false, payNote: '', proLost: '', confirmRemovePro: false,
     screen: store.profiles.length ? 'chart' : 'onboard', card: null, range: 30, tag: 'all', lesson: null, editId: null, showAllAsp: false, confirmDel: null, confirmWipe: false, place: null, results: [], searchMsg: '', formErr: '', sign: null, smonth: 0 };
@@ -2295,13 +2327,13 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
 
   var chartCache = {}, fcCache = {};
   function getChart(p) {
-    var k = p.id + '|' + p.updated + '|' + houseSys();
+    var k = p.id + '|' + p.updated + '|' + houseSys() + '|' + zodiac();
     if (!chartCache[k]) chartCache[k] = buildChart(p, houseSys());
     return chartCache[k];
   }
   function todayStart() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }
   function getForecast(c) {
-    var start = todayStart(), k = c.profile.id + '|' + c.profile.updated + '|' + houseSys() + '|' + start;
+    var start = todayStart(), k = c.profile.id + '|' + c.profile.updated + '|' + houseSys() + '|' + zodiac() + '|' + start;
     if (!fcCache[k]) fcCache[k] = forecast(c, start, 366);
     return fcCache[k];
   }
@@ -2611,7 +2643,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
       var P = PLANETS[id], S = SIGNS[signOf(c.pos[id])];
       return '<tr><td><span class="g">' + glyph(id) + '</span> ' + (id === 'asc' ? 'Rising' : P.name) + (c.retro[id] ? ' <small>R</small>' : '') + '</td><td>' + S.name + ' <small>' + degIn(c.pos[id]) + '</small></td>' + (c.hasTime ? '<td>' + (id === 'asc' ? '1st' : ord(c.houses[id])) + '</td>' : '') + '</tr>';
     }).join('') + '</tbody></table></div>');
-    o.push('<p class="r-note">' + (c.hasTime ? houseSys()[0].toUpperCase() + houseSys().slice(1).replace('whole', 'Whole Sign') + ' houses. ' : 'No birth time, so no Rising sign or houses, and the Moon is for noon. ') + 'R = retrograde when you were born.</p>');
+    o.push('<p class="r-note">' + (c.zodiac === 'sidereal' ? 'Sidereal (Vedic) zodiac, Lahiri. ' : '') + (c.hasTime ? ({ placidus: 'Placidus', whole: 'Whole Sign', equal: 'Equal' }[houseSys()] || houseSys()) + ' houses. ' : 'No birth time, so no Rising sign or houses, and the Moon is for noon. ') + 'R = retrograde when you were born.</p>');
     var lp = lifePath(p.date, s.masters), yr = new Date().getFullYear(), py = personalYear(p.date, yr);
     var rows = [['Life Path', lp, 'Full birth date'], ['Birthday Number', birthdayNumber(p.date, s.masters), 'Day you were born'], ['Expression', nameNumber(p.name, s.numSys, s.masters, 'all'), 'Every letter of the name'],
       ['Soul Urge', nameNumber(p.name, s.numSys, s.masters, 'vowels'), 'The vowels'], ['Personality', nameNumber(p.name, s.numSys, s.masters, 'cons'), 'The consonants'],
@@ -2647,7 +2679,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
       (ui.importMsg ? '<div class="' + (ui.importOk ? 'ok' : 'err') + '" role="status">' + esc(ui.importMsg) + '</div>' : '') + '</section>';
   }
   function backupData() {
-    return { app: 'duology', version: 1, exported: new Date().toISOString(), settings: { houses: store.settings.houses, numSys: store.settings.numSys, masters: store.settings.masters },
+    return { app: 'duology', version: 1, exported: new Date().toISOString(), settings: { houses: store.settings.houses, numSys: store.settings.numSys, masters: store.settings.masters, zodiac: store.settings.zodiac },
       profiles: store.profiles, clicks: store.clicks, activeId: store.activeId, pro: pro ? { token: pro.token } : null };
   }
   function doBackup(how) {
@@ -2699,7 +2731,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
         store.clicks.sort(function (p, q) { return q.t - p.t; });
       }
       if (!store.activeId && store.profiles.length) store.activeId = store.profiles[0].id;
-      if (d.settings && before === 0) { ['houses', 'numSys'].forEach(function (k) { if (typeof d.settings[k] === 'string') store.settings[k] = d.settings[k]; }); if (typeof d.settings.masters === 'boolean') store.settings.masters = d.settings.masters; }
+      if (d.settings && before === 0) { ['houses', 'numSys'].forEach(function (k) { if (typeof d.settings[k] === 'string') store.settings[k] = d.settings[k]; }); if (d.settings.zodiac === 'sidereal' || d.settings.zodiac === 'tropical') { store.settings.zodiac = d.settings.zodiac; Astro.setZodiac(d.settings.zodiac); } if (typeof d.settings.masters === 'boolean') store.settings.masters = d.settings.masters; }
       save(); chartCache = {}; fcCache = {};
       var bits = [];
       bits.push(added ? 'Loaded ' + added + ' chart' + (added === 1 ? '' : 's') + '.' : (ckAdd ? 'Loaded your saved Clicks.' : 'No new charts to load.'));
@@ -2893,12 +2925,12 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
   function ckUtc(s) {
     var k = String(s.n || '').toLowerCase(), hit = store.profiles.filter(function (p) { return p.kind !== 'pet' && p.time && p.date === s.d && ClickKit.firstOf(p.nowName || p.name).toLowerCase() === k; })[0];
     if (!hit) return null;
-    try { var ch = buildChart(hit, 'placidus'); return { ms: ch.utcMs, asc: ch.asc }; } catch (e) { return null; }
+    try { var ch = Astro.withZodiac('tropical', function () { return buildChart(hit, 'placidus'); }); return { ms: ch.utcMs, asc: ch.asc }; } catch (e) { return null; }
   }
   function ckRes(x) {
     var ua = ckUtc(x.a), ub = ckUtc(x.b), sg = function (u) { return u ? u.ms + ':' + u.asc : ''; }, sig = sg(ua) + '|' + sg(ub), c = ckCache[x.id];
     if (c && c.sig === sig) return c.res;
-    var res = ClickKit.analyse(ClickKit.person(x.a.n, x.a.d, x.a.f || '', ua && ua.ms, ua && ua.asc), ClickKit.person(x.b.n, x.b.d, x.b.f || '', ub && ub.ms, ub && ub.asc), x.type, { app: true, deep: true });
+    var res = Astro.withZodiac('tropical', function () { return ClickKit.analyse(ClickKit.person(x.a.n, x.a.d, x.a.f || '', ua && ua.ms, ua && ua.asc), ClickKit.person(x.b.n, x.b.d, x.b.f || '', ub && ub.ms, ub && ub.asc), x.type, { app: true, deep: true }); });
     ckCache[x.id] = { sig: sig, res: res }; return res;
   }
   function ckLink(x) { return CLICK_URL + '?ref=cc#c=' + ClickKit.b64e({ v: 1, n: x.a.n, d: x.a.d, t: x.type }); }
@@ -2931,6 +2963,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
   function screenClicks() {
     var pro = isPro(), out = ['<div class="stack">'];
     var people = ckPeople();
+    if (zodiac() === 'sidereal') out.push('<div class="note"><b>Clicks use Western (tropical) signs.</b> That keeps them matching the shareable Click page, so a sign here can differ from the one on your chart.</div>');
     if (ck.view === 'result') {
       var x = store.clicks.filter(function (z) { return z.id === ck.open; })[0];
       if (!x) { ck.view = 'list'; return screenClicks(); }
@@ -2970,6 +3003,29 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
     return out.join('');
   }
 
+  function zodiacMoves(p) {
+    var a = Astro.withZodiac('tropical', function () { return buildChart(p, 'placidus'); });
+    var b = Astro.withZodiac('sidereal', function () { return buildChart(p, 'whole'); });
+    var moves = [];
+    b.points.forEach(function (id) { var x = signOf(a.pos[id]), y = signOf(b.pos[id]); if (x !== y) moves.push(PLANETS[id].name + ' ' + SIGNS[x].name + ' → ' + SIGNS[y].name); });
+    return moves;
+  }
+  function ayanText() { var tot = Math.round(Astro.ayanamsa(Astro.jdFromMs(Date.now())) * 60), d = Math.floor(tot / 60), m = tot % 60; return d + '\u00B0' + (m < 10 ? '0' : '') + m + "'"; }
+  function zodiacBlock(p) {
+    var z = zodiac(), o = [];
+    o.push('<section class="stack-s"><h2>Astrology system</h2><div class="lbl">Zodiac</div><div class="grid2">' +
+      '<button type="button" class="opt" aria-pressed="' + (z === 'tropical') + '" data-act="zodiac:tropical"><b>Tropical</b><span>Western standard</span></button>' +
+      '<button type="button" class="opt" aria-pressed="' + (z === 'sidereal') + '" data-act="zodiac:sidereal"><b>Sidereal (Vedic)</b><span>Measured against the stars</span></button></div>');
+    o.push('<button type="button" class="link" data-act="learn:vedic">Why are there two zodiacs?</button>');
+    if (z === 'sidereal') {
+      var note = '<b>Sidereal is on.</b> It uses the Lahiri value, India’s official standard, which sits ' + ayanText() + ' behind the Western zodiac today. ';
+      if (p) { var mv = zodiacMoves(p); note += (mv.length ? 'Compared with Tropical, for ' + esc(p.name.split(/\s+/)[0]) + ': ' + mv.join(', ') + '. ' : 'Nothing changes sign in this chart compared with Tropical. '); }
+      note += 'Same sky, different starting line. The explanations are still our plain-English ones, so this isn’t a full Vedic reading (no nakshatras or dashas yet).';
+      o.push('<div class="note">' + note + '</div>');
+    }
+    return o.join('');
+  }
+
   function screenSettings() {
     var s = store.settings, p = active(), out = ['<div class="stack">'];
     out.push(proSection());
@@ -2982,8 +3038,9 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
     }).join('') + '<button type="button" class="btn-dashed" data-act="add-profile">+ Add a chart (partner, kids, mates, pets)' + (isPro() ? '' : ' ' + LOCK) + '</button>' + (isPro() ? '<div class="small">Up to ' + MAX_PROFILES + ' charts.</div>' : '<div class="small">The free version keeps one chart. Pro keeps up to ' + MAX_PROFILES + ', so you can read the whole family.</div>') + '</section>');
     out.push(backupSection());
     // astrology
-    out.push('<section class="stack-s"><h2>Astrology system</h2><div class="lbl">Zodiac</div><div class="grid2"><button type="button" class="opt" aria-pressed="true"><b>Tropical</b><span>Western standard</span></button><button type="button" class="opt" disabled><b>Sidereal (Vedic)</b><span>Coming later</span></button></div>');
-    out.push('<button type="button" class="link" data-act="learn:vedic">Why are there two zodiacs?</button><div class="lbl">House system</div>');
+    out.push(zodiacBlock(p));
+    out.push('<div class="lbl">House system</div>');
+    if (zodiac() === 'sidereal') { out.push('<div class="note">Sidereal charts use <b>Whole Sign</b> houses, the Vedic standard. Switch to Tropical to pick another system.</div>'); } else {
     [['placidus', 'Placidus', 'The most common. Divides the sky by time, not equal slices.'], ['whole', 'Whole Sign', 'The oldest system: one sign = one house. Popular with newer astrologers.'], ['equal', 'Equal', 'Twelve equal 30° slices, starting from your Rising sign.']].forEach(function (o) {
       var lk = !isPro() && o[0] !== 'placidus';
       out.push('<button type="button" class="opt" aria-pressed="' + (houseSys() === o[0]) + '" data-act="' + (lk ? 'paywall:houses' : 'houses:' + o[0]) + '"><b>' + o[1] + (lk ? ' ' + LOCK : '') + '</b><span>' + o[2] + '</span></button>');
@@ -2992,6 +3049,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
       var cur = getChart(p), base = buildChart(p, 'placidus'), moves = [];
       CHART_POINTS.forEach(function (id) { if (base.houses[id] !== cur.houses[id]) moves.push(PLANETS[id].name + ' ' + ord(base.houses[id]) + ' → ' + ord(cur.houses[id])); });
       out.push('<div class="note"><b>What this changes for ' + esc(p.name.split(/\s+/)[0]) + ': </b>' + (houseSys() === 'placidus' ? 'You’re on the default. Switch systems and we’ll show you exactly which planets change house.' : (moves.length ? 'Compared with Placidus: ' + moves.join(', ') + '. Same sky, different slicing.' : 'Nothing moves house in this chart compared with Placidus.')) + '</div>');
+    }
     }
     out.push('</section>');
     // numerology
@@ -3296,6 +3354,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
       case 'today-go': ui.today = false; go(arg); break;
       case 'range': ui.range = +arg; render(); break;
       case 'tag': ui.tag = arg; render(); break;
+      case 'zodiac': if (arg === 'sidereal' || arg === 'tropical') { s.zodiac = arg; Astro.setZodiac(arg); save(); chartCache = {}; fcCache = {}; } render(); break;
       case 'houses': s.houses = arg; save(); render(); break;
       case 'numsys': s.numSys = arg; save(); render(); break;
       case 'masters': s.masters = !s.masters; save(); render(); break;
@@ -3321,7 +3380,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
       case 'wipe':
         if (!ui.confirmWipe) { ui.confirmWipe = true; render(); break; }
         try { localStorage.removeItem(KEY); } catch (err) {}
-        store = JSON.parse(JSON.stringify(DEFAULT_STORE)); ui.confirmWipe = false; go('onboard'); break;
+        store = JSON.parse(JSON.stringify(DEFAULT_STORE)); Astro.setZodiac('tropical'); chartCache = {}; fcCache = {}; ui.confirmWipe = false; go('onboard'); break;
       case 'pick-place':
         var r = ui.results[+arg]; if (!r) break;
         var keep = readForm();
