@@ -2611,10 +2611,18 @@ function buildLinkShort() {
     var si = ui.shortSign, S = SIGNS[si], sh = short(), sn = S.name.toLowerCase();
     var hook = (sh.parts[0] && sh.parts[0].text) || (S.name + ': your next week.');
     var cap = hook.replace(/\s*Here\u2019s what it means for you\.?$/, '') + ' Here\u2019s what it means for you ' + S.glyph + '\n\nComment your sign \uD83D\uDC47\n\n#' + sn + ' #astrology #horoscope #zodiac';
-    var com = 'Your own forecast, from your exact birth chart and your numbers. Free to start: ' + TT.url + ' (type it into your browser). Want your sky every day? That’s Duology Pro: tap “Today in the sky” in the app.';
+    var com = 'Duology Pro is available from as little as US$3.99 for 30 days. One-off payment, no subscription, nothing to cancel, so we can’t take your money while you aren’t looking. Your own chart is free to start: ' + TT.url + ' (type it into your browser).';
     return { cap: cap, com: com, slot: ttSlot(si) };
   }
-  function firstComment() { return 'Don’t wait till next weekend for your forecast. Duology Pro gives you your sky and numbers every day: open the app and tap “Today in the sky”. Your own chart is free to start: ' + APP_URL; }
+  function firstComment() { return 'Duology Pro is available from as little as US$3.99 for 30 days. One-off payment, no subscription, nothing to cancel, so we can’t take your money while you aren’t looking. Your own chart is free to start: ' + APP_URL; }
+  // Caption test: A = comment prompt, no link in the caption. B = link in the caption.
+  // Sign order is Aries 0 ... Pisces 11. Six strong-history signs and six weak-history signs in each group.
+  var CAPTEST_A = [0, 1, 6, 7, 10, 11]; // Aries, Taurus, Libra, Scorpio, Aquarius, Pisces
+  function capGroup(si) { return CAPTEST_A.indexOf(si) >= 0 ? 'A' : 'B'; }
+  function fbCaption(k) {
+    var g = capGroup(ui.shortSign);
+    return { g: g, text: g === 'A' ? k.ig.caption : k.yt.desc, meta: g === 'A' ? 'Test group A: comment prompt, no link in caption' : 'Test group B: link in caption' };
+  }
   function kitPanel() {
     var k = curKit(); ui.kit = k;
     var box = function (lab, id, txt, rows, meta) { return '<div class="s-kit"><div class="s-kit-h"><b>' + lab + '</b>' + (meta ? '<span class="s-meta">' + meta + '</span>' : '') + '<button class="s-btn2" data-act="kitcopy:' + id + '">Copy</button></div><textarea readonly rows="' + rows + '">' + esc(txt) + '</textarea></div>'; };
@@ -2625,6 +2633,7 @@ function buildLinkShort() {
       box('YouTube description', 'desc', k.yt.desc, 12) +
       box('YouTube tags', 'tags', k.yt.tags.join(', '), 3, k.yt.tags.join(', ').length + '/500') +
       (ui.shortMode === 'sign' ? box('First comment (Facebook, Instagram, YouTube)', 'fcom', firstComment(), 4) : '') +
+      (ui.shortMode === 'sign' ? (function () { var fb = fbCaption(k); return box('Facebook caption (caption test)', 'fbcap', fb.text, 9, fb.meta); })() + '<p class="s-hint" style="margin:2px 0 8px">Caption test: A = ' + SIGNS.filter(function (s, i) { return capGroup(i) === 'A'; }).map(function (s) { return s.name; }).join(', ') + '. B = ' + SIGNS.filter(function (s, i) { return capGroup(i) === 'B'; }).map(function (s) { return s.name; }).join(', ') + '. Same length and time slots for both. Check Facebook views and average watch time per reel at 48 hours.</p>' : '') +
       box('Instagram caption', 'ig', k.ig.caption, 10, (k.ig.caption.match(/#/g) || []).length + ' hashtags (max 5)') + '</section>';
   }
   function ttPanel() {
@@ -2770,7 +2779,7 @@ function buildLinkShort() {
       else if (arg === 'c916' || arg === 'c169') saveChartThumb(arg === 'c169' ? 1280 : 1080, arg === 'c169' ? 720 : 1920);
       else if (arg === '169') saveThumb(ui.shortSign, 1280, 720); else saveThumb(ui.shortSign, 1080, 1920);
     }
-    else if (act === 'kitcopy') { var kk2 = ui.kit || curKit(); copy(arg === 'ttcap' ? ttKit().cap : arg === 'ttcom' ? ttKit().com : arg === 'fcom' ? firstComment() : arg === 'title' ? kk2.yt.title : arg === 'desc' ? kk2.yt.desc : arg === 'tags' ? kk2.yt.tags.join(', ') : kk2.ig.caption, el); }
+    else if (act === 'kitcopy') { var kk2 = ui.kit || curKit(); copy(arg === 'ttcap' ? ttKit().cap : arg === 'ttcom' ? ttKit().com : arg === 'fcom' ? firstComment() : arg === 'fbcap' ? fbCaption(kk2).text : arg === 'title' ? kk2.yt.title : arg === 'desc' ? kk2.yt.desc : arg === 'tags' ? kk2.yt.tags.join(', ') : kk2.ig.caption, el); }
     else if (act === 'tt') { stopRun(); st.tt = !st.tt; if (st.tt) ui.signFmt = 'quick'; ttSync(); persist(); render(); }
     else if (act === 'ttguide') { st.ttGuide = !st.ttGuide; persist(); render(); }
     else if (act === 'elbg') { stopRun(); st.elBg = st.elBg === false; persist(); render(); }
