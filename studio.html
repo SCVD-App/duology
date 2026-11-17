@@ -1537,7 +1537,7 @@ function buildShort0(sky, si, quick) {
     p.forEach(function (x) { x.text = stripTags(x.text); });
     return { quick: true, r: r, parts: p, b1: b1, b2: b2, nA: qA, nB: qB, rn: qrn, rp: qrp, t1: t1 };
   }
-  p.push({ id: 'hook', text: sky.win ? S.name + ', here’s your next ' + sky.span + ', ' + sky.spoken + ', in under a minute.' : S.name + ', here’s your ' + Mon + ' in under a minute.' });
+  p.push({ id: 'hook', text: sky.win ? sky.spoken + '. Here’s your ' + (sky.days === 7 ? 'week' : sky.span) + ' ahead, in just over a minute.' : Mon + '. Here’s your month ahead, in just over a minute.' });
   p.push({ id: 'theme', text: (sky.win ? (sky.days === 7 ? 'This week leans' : 'These ' + sky.span + ' lean') : 'This month leans') + ' on your ' + ord(r.theme) + ' house: ' + HOUSES[r.theme].area + '. That’s where the sky is busiest for you.' });
   var t2 = r.items.slice().sort(function (a, b) { return b.score - a.score || a.ms - b.ms; }).slice(0, 2).sort(function (a, b) { return a.ms - b.ms; }); p.push({ id: 'items', text: t2.map(function (it, k) { var same = k && dayOrd(it.ms) === dayOrd(t2[0].ms); return (k ? (same ? 'Also on the ' : 'Then on the ') : 'On the ') + dayOrd(it.ms) + ', ' + lc1(it.title) + '. ' + it.read; }).join(' ') });
   var nA = (si % 9) + 1, nB = ((si + 4) % 9) + 1;
