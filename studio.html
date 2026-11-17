@@ -2611,10 +2611,10 @@ function buildLinkShort() {
     var si = ui.shortSign, S = SIGNS[si], sh = short(), sn = S.name.toLowerCase();
     var hook = (sh.parts[0] && sh.parts[0].text) || (S.name + ': your next week.');
     var cap = hook.replace(/\s*Here\u2019s what it means for you\.?$/, '') + ' Here\u2019s what it means for you ' + S.glyph + '\n\nComment your sign \uD83D\uDC47\n\n#' + sn + ' #astrology #horoscope #zodiac';
-    var com = 'Duology Pro is available from as little as US$3.99 for 30 days. One-off payment, no subscription, nothing to cancel, so we can’t take your money while you aren’t looking. Your own chart is free to start: ' + TT.url + ' (type it into your browser).';
+    var com = 'Did this one land, ' + S.name + '? Tell me what\u2019s ringing true \uD83D\uDC47';
     return { cap: cap, com: com, slot: ttSlot(si) };
   }
-  function firstComment() { return 'Duology Pro is available from as little as US$3.99 for 30 days. One-off payment, no subscription, nothing to cancel, so we can’t take your money while you aren’t looking. Your own chart is free to start: ' + APP_URL; }
+  function firstComment() { return 'Did this one land, ' + SIGNS[ui.shortSign].name + '? Tell me what\u2019s ringing true \uD83D\uDC47'; }
   // Caption test: A = comment prompt, no link in the caption. B = link in the caption.
   // Sign order is Aries 0 ... Pisces 11. Six strong-history signs and six weak-history signs in each group.
   var CAPTEST_A = [0, 1, 6, 7, 10, 11]; // Aries, Taurus, Libra, Scorpio, Aquarius, Pisces
