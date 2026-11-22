@@ -3055,10 +3055,12 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
     // numerology
     out.push('<section class="stack-s"><h2>Numerology system</h2><div class="grid2"><button type="button" class="opt" aria-pressed="' + (s.numSys === 'pyth') + '" data-act="numsys:pyth"><b>Pythagorean</b><span>Most widely used</span></button><button type="button" class="opt" aria-pressed="' + (s.numSys === 'chaldean') + '" data-act="numsys:chaldean"><b>Chaldean</b><span>Older, sound-based</span></button></div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px"><div><b id="mlabel" style="font-size:14px">Keep master numbers</b><div class="small">11, 22 and 33 don’t get reduced</div></div><button type="button" class="switch" role="switch" aria-checked="' + s.masters + '" aria-labelledby="mlabel" data-act="masters"><i></i></button></div></section>');
+    // feedback
+    out.push('<section class="stack-s" id="feedback"><h2>Feedback</h2><p class="small" style="margin:0;color:var(--ink2)">We\u2019re a small team, so what you tell us really does shape the next update. What would you change?</p><a class="btn" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="mailto:' + SUPPORT_EMAIL + '?subject=' + encodeURIComponent('Duology feedback') + '">Send feedback</a></section>');
     // privacy
     out.push('<section class="stack-s" id="your-info"><h2>Securing your information</h2>' + privacyHTML() +
       '<h2 style="margin-top:6px">Refunds</h2><p class="small" style="margin:0;color:var(--ink2)">Every Pro pass is a one-off payment. Nothing renews and nothing is charged again. If Pro isn\u2019t what you expected, email <b>' + SUPPORT_EMAIL + '</b> within 14 days of buying and we\u2019ll refund you in full, no questions asked. This doesn\u2019t limit any rights you have under consumer law where you live.</p><button type="button" class="btn-danger" data-act="wipe">' + (ui.confirmWipe ? 'Tap again to delete everything' : 'Delete all my data') + '</button></section>');
-    out.push('<footer class="foot">Duology · astrology and numerology, explained<br>An SCVD app<br>All calculations run on your device.<br>Questions? ' + SUPPORT_EMAIL + '</footer></div>');
+    out.push('<footer class="foot">Duology · astrology and numerology, explained<br>An SCVD app<br>All calculations run on your device.<br>Questions or feedback? <a href="mailto:' + SUPPORT_EMAIL + '">' + SUPPORT_EMAIL + '</a></footer></div>');
     return out.join('');
   }
 
