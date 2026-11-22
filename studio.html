@@ -2939,9 +2939,9 @@ function buildLinkShort() {
     { t: 'The Moon is waning. So is your patience.', img: 'moon2' }
   ];
   var POST_SIZES = {
-    p: { n: 'Portrait 4:5', W: 1080, H: 1350, cy: 520, B: 800, t0: 965, t1: 1215, fy: 1282 },
-    s: { n: 'Square', W: 1080, H: 1080, cy: 330, B: 600, t0: 665, t1: 940, fy: 1012 },
-    v: { n: 'Story / Reel 9:16', W: 1080, H: 1920, cy: 800, B: 864, t0: 1285, t1: 1640, fy: 1752 }
+    p: { n: 'Portrait 4:5', W: 1080, H: 1350, cy: 520, wy: 195, py: 610, B: 670, t0: 965, t1: 1215, fy: 1282 },
+    s: { n: 'Square', W: 1080, H: 1080, cy: 330, wy: 175, py: 520, B: 470, t0: 770, t1: 950, fy: 1018 },
+    v: { n: 'Story / Reel 9:16', W: 1080, H: 1920, cy: 800, wy: 340, py: 900, B: 760, t0: 1300, t1: 1640, fy: 1752 }
   };
   var POST_T = 6, postAnim = null, postRec = false;
   function postK() { return ui.pImg || st.postImg || 'mars'; }
@@ -3002,7 +3002,7 @@ function buildLinkShort() {
     if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H;
     var x = cv.getContext('2d'); if (fin) t = POST_T;
     x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.fillStyle = '#14131A'; x.fillRect(0, 0, W, H);
-    var gl = x.createRadialGradient(W / 2, S.cy, 10, W / 2, S.cy, S.B * 0.85); gl.addColorStop(0, 'rgba(169,182,255,0.14)'); gl.addColorStop(1, 'rgba(169,182,255,0)'); x.fillStyle = gl; x.fillRect(0, 0, W, H);
+    var gl = x.createRadialGradient(W / 2, S.py, 10, W / 2, S.py, S.B * 0.85); gl.addColorStop(0, 'rgba(169,182,255,0.14)'); gl.addColorStop(1, 'rgba(169,182,255,0)'); x.fillStyle = gl; x.fillRect(0, 0, W, H);
     POST_STARS.forEach(function (s) { x.globalAlpha = s[3]; x.fillStyle = '#EEEAF2'; x.beginPath(); x.arc(s[0] * W, s[1] * H, s[2], 0, 6.2832); x.fill(); }); x.globalAlpha = 1;
     var serif = getComputedStyle(document.body).getPropertyValue('--serif') || 'Georgia, serif';
     // giant wordmark
@@ -3012,7 +3012,7 @@ function buildLinkShort() {
       var from = (st.postFrom || 'r') === 'r' ? 1 : -1;
       x.save(); x.textBaseline = 'alphabetic';
       x.font = '600 100px ' + serif; var w1 = x.measureText('Du').width; x.font = 'italic 500 100px ' + serif; var w2 = x.measureText('ology').width;
-      var fs = 100 * (W * 1.12) / (w1 + w2), tw = (w1 + w2) * fs / 100, sx = (W - tw) / 2 + (1 - e) * W * 1.3 * from, by = S.cy + fs * 0.34;
+      var fs = 100 * (W * 1.12) / (w1 + w2), tw = (w1 + w2) * fs / 100, sx = (W - tw) / 2 + (1 - e) * W * 1.3 * from, by = S.wy + fs * 0.34;
       x.globalAlpha = (mode === 'over' ? 0.9 : 1) * a;
       x.font = '600 ' + fs + 'px ' + serif; x.fillStyle = '#EEEAF2'; x.fillText('Du', sx, by);
       x.font = 'italic 500 ' + fs + 'px ' + serif; x.fillStyle = '#A9B6FF'; x.fillText('ology', sx + w1 * fs / 100, by);
@@ -3020,7 +3020,7 @@ function buildLinkShort() {
     }
     function planet() {
       var c = postCut(m), sc = Math.min(S.B / c.width, S.B / c.height) * (1 + 0.035 * (t / POST_T)), dw = c.width * sc, dh = c.height * sc;
-      x.save(); x.globalAlpha = Math.min(1, t / 0.6); x.drawImage(c, W / 2 - dw / 2, S.cy - dh / 2, dw, dh); x.restore();
+      x.save(); x.globalAlpha = Math.min(1, t / 0.6); x.drawImage(c, W / 2 - dw / 2, S.py - dh / 2, dw, dh); x.restore();
     }
     if (mode !== 'over') word();
     planet();
