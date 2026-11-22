@@ -3012,7 +3012,7 @@ function buildLinkShort() {
       var from = (st.postFrom || 'r') === 'r' ? 1 : -1;
       x.save(); x.textBaseline = 'alphabetic';
       x.font = '600 100px ' + serif; var w1 = x.measureText('Du').width; x.font = 'italic 500 100px ' + serif; var w2 = x.measureText('ology').width;
-      var fs = 100 * (W * 1.12) / (w1 + w2), tw = (w1 + w2) * fs / 100, sx = (W - tw) / 2 + (1 - e) * W * 1.3 * from, by = S.wy + fs * 0.34;
+      var fs = 100 * (W * 0.9) / (w1 + w2), tw = (w1 + w2) * fs / 100, sx = (W - tw) / 2 + (1 - e) * W * 1.3 * from, by = S.wy + fs * 0.34;
       x.globalAlpha = (mode === 'over' ? 0.9 : 1) * a;
       x.font = '600 ' + fs + 'px ' + serif; x.fillStyle = '#EEEAF2'; x.fillText('Du', sx, by);
       x.font = 'italic 500 ' + fs + 'px ' + serif; x.fillStyle = '#A9B6FF'; x.fillText('ology', sx + w1 * fs / 100, by);
