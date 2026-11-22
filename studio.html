@@ -82,6 +82,7 @@ body.clean .s-stage{position:fixed;inset:0;width:100vw !important;height:100vh !
 .v{position:absolute;inset:0;padding:90px 110px;color:var(--v-ink);font-family:var(--sans);background:var(--v-bg)}
 .v::after{content:"";position:absolute;inset:36px;border:2px solid var(--v-line);border-radius:28px;pointer-events:none}
 .v-title{display:flex;flex-direction:column;justify-content:center;padding-left:160px}
+.sign-tag{position:absolute;top:120px;left:0;right:0;text-align:center;font-size:56px;font-weight:700;letter-spacing:8px;text-transform:uppercase;color:var(--v-accent);opacity:.95}
 .v-kicker{font-size:34px;font-weight:700;letter-spacing:6px;text-transform:uppercase;color:var(--v-brass)}
 .v-huge{font-family:var(--serif);font-size:300px;font-weight:600;line-height:1;letter-spacing:-6px}
 .v-year{font-size:52px;color:var(--v-muted);margin-top:10px}
@@ -2385,7 +2386,13 @@ function buildLinkShort() {
     var si = ui.shortSign, ed = !!(st.hooks && st.hooks[si] != null);
     return '<section class="s-sec"><div class="s-sechead"><b>On-screen hook</b>' + (ed ? '<span class="s-edited">edited</span><button class="s-link" data-act="hookreset">Reset</button>' : '') + '<label class="s-field" style="margin-left:auto"><input type="checkbox" id="hookon"' + (st.hookOff ? '' : ' checked') + '> Show on the first frame</label></div><textarea id="hooktxt" rows="2">' + esc(hookText(si)) + '</textarea><span class="s-hint">Sits at the top of the first scene from frame 0, so it is what shows as the thumbnail. Not spoken. Your edits are remembered for each sign.</span></section>';
   }
+  // Every scene after the hook carries a small sign tag, so whichever frame YouTube (or anyone) picks as the thumbnail still says which sign it is.
   function scene916(i, sh, S) {
+    var h = scene916in(i, sh, S), Sg = sh && sh.r && sh.r.sign;
+    if (i > 0 && i !== 3 && !sh.quick && h && Sg && Sg.name && h.indexOf('sign-tag') < 0) h = h.replace(/^(<div class="v[^>]*>)/, '$1<div class="sign-tag">' + Sg.glyph + VS + ' ' + esc(Sg.name) + '</div>');
+    return h;
+  }
+  function scene916in(i, sh, S) {
     if (sh.quick) return scene916quick(i, sh, S);
     var r = sh.r, Sg = r.sign, Mon = S.win ? S.label : d(S.start, { month: 'long' }), hl = {}; r.top.forEach(function (t) { t.houses.forEach(function (h) { hl[h] = hl[h] || 1; }); }); hl[r.theme] = 2;
     if (i === 0) return '<div class="v v-tall' + ebCls(Sg) + '">' + ebHtml(Sg) + hookHtml(r.si) + '<div class="v-signglyph" style="font-size:' + (hookHtml(r.si) ? 300 : 420) + 'px">' + Sg.glyph + VS + '</div><div class="v-h1" style="font-size:150px;text-align:center">' + Sg.name + '</div><div class="a3 v-sub" style="font-size:64px;text-align:center">' + (S.win ? (S.days === 7 ? 'Your next week' : 'Your next ' + (S.days === 14 ? '2' : '4') + ' weeks') + '<br>' + S.label : Mon + ' in under a minute') + '</div><div class="a4" style="margin-top:80px">' + wordmark(90) + '</div></div>';
