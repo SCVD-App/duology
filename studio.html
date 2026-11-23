@@ -1835,7 +1835,7 @@ function postKit(mode, o, sky) {
     ig.caption = 'Your birth chart is NOT a clock 🕘\n\nStart at 9 o’clock (your Rising sign) and go counter-clockwise: houses 1 to 12.\nThe top is your 10th house: career and reputation.\nBelow the line = the private you. Above = the public you.\n\nPlanet = what · Sign = how · House = where\n\nSave this for later 📌 Reading charts can be hard. Let the app do it for you → link in bio\n\n#astrology #birthchart #natalchart #zodiac #duology';
   } else if (mode === 'asp') {
     var AT = o.T, ck = AT.kind === 'c', tg = (AT.tag || AT.n).toLowerCase();
-    yt.title = ck ? AT.yt : 'What is a ' + AT.n.toLowerCase() + ' in astrology? (30-second explainer) #shorts';
+    yt.title = ck ? AT.yt : 'What is a ' + AT.n.toLowerCase() + ' in astrology? (1-minute explainer) #shorts';
     L = [AT.geo, '', AT.mean, '', AT.catchy, '', 'Astrology 101: one word at a time. Reading charts can be hard, so let the app do it for you:', APP_URL, '', '#astrology #' + tg.replace(/ /g, '') + ' #astrology101 #shorts'];
     yt.tags = ['what is ' + tg, tg + ' astrology', 'astrology aspects', 'astrology for beginners', 'astrology 101', 'astrology explained', 'duology', 'shorts'];
     ig.caption = (ck ? AT.n + ' explained \u2728\n\n' + AT.geo + '\n\n' + AT.mean : 'What is a ' + AT.n.toLowerCase() + '? \u2728\n\n' + AT.n + ' = ' + AT.ang + '\u00B0 = ' + AT.frac + '.\n' + AT.mean) + '\n\n' + AT.catchy + '\n\nSave this for later \uD83D\uDCCC Astrology 101, one word at a time. Your own chart \u2192 link in bio\n\n#astrology #astrology101 #' + tg.replace(/ /g, '') + ' #zodiac #duology';
@@ -1902,7 +1902,7 @@ var ASP101 = {
 };
 
 ASP101.sun = { kind: 'c', n: 'Sun sign', yt: 'What is your Sun sign? (astrology 101) #shorts', tag: 'sun sign',
-  hook: 'Your Sun sign. It\u2019s the one everyone knows, but what does it actually mean? Thirty seconds.',
+  hook: 'Your Sun sign. It\u2019s the one everyone knows, but what does it actually mean? About a minute.',
   geo: 'Your Sun sign is the sign the Sun was in on the day you were born. Astrologers read it as your core self: your basic character and what drives you.',
   mean: 'The Sun spends about a month in each sign, so your birthday decides it. It\u2019s also why newspaper horoscopes only use the Sun sign: that\u2019s one-twelfth of the world.',
   catchy: 'The catch: your Sun sign is the headline, not the whole story. Two Leos can be completely different once their Moon and Rising sign come into it.', catchH: 'Just the headline',
@@ -1920,7 +1920,7 @@ ASP101.rising = { kind: 'c', n: 'Rising sign', yt: 'What is your Rising sign (As
   catchy: 'The catch: with no birth time you can\u2019t get a reliable Rising sign. That\u2019s why our weekly forecasts use your Sun sign, and your own chart in the app goes further.', catchH: 'You need your birth time',
   cta: 'Know your birth time? Click the link in bio and the app will find your Rising sign!' };
 ASP101.retro = { kind: 'c', n: 'Retrograde', yt: 'What does retrograde actually mean? (astrology 101) #shorts', tag: 'retrograde',
-  hook: 'What does retrograde actually mean? Thirty seconds, no panic.',
+  hook: 'What does retrograde actually mean? About a minute, no panic.',
   geo: 'A planet in retrograde looks like it\u2019s moving backwards across the sky. It isn\u2019t. It\u2019s an illusion.',
   mean: 'Think of overtaking a slower car on the highway: for a moment it seems to drift backwards. Earth does that to the other planets, and astrologers read it as a time for reviewing, redoing and double-checking.',
   catchy: 'The catch: it isn\u2019t a curse. Mercury goes retrograde three or four times a year, and most of them pass without drama.', catchH: 'It isn\u2019t a curse',
@@ -1971,7 +1971,7 @@ function buildAspShort(key) {
     liveShort = nm + ' · ' + d;
   } else live = 'There isn\u2019t a ' + T.n.toLowerCase() + ' in the next few weeks, but we\u2019ll flag it in your weekly forecast when one arrives.';
   return { akey: key, T: T, ev: ev, liveShort: liveShort, labels: ['Hook', 'The geometry', 'What it means', 'The catch', 'In the sky now', 'CTA'], parts: [
-    { id: 'hook', text: 'What is a ' + T.n.toLowerCase() + ' in astrology? The word everyone uses and nobody explains. Thirty seconds, no jargon.' },
+    { id: 'hook', text: 'What is a ' + T.n.toLowerCase() + ' in astrology? The word everyone uses and nobody explains. About a minute, no jargon.' },
     { id: 'geo', text: T.geo },
     { id: 'mean', text: T.mean },
     { id: 'catch', text: T.catchy },
@@ -2562,6 +2562,27 @@ function buildLinkShort() {
       '<div class="a5 c-ex"><b>Venus in Leo in the 10th</b>charm, shown boldly, at work</div></div>';
     return '<div class="v v-tall c-scene">' + '<div class="a1">' + chartSVG({ horizon: true, nums: true, hl: { 1: 1 }, w: 840 }) + '</div>' + '<div class="a2 m-cta" style="margin-top:0"><b>Reading charts can be hard!</b>Click the link in bio and let the app do it for you</div><div class="a3" style="margin-top:30px">' + wordmark(130) + '</div></div>';
   }
+  // Rotating birth-chart wheel for the Astrology 101 geometry scene: the two planets in the aspect get big glyph discs, and the chart turns slowly while the glyphs stay upright.
+  function aspWheel(key, ev) {
+    var T = ASP101[key], ang = T.ang, cx = 360, cy = 360, RP = 205, pa = ev ? ev.p : 'sun', pb = ev ? ev.q : 'moon';
+    var pt = function (deg, r) { var a = (deg - 90) * Math.PI / 180; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
+    var up = function (x, y, fs, fill, txt, w) { return '<g transform="translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ')"><g class="aw-cr"><text text-anchor="middle" dy=".35em" font-size="' + fs + '" fill="' + fill + '" font-family="serif"' + (w ? ' font-weight="' + w + '"' : '') + '>' + txt + '</text></g></g>'; };
+    var out = '<circle cx="360" cy="360" r="342" fill="none" stroke="rgba(255,255,255,.30)" stroke-width="3"/><circle cx="360" cy="360" r="286" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2"/><circle cx="360" cy="360" r="150" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>';
+    for (var i = 0; i < 12; i++) {
+      var a0 = pt(i * 30, 286), a1 = pt(i * 30, 342), m = pt(i * 30 + 15, 314);
+      out += '<line x1="' + a0[0].toFixed(1) + '" y1="' + a0[1].toFixed(1) + '" x2="' + a1[0].toFixed(1) + '" y2="' + a1[1].toFixed(1) + '" stroke="rgba(255,255,255,.22)" stroke-width="2"/>' + up(m[0], m[1], 40, 'rgba(255,255,255,.7)', SIGNS[i].glyph + VS);
+    }
+    var A = ang === 0 ? -14 : 0, B = ang === 0 ? 14 : ang, n = ang === 0 ? 1 : Math.round(360 / ang), pts = [];
+    for (var k = 0; k < n; k++) pts.push(pt(A + k * (ang || 0), RP));
+    if (ang === 0) pts = [pt(A, RP), pt(B, RP)];
+    if (n > 2) out += '<polygon points="' + pts.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ') + '" fill="rgba(255,210,94,.10)" stroke="#FFD25E" stroke-width="6" stroke-linejoin="round"/>';
+    else if (ang !== 0) out += '<line x1="' + pts[0][0].toFixed(1) + '" y1="' + pts[0][1].toFixed(1) + '" x2="' + pts[1][0].toFixed(1) + '" y2="' + pts[1][1].toFixed(1) + '" stroke="#FFD25E" stroke-width="6"/>';
+    for (var j = 2; j < pts.length; j++) out += '<circle cx="' + pts[j][0].toFixed(1) + '" cy="' + pts[j][1].toFixed(1) + '" r="12" fill="rgba(255,255,255,.45)"/>';
+    [[pts[0], pa], [pts[1], pb]].forEach(function (x) {
+      out += '<circle cx="' + x[0][0].toFixed(1) + '" cy="' + x[0][1].toFixed(1) + '" r="80" fill="#1d2146" stroke="#FFD25E" stroke-width="6"/>' + up(x[0][0], x[0][1], 110, '#FFD25E', glyph(x[1]));
+    });
+    return '<svg viewBox="0 0 720 720" width="900" height="900" style="display:block"><style>.aw-spin{transform-origin:360px 360px;animation:awspin 150s linear infinite}.aw-cr{transform-origin:0 0;animation:awcr 150s linear infinite}@keyframes awspin{to{transform:rotate(360deg)}}@keyframes awcr{to{transform:rotate(-360deg)}}</style><g class="aw-spin">' + out + '</g><text x="360" y="' + (cy + 40) + '" text-anchor="middle" font-size="110" font-weight="700" fill="#fff" font-family="serif">' + ang + '°</text></svg>';
+  }
   function aspSVG(key, big) {
     var T = ASP101[key], ang = T.ang, R = 300, cx = 360, cy = 360;
     var pt = function (deg) { var a = (deg - 90) * Math.PI / 180; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; };
@@ -2594,7 +2615,7 @@ function buildLinkShort() {
   function scene916concept(i, o) {
     var T = o.T, L = o.L, k = function (t) { return '<div class="a1 v-kicker">' + t + '</div>'; }, h1 = function (t, sz) { return '<div class="a2 v-h1" style="font-size:' + (sz || 110) + 'px;text-align:center;line-height:1.05">' + t + '</div>'; }, sub = function (t, c, f) { return '<div class="' + (c || 'a4') + ' v-sub" style="font-size:' + (f || 52) + 'px;text-align:center;max-width:920px;line-height:1.3">' + t + '</div>'; };
     var K = o.akey;
-    if (i === 0) return '<div class="v v-tall v-bigbrand"><div class="a1" style="margin-bottom:10px">' + wordmark(110) + '</div>' + k('Astrology 101') + '<div class="a2 v-h1" style="font-size:160px;text-align:center;line-height:1">' + T.n + '</div><div class="a3" style="display:flex;justify-content:center">' + conceptVis(K, 560) + '</div>' + sub('in 30 seconds', 'a4', 58) + '</div>';
+    if (i === 0) return '<div class="v v-tall v-bigbrand"><div class="a1" style="margin-bottom:10px">' + wordmark(110) + '</div>' + k('Astrology 101') + '<div class="a2 v-h1" style="font-size:160px;text-align:center;line-height:1">' + T.n + '</div><div class="a3" style="display:flex;justify-content:center">' + conceptVis(K, 560) + '</div>' + sub('in about a minute', 'a4', 58) + '</div>';
     if (i === 1) return '<div class="v v-tall">' + k('What it is') + '<div class="a2" style="display:flex;justify-content:center">' + conceptVis(K, 420) + '</div>' + sub(T.geo, 'a3', 50) + '</div>';
     if (i === 2) return '<div class="v v-tall">' + k('How it works') + '<div class="a2" style="display:flex;justify-content:center">' + conceptVis(K, 420) + '</div>' + sub(T.mean, 'a3', 50) + '</div>';
     if (i === 3) return '<div class="v v-tall">' + k('The catch') + h1(T.catchH, 120) + sub(T.catchy.replace(/^The catch: /, '').replace(/^./, function (c) { return c.toUpperCase(); }), 'a4', 54) + '</div>';
@@ -2607,8 +2628,8 @@ function buildLinkShort() {
   function scene916asp(i, o) {
     if (o.T.kind === 'c') return scene916concept(i, o);
     var T = o.T, k = function (t) { return '<div class="a1 v-kicker">' + t + '</div>'; }, h1 = function (t, sz) { return '<div class="a2 v-h1" style="font-size:' + (sz || 110) + 'px;text-align:center;line-height:1.05">' + t + '</div>'; }, sub = function (t, c) { return '<div class="' + (c || 'a4') + ' v-sub" style="font-size:58px;text-align:center;max-width:900px;line-height:1.3">' + t + '</div>'; };
-    if (i === 0) return '<div class="v v-tall v-bigbrand"><div class="a1" style="margin-bottom:10px">' + wordmark(110) + '</div>' + k('Astrology 101') + '<div class="a2 v-h1" style="font-size:190px;text-align:center;line-height:1">' + T.n + '</div><div class="a3">' + aspSVG(o.akey) + '</div>' + sub('in 30 seconds', 'a4') + '</div>';
-    if (i === 1) return '<div class="v v-tall">' + k('The geometry') + '<div class="a2">' + aspSVG(o.akey, true) + '</div>' + sub('<b>' + T.ang + '\u00B0</b> = ' + T.frac + '<br>' + (T.shape === 'one point' ? 'the same point' : 'it draws ' + T.shape), 'a5') + '</div>';
+    if (i === 0) return '<div class="v v-tall v-bigbrand"><div class="a1" style="margin-bottom:10px">' + wordmark(110) + '</div>' + k('Astrology 101') + '<div class="a2 v-h1" style="font-size:190px;text-align:center;line-height:1">' + T.n + '</div><div class="a3">' + aspSVG(o.akey) + '</div>' + sub('in about a minute', 'a4') + '</div>';
+    if (i === 1) return '<div class="v v-tall">' + k('The geometry') + '<div class="a2">' + aspWheel(o.akey, o.ev) + '</div>' + sub('<b>' + T.ang + '\u00B0</b> = ' + T.frac + '<br>' + (T.shape === 'one point' ? 'the same point' : 'it draws ' + T.shape), 'a5') + '</div>';
     if (i === 2) return '<div class="v v-tall">' + k('What it means') + h1(T.flavour, 130) + '<div class="a3" style="opacity:.9;transform:scale(.7);margin:-60px 0">' + aspSVG(o.akey) + '</div>' + sub(T.mean.split('. ').slice(1).join('. '), 'a4') + '</div>';
     if (i === 3) return '<div class="v v-tall">' + k('The catch') + h1('Don\u2019t get lazy', 120).replace('Don\u2019t get lazy', o.akey === 'tri' ? 'Easy can mean lazy' : o.akey === 'sq' ? 'Friction is fuel' : o.akey === 'opp' ? 'Find the balance' : o.akey === 'sext' ? 'You have to say yes' : 'Neither good nor bad') + sub((function () { var b = T.catchy.replace(/^The catch: /, '').replace(/^./, function (c) { return c.toUpperCase(); }), hd = { tri: 'Easy can mean lazy', sq: 'Friction is fuel', opp: 'Find the balance', sext: 'You have to say yes', conj: 'Neither good nor bad' }[o.akey]; return b.toLowerCase().indexOf(hd.toLowerCase()) === 0 && b.indexOf('. ') > 0 ? b.slice(b.indexOf('. ') + 2) : b; })(), 'a4') + '</div>';
     if (i === 4) {
