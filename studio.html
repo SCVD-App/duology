@@ -1942,6 +1942,21 @@ function retroNow() {
   var ms = Date.now(), jd = Astro.jdFromMs(ms), a = Astro.positions(jd - 0.5), b = Astro.positions(jd + 0.5);
   return RETRO_PLANETS.filter(function (p) { return (((b[p] - a[p] + 540) % 360) - 180) < 0; });
 }
+// Evergreen "your sky" question: no dates or live positions, so the videos never go stale.
+var SKYQ = {
+  sun: ['Where is the Sun in your sky right now?', 'Everyone\u2019s sky is a little different. Open the app to see yours.'],
+  moon: ['Where is the Moon in your sky right now?', 'It changes every couple of days. Open the app to see where it is for you.'],
+  rising: ['What is rising in your sky right now?', 'Your Rising sign is yours alone. Open the app to find it.'],
+  retro: ['Which planets are retrograde in your sky right now?', 'Open the app to see what is going backwards, and what it means for you.'],
+  houses: ['Which house is lit up in your sky right now?', 'Open the app to see which part of your life is in the spotlight.'],
+  ruler: ['What is your ruling planet doing right now?', 'Open the app to see where it is, and what it means for you.'],
+  tri: ['Is there a trine in your sky right now?', 'Every chart has its own. Open the app to see yours.'],
+  sq: ['Is there a square in your sky right now?', 'Every chart has its own. Open the app to see yours.'],
+  conj: ['Is there a conjunction in your sky right now?', 'Every chart has its own. Open the app to see yours.'],
+  opp: ['Is there an opposition in your sky right now?', 'Every chart has its own. Open the app to see yours.'],
+  sext: ['Is there a sextile in your sky right now?', 'Every chart has its own. Open the app to see yours.']
+};
+function skyQ(key) { var q = SKYQ[key] || SKYQ.tri; return { q: q[0], a: q[1], t: q[0] + ' ' + q[1] }; }
 function conceptLive(key) {
   var now = Date.now(), jd = Astro.jdFromMs(now), pos = Astro.positions(jd), sk = skyWindow(weekStartOf(now), 28), i, e;
   var nameList = function (a) { return a.length === 1 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; };
@@ -1962,20 +1977,20 @@ function aspLive(key) {
 }
 function buildAspShort(key) {
   var T = ASP101[key] || ASP101.tri;
-  if (T.kind === 'c') { var L = conceptLive(key); return { akey: key, T: T, L: L, labels: ['Hook', 'What it is', 'How it works', 'The catch', 'Right now', 'CTA'], parts: [
-    { id: 'hook', text: T.hook }, { id: 'geo', text: T.geo }, { id: 'mean', text: T.mean }, { id: 'catch', text: T.catchy }, { id: 'live', text: L.t }, { id: 'cta', text: T.cta }] }; }
+  if (T.kind === 'c') { var L = conceptLive(key); return { akey: key, T: T, L: L, labels: ['Hook', 'What it is', 'How it works', 'The catch', 'Your sky', 'CTA'], parts: [
+    { id: 'hook', text: T.hook }, { id: 'geo', text: T.geo }, { id: 'mean', text: T.mean }, { id: 'catch', text: T.catchy }, { id: 'live', text: skyQ(key).t }, { id: 'cta', text: T.cta }] }; }
   var ev = aspLive(key), live, liveShort = '';
   if (ev) {
     var d = dayOrd(ev.ms) + ' of ' + monthName(ev.ms), nm = PLANETS[ev.p].name + ' ' + T.n.toLowerCase() + ' ' + PLANETS[ev.q].name;
     live = 'You can see one in the sky right now: ' + nm + ', on the ' + d + '. ' + PLANETS[ev.p].name + ' is about ' + PLANETS[ev.p].theme + ', and ' + PLANETS[ev.q].name + ' is about ' + PLANETS[ev.q].theme + '.';
     liveShort = nm + ' · ' + d;
   } else live = 'There isn\u2019t a ' + T.n.toLowerCase() + ' in the next few weeks, but we\u2019ll flag it in your weekly forecast when one arrives.';
-  return { akey: key, T: T, ev: ev, liveShort: liveShort, labels: ['Hook', 'The geometry', 'What it means', 'The catch', 'In the sky now', 'CTA'], parts: [
+  return { akey: key, T: T, ev: ev, liveShort: liveShort, labels: ['Hook', 'The geometry', 'What it means', 'The catch', 'Your sky', 'CTA'], parts: [
     { id: 'hook', text: 'What is a ' + T.n.toLowerCase() + ' in astrology? The word everyone uses and nobody explains. About a minute, no jargon.' },
     { id: 'geo', text: T.geo },
     { id: 'mean', text: T.mean },
     { id: 'catch', text: T.catchy },
-    { id: 'live', text: live },
+    { id: 'live', text: skyQ(key).t },
     { id: 'cta', text: 'Want to know what it means for your sign? Click the link in bio, and the app will do it for you!' }
   ] };
 }
@@ -2619,8 +2634,8 @@ function buildLinkShort() {
     if (i === 2) return '<div class="v v-tall">' + k('How it works') + '<div class="a2" style="display:flex;justify-content:center">' + conceptVis(K, 420) + '</div>' + sub(T.mean, 'a3', 50) + '</div>';
     if (i === 3) return '<div class="v v-tall">' + k('The catch') + h1(T.catchH, 120) + sub(T.catchy.replace(/^The catch: /, '').replace(/^./, function (c) { return c.toUpperCase(); }), 'a4', 54) + '</div>';
     if (i === 4) {
-      var vis = K === 'sun' ? aspPlanetDisc('sun', 330) : K === 'moon' ? aspPlanetDisc('moon', 330) : (K === 'ruler' && L.p) ? aspPlanetDisc(L.p, 330) : '<div style="width:330px;height:330px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 30%,#3a3f6e,#14162b);border:4px solid rgba(255,255,255,.35);font-size:' + (K === 'houses' ? 150 : 170) + 'px;color:#FFD25E;font-family:serif">' + L.big + '</div>';
-      return '<div class="v v-tall">' + k('Right now') + '<div class="a2" style="display:flex;justify-content:center">' + vis + '</div>' + h1(L.line, 78) + (L.small ? sub(L.small, 'a4', 52) : '') + '</div>';
+      var Q = skyQ(K), vis = K === 'sun' ? aspPlanetDisc('sun', 330) : K === 'moon' ? aspPlanetDisc('moon', 330) : '<div style="width:330px;height:330px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 30%,#3a3f6e,#14162b);border:4px solid rgba(255,255,255,.35);font-size:190px;color:#FFD25E;font-family:serif">?</div>';
+      return '<div class="v v-tall">' + k('Your sky') + '<div class="a2" style="display:flex;justify-content:center">' + vis + '</div>' + h1(Q.q, 84) + sub(Q.a, 'a4', 52) + '</div>';
     }
     return '<div class="v v-tall"><div class="a1 v-h1" style="font-size:84px;text-align:center;line-height:1.1">' + T.cta.replace(/^(.*?)\?.*$/, '$1?') + '</div><div class="a3 m-cta"><b>Link in bio</b>Let the app work it out for you</div><div class="a5" style="margin-top:20px">' + wordmark(120) + '</div></div>';
   }
@@ -2632,9 +2647,8 @@ function buildLinkShort() {
     if (i === 2) return '<div class="v v-tall">' + k('What it means') + h1(T.flavour, 130) + '<div class="a3" style="opacity:.9;transform:scale(.7);margin:-60px 0">' + aspSVG(o.akey) + '</div>' + sub(T.mean.split('. ').slice(1).join('. '), 'a4') + '</div>';
     if (i === 3) return '<div class="v v-tall">' + k('The catch') + h1('Don\u2019t get lazy', 120).replace('Don\u2019t get lazy', o.akey === 'tri' ? 'Easy can mean lazy' : o.akey === 'sq' ? 'Friction is fuel' : o.akey === 'opp' ? 'Find the balance' : o.akey === 'sext' ? 'You have to say yes' : 'Neither good nor bad') + sub((function () { var b = T.catchy.replace(/^The catch: /, '').replace(/^./, function (c) { return c.toUpperCase(); }), hd = { tri: 'Easy can mean lazy', sq: 'Friction is fuel', opp: 'Find the balance', sext: 'You have to say yes', conj: 'Neither good nor bad' }[o.akey]; return b.toLowerCase().indexOf(hd.toLowerCase()) === 0 && b.indexOf('. ') > 0 ? b.slice(b.indexOf('. ') + 2) : b; })(), 'a4') + '</div>';
     if (i === 4) {
-      var e = o.ev;
-      if (!e) return '<div class="v v-tall">' + k('In the sky') + h1('Coming up', 120) + sub('We\u2019ll flag the next ' + T.n.toLowerCase() + ' in your weekly forecast', 'a3') + '</div>';
-      return '<div class="v v-tall">' + k('In the sky now') + '<div class="a2" style="display:flex;align-items:center;gap:30px">' + aspPlanetDisc(e.p, 330) + '<div style="font-size:90px;color:#FFD25E;font-family:serif">' + T.ang + '\u00B0</div>' + aspPlanetDisc(e.q, 330) + '</div>' + h1(PLANETS[e.p].name + ' ' + T.n.toLowerCase() + ' ' + PLANETS[e.q].name, 84) + sub(dayOrd(e.ms) + ' of ' + monthName(e.ms) + '<br>' + PLANETS[e.p].theme + ' meets ' + PLANETS[e.q].theme, 'a4') + '</div>';
+      var Q = skyQ(o.akey);
+      return '<div class="v v-tall">' + k('Your sky') + '<div class="a2" style="display:flex;justify-content:center"><div style="width:330px;height:330px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 30%,#3a3f6e,#14162b);border:4px solid rgba(255,255,255,.35);font-size:190px;color:#FFD25E;font-family:serif">?</div></div>' + h1(Q.q, 84) + sub(Q.a, 'a4') + '</div>';
     }
     return '<div class="v v-tall"><div class="a1 v-h1" style="font-size:90px;text-align:center;line-height:1.1">What does it mean<br>for <span style="color:#FFD25E">your</span> sign?</div><div class="a3 m-cta"><b>Link in bio</b>Let the app work it out for you</div><div class="a5" style="margin-top:20px">' + wordmark(120) + '</div></div>';
   }
