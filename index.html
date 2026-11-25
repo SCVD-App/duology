@@ -275,6 +275,25 @@ footer.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
 .ck-item.click{border-color:var(--flow)}.ck-item.spark{border-color:var(--tension)}.ck-item.lens{border-color:var(--accent)}
 .ck-item b{display:block;font-size:14px}.ck-item p{margin:2px 0 0;font-size:14px;color:var(--ink2)}.ck-item p.ck-more{margin-top:8px}
 .ck-h{font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--rust);margin:0}
+
+/* welcome (first visit): black on the left fading into Duology lilac on the right */
+body.wl{background:#0d0d0d linear-gradient(100deg,#0d0d0d 0%,#0d0d0d 22%,#2c2f63 58%,#7f8bd9 82%,#A9B6FF 100%) fixed;color:#f5f3ee}
+body.wl .app{background:transparent;border-color:transparent}
+.wlc{min-height:100vh;min-height:100dvh;padding:44px 24px 36px;display:flex;flex-direction:column;gap:22px;justify-content:center;color:#f5f3ee}
+.wlc .wl-brand{font-family:var(--serif);font-size:40px;font-weight:600;letter-spacing:-.5px;line-height:1}
+.wlc .wl-brand em{font-style:italic;font-weight:500;color:#A9B6FF}
+.wlc h1{font-size:31px;line-height:1.12;color:#f5f3ee;max-width:88%}
+.wlc .wl-sub{margin:0;font-size:16px;line-height:1.5;color:rgba(245,243,238,.82);max-width:92%}
+.wl-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.wl-steps li{display:flex;gap:14px;align-items:center;padding:13px 14px;border-radius:14px;background:rgba(13,13,13,.72);border:1px solid rgba(245,243,238,.14);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:15px;line-height:1.35}
+.wl-steps b{display:flex;width:30px;height:30px;flex-shrink:0;border-radius:50%;align-items:center;justify-content:center;background:#C9A84C;color:#0d0d0d;font-size:14px}
+.wl-steps span small{display:block;margin-top:2px;font-size:13px;color:rgba(245,243,238,.66)}
+.wl-pills{display:flex;flex-wrap:wrap;gap:8px}
+.wl-pills span{font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;background:rgba(13,13,13,.72);border:1px solid rgba(245,243,238,.18)}
+.wl-btn{height:56px;border:none;border-radius:999px;background:#f5f3ee;color:#14131A;font-size:17px;font-weight:700;padding:0 24px;box-shadow:0 10px 30px -10px rgba(0,0,0,.6)}
+.wl-btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.wl-fine{margin:0;font-size:13px;line-height:1.5;color:rgba(245,243,238,.78);max-width:92%}
+.wl-link{background:none;border:none;padding:0;min-height:44px;color:#f5f3ee;font-size:14px;font-weight:600;text-decoration:underline;text-align:left}
 </style>
 </head>
 <body>
@@ -2313,8 +2332,9 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
   var store = load();
   Astro.setZodiac(store.settings.zodiac);
   var PET_KINDS = [['dog', 'Dog'], ['cat', 'Cat'], ['horse', 'Horse'], ['bird', 'Bird'], ['rabbit', 'Rabbit'], ['other', 'Other']];
+  function welcomed() { try { return !!localStorage.getItem('duology.welcomed'); } catch (e) { return false; } }
   var ui = { kind: 'person', paywall: null, claim: null, payBusy: null, payMsg: '', codeMsg: '', codeOk: false, restoreMsg: '', copied: false, payNote: '', proLost: '', confirmRemovePro: false,
-    screen: store.profiles.length ? 'chart' : 'onboard', card: null, range: 30, tag: 'all', lesson: null, editId: null, showAllAsp: false, confirmDel: null, confirmWipe: false, place: null, results: [], searchMsg: '', formErr: '', sign: null, smonth: 0 };
+    screen: store.profiles.length ? 'chart' : (welcomed() ? 'onboard' : 'welcome'), card: null, range: 30, tag: 'all', lesson: null, editId: null, showAllAsp: false, confirmDel: null, confirmWipe: false, place: null, results: [], searchMsg: '', formErr: '', sign: null, smonth: 0 };
   (function () { var mm = /sign=([a-z]+)/i.exec(location.hash || ''); if (mm) { var ix = SIGNS.map(function (x) { return x.name.toLowerCase(); }).indexOf(mm[1].toLowerCase()); if (ix >= 0) { ui.sign = ix; ui.screen = 'signs'; } } })();
   var root = document.getElementById('app');
 
@@ -2350,7 +2370,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
     x: '<svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>'
   };
   var TABS = [['chart', 'Chart'], ['forecast', 'Forecast'], ['numbers', 'Numbers'], ['clicks', 'Clicks'], ['learn', 'Learn'], ['settings', 'Settings']];
-  var NAMES = { onboard: 'New chart', chart: 'My chart', forecast: 'Forecast', numbers: 'Numbers', clicks: 'Clicks', learn: 'Learn', settings: 'Settings', signs: 'Star signs', report: 'Your reading' };
+  var NAMES = { welcome: '', onboard: 'New chart', chart: 'My chart', forecast: 'Forecast', numbers: 'Numbers', clicks: 'Clicks', learn: 'Learn', settings: 'Settings', signs: 'Star signs', report: 'Your reading' };
   var ABBR = { sun: 'SUN', moon: 'MOON', mercury: 'MERC', venus: 'VEN', mars: 'MARS', jupiter: 'JUP', saturn: 'SAT', uranus: 'URA', neptune: 'NEP', pluto: 'PLU' };
 
   // ---------- wheel ----------
@@ -2426,27 +2446,40 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
     return fmtDate(d.getTime()) + ' · ' + (c.hasTime ? fmtTime(p.time) + ' (' + offStr(c.offsetMin) + (dst ? ', daylight saving was on' : '') + ')' : 'time unknown') + ' · ' + esc(p.placeName);
   }
 
+  function screenWelcome() {
+    return '<div class="wlc">' +
+      '<div class="wl-brand">Du<em>ology</em></div>' +
+      '<div class="stack-s"><h1>Your birth chart and numerology, explained in plain English.</h1>' +
+      '<p class="wl-sub">Most birth charts hand you a wall of symbols. Duology tells you what each one means, in words you can actually use.</p></div>' +
+      '<ol class="wl-steps">' +
+        '<li><b>1</b><span>Your name and birthday<small>Numerology works from your birth name</small></span></li>' +
+        '<li><b>2</b><span>Where you were born<small>So we can place the sky over you</small></span></li>' +
+        '<li><b>3</b><span>Your chart, in about a minute<small>Planets, numbers and what they mean</small></span></li>' +
+      '</ol>' +
+      '<div class="wl-pills"><span>Free to start</span><span>No account</span><span>No ads, ever</span></div>' +
+      '<button type="button" class="wl-btn" data-act="begin">Build my chart</button>' +
+      '<p class="wl-fine">Your details stay on this device. Don’t know your birth time? No problem, you can skip it and still get your full chart.</p>' +
+      '<button type="button" class="wl-link" data-act="wl-sign">Just want your star sign’s forecast? Start there</button>' +
+    '</div>';
+  }
+
   function screenOnboard() {
     var p = ui.editId ? store.profiles.filter(function (x) { return x.id === ui.editId; })[0] : null;
     var guessTz = ''; try { guessTz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) {}
     var tzs = []; try { tzs = Intl.supportedValuesOf('timeZone'); } catch (e) { tzs = [guessTz || 'UTC']; }
     var tzSel = (p && p.manual) ? p.tz : guessTz;
     var place = ui.place, pet = ui.kind === 'pet';
-    var noTimeOn = p ? !p.time : pet;
-    var sp = (p && p.species) || 'dog', sx = (p && p.sex) || 'girl';
+        var sp = (p && p.species) || 'dog', sx = (p && p.sex) || 'girl';
     return '<div class="stack">' +
-      '<div><h1>' + (p ? 'Edit chart' : (pet ? 'Add a pet' : (store.profiles.length ? 'Add a chart' : "Let's build your chart"))) + '</h1><p class="lede">' + (pet ? 'A reading for the four-legged (or feathered) member of the family. Their character, what settles them, how they play, and how they fit with everyone at home. Just for fun.' : 'Astrology and numerology, explained. Plain English, no glyph-guessing. Takes about a minute.') + '</p></div>' +
+      '<div><h1>' + (p ? 'Edit chart' : (pet ? 'Add a pet' : (store.profiles.length ? 'Add a chart' : "Let's build your chart"))) + '</h1><p class="lede">' + (pet ? 'A reading for the four-legged (or feathered) member of the family. Their character, what settles them, how they play, and how they fit with everyone at home. Just for fun.' : 'Name, birthday and birthplace. That\u2019s all we need. Takes about a minute.') + '</p></div>' +
       (store.profiles.length || p ? '<div class="seg" role="group" aria-label="Who is this chart for" style="grid-template-columns:repeat(2,minmax(0,1fr))"><button type="button" aria-pressed="' + !pet + '" data-act="kind:person">A person</button><button type="button" aria-pressed="' + pet + '" data-act="kind:pet">A pet</button></div>' : '') +
       (pet
         ? '<div class="field"><label for="f-name">Pet\u2019s name</label><input class="input" id="f-name" autocomplete="off" value="' + esc(p ? p.name : '') + '"><div class="small">Add the family surname if you like (Stella Smith). The numbers are worked out from the name you enter.</div></div>' +
           '<div class="grid2"><div class="field"><label for="f-species">Animal</label><select class="input" id="f-species">' + PET_KINDS.map(function (k) { return '<option value="' + k[0] + '"' + (k[0] === sp ? ' selected' : '') + '>' + k[1] + '</option>'; }).join('') + '</select></div>' +
           '<div class="field"><label for="f-sex">Girl or boy</label><select class="input" id="f-sex"><option value="girl"' + (sx === 'girl' ? ' selected' : '') + '>Girl</option><option value="boy"' + (sx === 'boy' ? ' selected' : '') + '>Boy</option></select></div></div>'
         : '<div class="field"><label for="f-name">Full birth name</label><input class="input" id="f-name" autocomplete="name" value="' + esc(p ? p.name : '') + '"><div class="small">As it’s written on the birth certificate. Numerology works from this, not a nickname.</div></div>' +
-          '<div class="field"><label for="f-now">Name you go by now <span class="small">(optional)</span></label><div class="small" style="color:var(--ink2);line-height:1.5">Changed your name since you were born? Maybe through marriage, or a name you chose yourself. Numerology reads your birth name as the blueprint you came in with. The name you live under now is read as a second layer on top: how you show up and how people treat you today. Add it and we\u2019ll show you how the two fit together.</div><input class="input" id="f-now" autocomplete="off" value="' + esc(p && p.nowName ? p.nowName : '') + '"><div class="small">Leave it blank if it\u2019s the same as your birth name.</div></div>') +
+          '<div class="field"><label for="f-now">Name you go by now <span class="small">(optional)</span></label><div class="small" style="color:var(--ink2);line-height:1.5">Changed your name since birth? Add it and we\u2019ll show how the two names fit together. Most people can skip this.</div><input class="input" id="f-now" autocomplete="off" value="' + esc(p && p.nowName ? p.nowName : '') + '"><div class="small">Leave it blank if it\u2019s the same as your birth name.</div></div>') +
       '<div class="field"><label for="f-date">Birth date</label><input class="input" id="f-date" type="date" min="1800-01-01" max="2050-12-31" value="' + esc(p ? p.date : '') + '"></div>' +
-      '<div class="field"><label for="f-time">Birth time</label><input class="input" id="f-time" type="time" value="' + esc(p && p.time ? p.time : '') + '"' + (noTimeOn ? ' disabled' : '') + '>' +
-      '<div class="check"><input type="checkbox" id="f-notime"' + (noTimeOn ? ' checked' : '') + '><label for="f-notime">I don’t know the birth time</label></div>' +
-      '<div class="small" id="notime-note"' + (noTimeOn ? '' : ' hidden') + '>No drama. We’ll build a noon chart and leave out the houses and Rising sign, because those need the time. We won’t fake them.</div></div>' +
       '<div class="field"><label for="f-place">' + (pet ? 'Where ' + (sx === 'boy' ? 'he' : 'she') + ' was born (or the nearest town you know)' : 'Birth place') + '</label>' +
       (place ? '<div class="chosen"><div style="flex:1"><b>' + esc(place.label) + '</b><br>' + Math.abs(place.lat).toFixed(2) + '°' + (place.lat < 0 ? 'S' : 'N') + ' ' + Math.abs(place.lon).toFixed(2) + '°' + (place.lon < 0 ? 'W' : 'E') + ' · ' + esc(place.tz) + '</div><button type="button" class="btn-ghost" data-act="clear-place">Change</button></div>'
         : '<input class="input" id="f-place" placeholder="Start typing a town or city" autocomplete="off"><div id="place-results" class="results" aria-live="polite"></div>') +
@@ -2456,6 +2489,9 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
         '<div class="field"><label for="m-tz">Timezone</label><select class="input" id="m-tz">' + tzs.map(function (z) { return '<option' + (z === tzSel ? ' selected' : '') + '>' + esc(z) + '</option>'; }).join('') + '</select></div>' +
         '<div class="field"><label for="m-name">Place name (for your reference)</label><input class="input" id="m-name" value="' + esc(p && p.manual ? p.placeName : '') + '"></div></div></details>') +
       '</div>' +
+      '<div class="field"><label for="f-time">Birth time <span class="small">(optional)</span></label><input class="input" id="f-time" type="time" value="' + esc(p && p.time ? p.time : '') + '">' +
+      '<button type="button" class="link" id="time-clear" data-act="clear-time"' + (p && p.time ? '' : ' hidden') + '>Clear the time</button>' +
+      '<div class="small" id="time-hint">' + (pet ? 'Most pets don’t have one. Skip it.' : 'Don’t know it? Skip it. You’ll still get your full chart, numerology and forecasts, and you can add the time later. If you want to track it down, try your birth certificate or ask a parent. It unlocks your Rising sign and houses.') + '</div></div>' +
       (ui.formErr ? '<div class="err" role="alert">' + esc(ui.formErr) + '</div>' : '') +
       '<button type="button" class="btn" data-act="save-profile">' + (p ? 'Save changes' : 'Save to my profile') + '</button>' +
       (store.profiles.length ? '<button type="button" class="btn-ghost" data-act="tab:' + (p ? 'settings' : 'chart') + '">Cancel</button>' : '') +
@@ -2473,7 +2509,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
     }
     out.push('<div><h1>' + esc(p.name.split(/\s+/)[0]) + '’s chart</h1><p class="lede">' + birthLine(c) + '</p></div>');
     out.push(todayEntry());
-    if (!c.hasTime) out.push('<div class="note">No birth time, so no houses or Rising sign. Those depend on which bit of sky was on the horizon when you were born, and that changes every few minutes. <button type="button" class="link" data-act="learn:time">Why?</button></div>');
+    if (!c.hasTime) out.push('<div class="note">No birth time, so no houses or Rising sign. Those depend on which bit of sky was on the horizon when you were born, and that changes every few minutes. <button type="button" class="link" data-act="learn:time">Why?</button> <button type="button" class="link" data-act="edit-profile:' + p.id + '">Add a birth time</button></div>');
     if (c.houseFallback) out.push('<div class="note">Placidus houses don’t work this close to the poles (the maths breaks down), so we’ve used Equal houses instead.</div>');
     out.push('<div class="wheel">' + wheelSVG(c) + '</div>');
     out.push('<div class="legend"><span><svg width="22" height="4" aria-hidden="true"><line x1="0" y1="2" x2="22" y2="2" style="stroke:var(--flow);stroke-width:2"/></svg>Flowing angle</span><span><svg width="22" height="4" aria-hidden="true"><line x1="0" y1="2" x2="22" y2="2" style="stroke:var(--tension);stroke-width:2;stroke-dasharray:4 3"/></svg>Tension angle</span>' + (c.hasTime ? '<span>AC = Rising · MC = Midheaven</span>' : '') + '</div>');
@@ -3154,9 +3190,11 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
   }
   function render() {
     var scr = ui.screen;
-    if (scr !== 'onboard' && scr !== 'signs' && scr !== 'learn' && !active()) scr = ui.screen = 'onboard';
-    var body = scr === 'onboard' ? screenOnboard() : scr === 'chart' ? screenChart() : scr === 'forecast' ? screenForecast() : scr === 'numbers' ? screenNumbers() : scr === 'clicks' ? screenClicks() : scr === 'learn' ? screenLearn() : scr === 'signs' ? screenSigns() : scr === 'report' ? screenReport() : screenSettings();
+    if (scr !== 'welcome' && scr !== 'onboard' && scr !== 'signs' && scr !== 'learn' && !active()) scr = ui.screen = 'onboard';
+    document.body.classList.toggle('wl', scr === 'welcome');
+    var body = scr === 'welcome' ? screenWelcome() : scr === 'onboard' ? screenOnboard() : scr === 'chart' ? screenChart() : scr === 'forecast' ? screenForecast() : scr === 'numbers' ? screenNumbers() : scr === 'clicks' ? screenClicks() : scr === 'learn' ? screenLearn() : scr === 'signs' ? screenSigns() : scr === 'report' ? screenReport() : screenSettings();
     var tabs = (scr === 'onboard' || !active()) ? '' : '<nav class="tabs" aria-label="Main">' + TABS.map(function (t) { return '<button type="button" data-act="tab:' + t[0] + '"' + (scr === t[0] || (scr === 'signs' && t[0] === 'forecast') || (scr === 'report' && t[0] === 'chart') ? ' aria-current="page"' : '') + '>' + ICON[t[0]] + t[1] + '</button>'; }).join('') + '</nav>';
+    if (scr === 'welcome') { root.innerHTML = '<main id="main" style="padding:0">' + body + '</main>'; return; }
     root.innerHTML = '<header class="top"><div class="brand">Du<em>ology</em>' + (isPro() ? '<button type="button" class="pro-badge" data-act="tab:settings" aria-label="Duology Pro is active. Open Settings">Pro</button>' : '') + '</div><div class="screen-name">' + NAMES[scr] + '</div></header><main id="main">' + body + '</main>' + tabs + sheet();
     var anySheet = ui.card || ui.paywall || ui.claim || ui.today;
     document.body.style.overflow = anySheet ? 'hidden' : '';
@@ -3227,8 +3265,8 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
   // ---------- onboarding wiring ----------
   var searchTimer = null, searchSeq = 0;
   function wireOnboard() {
-    var nt = document.getElementById('f-notime'), ti = document.getElementById('f-time'), note = document.getElementById('notime-note');
-    nt.addEventListener('change', function () { ti.disabled = nt.checked; note.hidden = !nt.checked; });
+    var ti = document.getElementById('f-time'), tcl = document.getElementById('time-clear');
+    if (ti && tcl) { var sync = function () { tcl.hidden = !ti.value; }; ti.addEventListener('input', sync); ti.addEventListener('change', sync); }
     var pl = document.getElementById('f-place');
     if (!pl) return;
     pl.addEventListener('input', function () {
@@ -3260,7 +3298,6 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
     return {
       name: document.getElementById('f-name').value.trim(),
       date: document.getElementById('f-date').value,
-      noTime: document.getElementById('f-notime').checked,
       time: document.getElementById('f-time').value,
       nowName: (document.getElementById('f-now') || {}).value || '',
       species: (document.getElementById('f-species') || {}).value || '',
@@ -3270,15 +3307,13 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
   function fillForm(k) {
     var set = function (id, v) { var el = document.getElementById(id); if (el && v !== undefined && v !== '') el.value = v; };
     set('f-name', k.name); set('f-date', k.date); set('f-time', k.time); set('f-now', k.nowName); set('f-species', k.species); set('f-sex', k.sex);
-    document.getElementById('f-notime').checked = k.noTime;
-    document.getElementById('f-time').disabled = k.noTime; document.getElementById('notime-note').hidden = !k.noTime;
+    var tcl = document.getElementById('time-clear'); if (tcl) tcl.hidden = !k.time;
   }
   function saveProfile() {
     var f = readForm(), err = '';
     if (!f.name) err = ui.kind === 'pet' ? 'Add your pet\u2019s name.' : 'Add a name. Numerology needs the full birth name.';
     else if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) err = 'Add the birth date.';
     else if (+f.date.slice(0, 4) < 1800 || +f.date.slice(0, 4) > 2050) err = 'The calculations are built for births between 1800 and 2050.';
-    else if (!f.noTime && !f.time) err = 'Add the birth time, or tick “I don’t know the birth time”.';
     var place = ui.place;
     if (!err && !place) {
       var lat = parseFloat((document.getElementById('m-lat') || {}).value), lon = parseFloat((document.getElementById('m-lon') || {}).value);
@@ -3292,7 +3327,7 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
       fillForm(keep);
       return;
     }
-    var rec = { name: f.name, date: f.date, time: f.noTime ? null : f.time, placeName: place.label, lat: place.lat, lon: place.lon, tz: place.tz, manual: !!place.manual, updated: Date.now() };
+    var rec = { name: f.name, date: f.date, time: f.time || null, placeName: place.label, lat: place.lat, lon: place.lon, tz: place.tz, manual: !!place.manual, updated: Date.now() };
     if (ui.kind === 'pet') { rec.kind = 'pet'; rec.species = f.species || 'dog'; rec.sex = f.sex || 'girl'; }
     else if (f.nowName && f.nowName.trim().toLowerCase() !== f.name.toLowerCase()) rec.nowName = f.nowName.trim();
     if (!ui.editId) { if (!store.profiles.length) milestone('first'); track('chart'); }
@@ -3366,8 +3401,11 @@ return { TYPES: TYPES, person: person, analyse: analyse, cleanName: cleanName, c
         if (!isPro() && store.profiles.length >= 1) { openPaywall('profiles'); break; }
         if (store.profiles.length >= MAX_PROFILES) { toast('That\u2019s the limit of ' + MAX_PROFILES + ' charts. Delete one to add another.'); break; }
         ui.editId = null; ui.place = null; ui.kind = 'person'; go('onboard'); break;
+      case 'begin': try { localStorage.setItem('duology.welcomed', '1'); } catch (e) {} go('onboard'); break;
+      case 'wl-sign': try { localStorage.setItem('duology.welcomed', '1'); } catch (e) {} ui.sign = null; go('signs'); break;
+      case 'clear-time': var tt = document.getElementById('f-time'); if (tt) { tt.value = ''; var tc = document.getElementById('time-clear'); if (tc) tc.hidden = true; } break;
       case 'kind':
-        var kk = readForm(); ui.kind = arg; ui.formErr = ''; render(); fillForm({ name: kk.name, date: kk.date, time: kk.time, noTime: arg === 'pet' && !kk.time ? true : kk.noTime });
+        var kk = readForm(); ui.kind = arg; ui.formErr = ''; render(); fillForm({ name: kk.name, date: kk.date, time: kk.time });
         break;
       case 'edit-profile':
         var ep = store.profiles.filter(function (x) { return x.id === arg; })[0];
