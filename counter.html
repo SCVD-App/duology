@@ -164,8 +164,8 @@ function delta(cur, prev, money) {
 /* ---------- pieces ---------- */
 function statCard(label, cur, prev, money) { return '<div class="stat"><div class="k">' + esc(label) + '</div><div class="v">' + (money ? usd(cur) : int(cur)) + '</div>' + delta(cur, prev, money) + '</div>'; }
 
-function funnel(t) {
-  var steps = [
+function funnelSteps(t) {
+  return [
     ['Landing page views', t.land, null, ''],
     ['Tapped through to the app', t.go, t.land, 'of landing views'],
     ['New devices', t.new, t.go, 'of tap-throughs (not every new device arrives via the landing page)'],
@@ -175,7 +175,10 @@ function funnel(t) {
     ['Saw the Pro screen', t.wall, t.first, 'of first charts'],
     ['Tapped buy', t.pro, t.new, 'of new devices'],
     ['Paid for Pro', t.proSales, t.pro, 'of buy taps']
-  ], max = Math.max.apply(null, steps.map(function (s) { return s[1]; }).concat([1]));
+  ];
+}
+function funnel(t) {
+  var steps = funnelSteps(t), max = Math.max.apply(null, steps.map(function (s) { return s[1]; }).concat([1]));
   var h = '<div class="fn">';
   steps.forEach(function (s) {
     h += '<div class="frow"><div>' + esc(s[0]) + '</div><div class="bar" aria-hidden="true"><i style="width:' + Math.max(0, s[1] / max * 100).toFixed(1) + '%"></i></div><div class="n">' + int(s[1]) + '</div>' +
@@ -233,6 +236,108 @@ function dailyTable(rows) {
   return h + '</tbody></table></div>';
 }
 
+/* ---------- report for Claude ---------- */
+var LAST = null;
+function chg(cur, prev, money) {
+  if (prev === null || prev === undefined) return '';
+  var s = money ? usd(prev) : int(prev), p = prev ? Math.round((cur - prev) / prev * 100) : null;
+  return ' (previous: ' + s + (p === null ? (cur ? ', new this period' : '') : ', ' + (p > 0 ? '+' : '') + p + '%') + ')';
+}
+function mdRow(a) { return '| ' + a.join(' | ') + ' |'; }
+function report() {
+  var R = LAST, t = R.cur, pv = R.prev, n = R.n, L = [];
+  var now = new Date().toLocaleString('en-AU', { timeZone: 'Australia/Brisbane', weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+  L.push('DUOLOGY COUNTER REPORT');
+  L.push('Generated: ' + now + ' (Brisbane time).');
+  L.push('Window: last ' + n + ' days (' + R.curDates[n - 1] + ' to ' + R.curDates[0] + ' UTC)' + (R.compare ? ', compared with the ' + n + ' days before (' + R.prevDates[n - 1] + ' to ' + R.prevDates[0] + ' UTC).' : ', no comparison period.'));
+  L.push('Days with data in the window: ' + R.curRows.length + ' of ' + n + '. The newest day is partial. Counter days run on UTC, so a day ends at 10am Brisbane time.');
+  L.push('');
+  L.push('## Headline numbers');
+  L.push('- Net revenue (USD): ' + usd(t.net) + chg(t.net, pv && pv.net, true));
+  L.push('- Pro sales: ' + int(t.proSales) + chg(t.proSales, pv && pv.proSales));
+  L.push('- Gift cards sold: ' + int(t.sales.gift.n) + chg(t.sales.gift.n, pv && pv.sales.gift.n));
+  L.push('- Landing page views: ' + int(t.land) + chg(t.land, pv && pv.land));
+  L.push('- Tapped through to the app: ' + int(t.go) + chg(t.go, pv && pv.go));
+  L.push('- New devices: ' + int(t.new) + chg(t.new, pv && pv.new));
+  L.push('- App opens: ' + int(t.open) + chg(t.open, pv && pv.open));
+  L.push('- First charts made: ' + int(t.first) + chg(t.first, pv && pv.first));
+  L.push(R.hasPair ? '- Click checks: ' + int(t.pair) + chg(t.pair, pv && pv.pair) : '- Click checks: not counted yet (counter Worker still on v2)');
+  L.push('');
+  L.push('## Funnel (this window' + (R.compare ? ', with previous window counts' : '') + ')');
+  var ps = pv ? funnelSteps(pv) : null;
+  funnelSteps(t).forEach(function (s, i) {
+    L.push('- ' + s[0] + ': ' + int(s[1]) + (s[2] === null ? '' : ' = ' + pctTxt(s[1], s[2]) + ' ' + s[3]) + (ps ? ' | previous: ' + int(ps[i][1]) + (ps[i][2] === null ? '' : ' = ' + pctTxt(ps[i][1], ps[i][2])) : ''));
+  });
+  L.push('- Paid per 1,000 new devices: ' + (t.new ? Math.round(t.proSales / t.new * 10000) / 10 : 'n/a'));
+  L.push('');
+  L.push('## Sales (USD, from Stripe)');
+  L.push(mdRow(['Plan', 'Sold', 'Gross', 'Refunds', 'Net']));
+  L.push(mdRow(['---', '---', '---', '---', '---']));
+  PLANS.forEach(function (p) { var a = t.sales[p[0]], b = t.refunds[p[0]]; L.push(mdRow([p[1], int(a.n), usd(a.c), b.n ? int(b.n) + ' (' + usd(b.c) + ')' : '0', usd(a.c - b.c)])); });
+  L.push(mdRow(['Total', int(PLANS.reduce(function (a, p) { return a + t.sales[p[0]].n; }, 0)), usd(t.gross), usd(t.refunded), usd(t.net)]));
+  L.push('Gift cards redeemed in this window: ' + int(t.gr) + ' (of ' + int(t.sales.gift.n) + ' sold in it; redemptions can be of cards sold earlier).');
+  L.push('');
+  L.push('## Where visitors came from (?ref= tag on the link)');
+  var cols = ['land', 'go', 'open', 'new', 'first', 'pro'], hdr = ['Source', 'Landing', 'Tapped in', 'Opens', 'New', 'First chart', 'Buy taps', 'New to chart'];
+  if (R.compare) hdr.push('Landing (prev)', 'New (prev)');
+  L.push(mdRow(hdr)); L.push(mdRow(hdr.map(function () { return '---'; })));
+  var refs = Object.keys(t.rf), tagged = {}; cols.forEach(function (k) { tagged[k] = 0; });
+  if (pv) Object.keys(pv.rf).forEach(function (r) { if (refs.indexOf(r) < 0) refs.push(r); });
+  refs.forEach(function (r) { cols.forEach(function (k) { tagged[k] += (t.rf[r] && t.rf[r][k]) || 0; }); });
+  refs.sort(function (a, b) { var A = t.rf[a] || {}, B = t.rf[b] || {}; return ((B.new || 0) + (B.land || 0)) - ((A.new || 0) + (A.land || 0)); });
+  refs.forEach(function (r) { var v = t.rf[r] || {}, pr = pv && pv.rf[r] || {}; var row = ['?ref=' + r].concat(cols.map(function (k) { return int(v[k]); }), [pctTxt(v.first || 0, v.new || 0)]); if (R.compare) row.push(int(pr.land), int(pr.new)); L.push(mdRow(row)); });
+  var un = {}, pun = {}; cols.forEach(function (k) { un[k] = Math.max(0, t[k] - tagged[k]); });
+  var urow = ['No tag'].concat(cols.map(function (k) { return int(un[k]); }), [pctTxt(un.first, un.new)]);
+  if (R.compare) { var pt = { land: 0, new: 0 }; Object.keys(pv.rf).forEach(function (r) { pt.land += pv.rf[r].land || 0; pt.new += pv.rf[r].new || 0; }); urow.push(int(Math.max(0, pv.land - pt.land)), int(Math.max(0, pv.new - pt.new))); }
+  L.push(mdRow(urow));
+  L.push('"No tag" is everything that arrived without a ?ref= on the link.');
+  L.push('');
+  L.push('## Countries (app opens, once a day per device, top 10)');
+  var dn = null; try { dn = new Intl.DisplayNames(['en'], { type: 'region' }); } catch (e) {}
+  var ks = Object.keys(t.c).sort(function (a, b) { return t.c[b] - t.c[a]; }).slice(0, 10);
+  if (!ks.length) L.push('No app opens recorded in this window.');
+  ks.forEach(function (k) { L.push('- ' + k + ' ' + (k === 'XX' ? 'Unknown' : (dn ? (dn.of(k) || k) : k)) + ': ' + int(t.c[k])); });
+  L.push('');
+  L.push('## Click');
+  if (!R.hasPair) L.push('Not counted yet: the counter Worker is still on v2, which refuses the pair and pshare events.');
+  else {
+    L.push('- Click checks made: ' + int(t.pair) + '; shared: ' + int(t.pshare) + ' (' + pctTxt(t.pshare, t.pair) + ' of checks). Includes your own testing.');
+    Object.keys(t.rf).filter(function (r) { return t.rf[r].pair || t.rf[r].pshare; }).forEach(function (r) { L.push('- ?ref=' + r + ': ' + int(t.rf[r].pair) + ' checks, ' + int(t.rf[r].pshare) + ' shared'); });
+  }
+  L.push('');
+  L.push('## Day by day (UTC, oldest first)');
+  var dh = ['Day', 'Landing', 'Opens', 'New', 'First chart', 'Buy taps', 'Sales', 'Net', 'Click', 'Shared'];
+  L.push(mdRow(dh)); L.push(mdRow(dh.map(function () { return '---'; })));
+  R.curRows.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; }).forEach(function (d) { var a = agg([d]); L.push(mdRow([d.date, int(a.land), int(a.open), int(a.new), int(a.first), int(a.pro), int(a.proSales + a.sales.gift.n), usd(a.net), int(a.pair), int(a.pshare)])); });
+  L.push('');
+  L.push('## How to read these numbers');
+  L.push('- Everything counts devices, not people, so treat rates as a guide.');
+  L.push('- A device can return on another day, so a buyer may not have been "new" in the same window.');
+  L.push('- "New devices" are not all from the landing page, so the tap-through to new-device step is only indicative.');
+  L.push('- App opens by country are counted once a day per device.');
+  L.push('- Amounts are US dollars from Stripe. Landing and app counts are skipped for visitors with Do Not Track on.');
+  return L.join('\n');
+}
+function setCopyMsg(t) { var m = $('#copymsg'); if (m) m.textContent = t; }
+function copyReport() {
+  var txt = report(), ta = $('#reptxt');
+  function manual() {
+    ta.value = txt; ta.hidden = false; ta.focus(); ta.select();
+    var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+    setCopyMsg(ok ? 'Copied. Paste it into the chat.' : 'Couldn’t copy automatically. The report is selected below, so copy it from there.');
+  }
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(function () { ta.hidden = true; setCopyMsg('Copied. Paste it into the chat.'); }, manual);
+  else manual();
+}
+function downloadReport() {
+  var txt = report(), a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain' }));
+  a.download = 'duology-counter-report-' + utcDay(0) + '.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  setCopyMsg('Downloaded.');
+}
+
 /* ---------- page ---------- */
 function render(data, n, compare) {
   var all = (data && data.days) || [], curDates = [], prevDates = [];
@@ -244,6 +349,7 @@ function render(data, n, compare) {
   var chron = curDates.slice().reverse(), byDate = {}; curRows.forEach(function (d) { byDate[d.date] = agg([d]); });
   var series = function (fn) { return chron.map(function (d) { return byDate[d] ? fn(byDate[d]) : 0; }); };
   var out = '';
+  out += '<section class="card"><div class="actions" style="margin:0"><button type="button" id="copyrep">Copy report for Claude</button><button type="button" class="ghost" id="dlrep">Download as text file</button><span id="copymsg" class="small" role="status" aria-live="polite"></span></div><textarea id="reptxt" hidden readonly rows="10" aria-label="Report text" style="width:100%;margin-top:12px;padding:10px;border:1px solid var(--line2);border-radius:10px;background:var(--bg);color:var(--ink);font:12px/1.4 ui-monospace,Consolas,monospace"></textarea></section>';
   out += '<section><h2>Last ' + n + ' days' + (compare ? ' and the ' + n + ' before' : '') + '</h2><div class="grid">' +
     statCard('Net revenue', cur.net, P('net'), true) + statCard('Pro sales', cur.proSales, P('proSales')) + statCard('Gift cards sold', cur.sales.gift.n, prev ? prev.sales.gift.n : null) +
     statCard('New devices', cur.new, P('new')) + statCard('App opens', cur.open, P('open')) + (hasPair ? statCard('Click checks', cur.pair, P('pair')) : '<div class="stat"><div class="k">Click checks</div><div class="v" style="font-size:18px">Not counted yet</div><div class="d flat">Worker needs v3</div></div>') + '</div></section>';
@@ -256,7 +362,9 @@ function render(data, n, compare) {
   out += '<section class="card"><h2>Countries</h2>' + countries(cur) + '</section>';
   out += '<section class="card"><h2>Click</h2>' + clickPanel(cur, hasPair) + '</section>';
   out += '<section class="card"><details><summary>Every day in this window</summary>' + dailyTable(curRows) + '</details></section>';
+  LAST = { cur: cur, prev: prev, n: n, compare: compare, curDates: curDates, prevDates: prevDates, curRows: curRows, hasPair: hasPair };
   var el = $('#out'); el.innerHTML = out; el.hidden = false;
+  $('#copyrep').addEventListener('click', copyReport); $('#dlrep').addEventListener('click', downloadReport);
 }
 })();
 </script>
